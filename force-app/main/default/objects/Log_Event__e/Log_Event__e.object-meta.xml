@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Represents a call to the logging framework. 
+For each trigger instance, a &quot;Log Transaction&quot; record will be created. 
+For each event instance, a &quot;Log&quot; record will be created.</description>
+    <eventType>HighVolume</eventType>
+    <label>Log Event</label>
+    <pluralLabel>Log Events</pluralLabel>
+    <publishBehavior>PublishImmediately</publishBehavior>
+</CustomObject>

@@ -8,7 +8,7 @@ private class DmlMock_Test {
         dmlMock.doInsert(account); 
         Test.stopTest();
         System.assertNotEquals(null, account.Id, 'Id was not added'); 
-        System.assertEquals(true, dmlMock.inserted.containsKey(account.Id), 'Not inserted');
+        System.assertEquals(true, dmlMock.inserted.containsRecord(account.Id), 'Not inserted');
     }
 
     @IsTest 
@@ -22,8 +22,8 @@ private class DmlMock_Test {
         dmlMock.doUpdate(testAccount); 
         Test.stopTest();
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
-        System.assertEquals(true, dmlMock.updated.containsKey(testAccount.Id), 'Not updated');
-        System.assertEquals(newName, dmlMock.updated.get(testAccount.Id).get(Account.Name), 'Name was not updated in the "updated" list');
+        System.assertEquals(true, dmlMock.updated.containsRecord(testAccount.Id), 'Not updated');
+        System.assertEquals(newName, dmlMock.updated.getRecord(testAccount).get(Account.Name), 'Name was not updated in the "updated" list');
     }
 
     @IsTest 
@@ -32,12 +32,12 @@ private class DmlMock_Test {
         DmlMock dmlMock = new DmlMock(); 
         dmlMock.doUpsert(testAccount); 
         System.assertNotEquals(null, testAccount.Id, 'Id was not added'); 
-        System.assertEquals(true, dmlMock.upserted.containsKey(testAccount.Id), 'Not upserted');
+        System.assertEquals(true, dmlMock.upserted.containsRecord(testAccount.Id), 'Not upserted');
         final String newName = 'Some other name';
         testAccount.Name = newName; 
         dmlMock.doUpsert(testAccount); 
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
-        System.assertEquals(newName, dmlMock.upserted.get(testAccount?.Id)?.get(Account.Name), 'Name was not updated in the "upserted" list');
+        System.assertEquals(newName, dmlMock.upserted.getRecord(testAccount)?.get(Account.Name), 'Name was not updated in the "upserted" list');
     }
 
     @IsTest 
@@ -47,12 +47,12 @@ private class DmlMock_Test {
         DmlMock dmlMock = new DmlMock(); 
         dmlMock.doUpsert(testAccount, Account.Name); 
         System.assertNotEquals(null, testAccount.Id, 'Id was not added'); 
-        System.assertEquals(true, dmlMock.upserted.containsKey(testAccount.Id), 'Not upserted');
+        System.assertEquals(true, dmlMock.upserted.containsRecord(testAccount.Id), 'Not upserted');
         final String newName = 'Some other name';
         testAccount.Name = newName; 
         dmlMock.doUpsert(testAccount, Account.Name); 
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
-        System.assertEquals(newName, dmlMock.upserted.get(testAccount.Id).get(Account.Name), 'Name was not updated in the "upserted" list');
+        System.assertEquals(newName, dmlMock.upserted.getRecord(testAccount).get(Account.Name), 'Name was not updated in the "upserted" list');
     }
 
     @IsTest 
@@ -64,7 +64,7 @@ private class DmlMock_Test {
         Test.startTest();
         dmlMock.doUndelete(account); 
         Test.stopTest();
-        System.assertEquals(true, dmlMock.undeleted.containsKey(account.Id)); 
+        System.assertEquals(true, dmlMock.undeleted.containsRecord(account.Id)); 
     }
 
     @IsTest 
@@ -75,7 +75,7 @@ private class DmlMock_Test {
         Test.startTest();
         dmlMock.doDelete(account); 
         Test.stopTest(); 
-        System.assertEquals(true, dmlMock.deleted.containsKey(account.Id)); 
+        System.assertEquals(true, dmlMock.deleted.containsRecord(account.Id)); 
     }
 
     @IsTest 
@@ -86,6 +86,87 @@ private class DmlMock_Test {
         Test.startTest();
         dmlMock.doHardDelete(account); 
         Test.stopTest(); 
-        System.assertEquals(true, dmlMock.deleted.containsKey(account.Id)); 
+        System.assertEquals(true, dmlMock.deleted.containsRecord(account.Id)); 
+    }
+
+    @IsTest 
+    static void shouldDetermineIfRecordWasProcessed() {
+        Account account = new Account(Name = 'Test Account'); 
+        DmlMock dmlMock = new DmlMock(); 
+
+        Test.startTest();
+        dmlMock.doInsert(account); 
+        System.assertEquals(true, dmlMock.inserted?.containsRecord(account)); 
+        System.assertEquals(false, dmlMock.updated?.containsRecord(account)); 
+        System.assertEquals(false, dmlMock.upserted?.containsRecord(account)); 
+        System.assertEquals(false, dmlMock.deleted?.containsRecord(account)); 
+        System.assertEquals(false, dmlMock.undeleted?.containsRecord(account)); 
+        Test.stopTest();
+    }
+
+    @IsTest 
+    static void shouldReturnRecordIfProcessed() {
+        Account account = new Account(Name = 'Test Account'); 
+        DmlMock dmlMock = new DmlMock(); 
+
+        Test.startTest();
+        dmlMock.doInsert(account); 
+        System.assertEquals(account, dmlMock.inserted?.getRecord(account)); 
+        System.assertEquals(null, dmlMock.updated?.getRecord(account)); 
+        System.assertEquals(null, dmlMock.upserted?.getRecord(account)); 
+        System.assertEquals(null, dmlMock.deleted?.getRecord(account)); 
+        System.assertEquals(null, dmlMock.undeleted?.getRecord(account)); 
+        Test.stopTest();
+    }
+
+    @IsTest 
+    static void shouldReturnAllProcessedRecordsOfAnSObjectType() {
+        List<Account> accounts = new List<Account>(); 
+        for (Integer i = 0; i < 200; i++) {
+            accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
+        }
+        DmlMock dmlMock = new DmlMock(); 
+
+        Test.startTest();
+        dmlMock.doInsert(accounts); 
+        System.assertEquals(accounts, dmlMock.inserted.getRecords(Account.SObjectType));
+        System.assertEquals(null, dmlMock.updated.getRecords(Account.SObjectType));
+        System.assertEquals(null, dmlMock.upserted.getRecords(Account.SObjectType));
+        System.assertEquals(null, dmlMock.deleted.getRecords(Account.SObjectType));
+        System.assertEquals(null, dmlMock.undeleted.getRecords(Account.SObjectType));
+        Test.stopTest();
+    }
+
+    @IsTest 
+    static void shouldReturnAllProcessedRecords() {
+        DmlMock dmlMock = new DmlMock(); 
+        Account account = new Account(Name = 'Test Account');
+        dmlMock.doInsert(account); 
+        Contact contact = new Contact(AccountId = account.Id, LastName = 'Test'); 
+        dmlMock.doInsert(contact); 
+        
+        Test.startTest();
+        List<SObject> insertedRecords = dmlMock.inserted.getAll();
+        System.assertEquals(2, insertedRecords?.size(), 'Wrong # of inserted records');
+        System.assert(insertedRecords.contains(account), 'Does not contain the account: ' + JSON.serialize(insertedRecords));
+        System.assert(insertedRecords.contains(contact), 'Does not contain the contact: ' + JSON.serialize(insertedRecords)); 
+        Test.stopTest(); 
+    }
+
+    @IsTest 
+    static void shouldResetDml() {
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 200; i++) {
+            accounts.add(new Account(Name = 'Test Account'));
+        }
+        DmlMock dmlMock = new DmlMock();
+        dmlMock.doInsert(accounts); 
+        System.assertEquals(200, dmlMock.inserted?.getAll()?.size(), 'Wrong # of records inserted'); 
+        
+        Test.startTest();
+        dmlMock.inserted?.clear(); 
+        Test.stopTest(); 
+
+        System.assertEquals(0, dmlMock.inserted?.getAll()?.size(), 'Records were not cleared');
     }
 }
