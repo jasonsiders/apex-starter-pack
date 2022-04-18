@@ -6,7 +6,7 @@
     <label>Log Transaction</label>
     <referenceTo>Log_Transaction__c</referenceTo>
     <relationshipLabel>Logs</relationshipLabel>
-    <relationshipName>Log</relationshipName>
+    <relationshipName>Logs</relationshipName>
     <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
