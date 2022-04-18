@@ -1,7 +1,7 @@
 global interface IQuery {
     IQuery addFields(List<SObjectField> fields);
     IQuery addFields(SObjectField field);
-    IQuery addFields(List<String> fields); // TODO, for parent field support
+    IQuery addFields(List<String> fields); 
     IQuery addFields(String field);
     IQuery resetFields();
 
@@ -20,7 +20,7 @@ global interface IQuery {
     IQuery setLimit(Integer numResults); 
     IQuery resetLimit();
 
-    IQuery addTags(List<String> queryTags); // TODO, maybe create a class for this? i.e., WITH_SECURITY_ENFORCED, or ALL ROWS
+    IQuery addTags(List<String> queryTags);
     IQuery addTags(String queryTag);
     IQuery resetTags(); 
     

@@ -1,9 +1,9 @@
 global without sharing class Logger {
     @TestVisible static Log_Setting__c settings;
     @TestVisible static LoggingLevel threshold;
+    @TestVisible static Integer maxPublishCalls; 
     @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
     @TestVisible static PlatformEventDml dmlEngine = new PlatformEventDml();
-    @TestVisible static Integer maxPublishCalls = 100; // TODO: Add this to custom settings or a new MDT?
     
     // Indicates how severe something is. A log will only be published
     // if a log's logging level < the current user's "Level" threshold
@@ -20,6 +20,8 @@ global without sharing class Logger {
     };
 
     static {
+        maxPublishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
+        maxPublishCalls = (maxPublishCalls != null) ? maxPublishCalls : 100; 
         settings = Log_Setting__c.getInstance(UserInfo.getUserId());
         threshold = loggingLevelValueOf(settings?.Level__c);
     }
@@ -55,7 +57,6 @@ global without sharing class Logger {
     }
 
     global static void publish() {
-        // TODO: What to do if we've hit the max? Create a queueable job or something? Don't log?
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
         if (currentPublishCalls < maxPublishCalls) {
             dmlEngine.publish(pendingEvents); 
