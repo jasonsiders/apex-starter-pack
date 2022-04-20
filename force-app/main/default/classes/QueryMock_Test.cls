@@ -1,7 +1,7 @@
 @IsTest
-private class MockQuery_Test {
+private class QueryMock_Test {
     @IsTest 
-    static void shouldMockQuery() {
+    static void shouldQueryMock() {
         // Generate a stupid amount of records, insert them via mock Dml, then retrieve them via mock query
         List<Account> accounts = new List<Account>(); 
         for (Integer i = 0; i < 10000; i++) {
@@ -12,7 +12,7 @@ private class MockQuery_Test {
         }
         new DmlMock().doInsert(accounts); 
         Test.startTest();
-        IQuery query = new MockQuery(Account.SObjectType, accounts)
+        IQuery query = new QueryMock(Account.SObjectType, accounts)
             .addFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
             .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'));
         List<Account> results = (List<Account>) query.run(); 

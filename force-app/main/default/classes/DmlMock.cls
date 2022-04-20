@@ -1,49 +1,64 @@
-global virtual class DmlMock extends Dml {
+@IsTest
+global class DmlMock extends Dml {
     global DmlHistory inserted = new DmlHistory(); 
     global DmlHistory updated = new DmlHistory(); 
     global DmlHistory upserted = new DmlHistory(); 
     global DmlHistory deleted = new DmlHistory(); 
     global DmlHistory undeleted = new DmlHistory(); 
+    global DmlHistory published = new DmlHistory();
 
-    @TestVisible DmlMock() {
-        // This should not be used outside of test context, 
-        // but @IsTest classes cannot be virtual
+    // Publish Methods
+    global override List<DmlResult> doPublish(List<SObject> platformEvents) {
+        this.published.add(platformEvents); 
+        return DmlResult.getMockResults(platformEvents);
     }
 
-    global override List<SObject> doInsert(List<SObject> records) {
-        List<SObject> recordsWithIds = TestUtils.generateFakeIds(records);
-        this.inserted.add(recordsWithIds); 
-        return records;
+    global override List<SObject> getPublishedEvents() {
+        return this.published.getAll();
+    }
+    
+    // Insert Methods
+    global override List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
+        records = TestUtils.generateFakeIds(records);
+        this.inserted.add(records); 
+        return DmlResult.getMockResults(records);
     }
 
-    global override List<SObject> doUpdate(List<SObject> records) {
+    // Update Methods
+    global override List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
         this.updated.add(records); 
-        return records; 
+        return DmlResult.getMockResults(records);
     }
 
-    global override List<SObject> doUpsert(List<SObject> records) {
-        List<SObject> recordsWithIds = TestUtils.generateFakeIds(records); 
-        this.upserted.add(recordsWithIds); 
-        return records;
+    // Upsert Methods
+    global override List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
+        records = TestUtils.generateFakeIds(records); 
+        this.upserted.add(records); 
+        return DmlResult.getMockResults(records);
     }
 
-    global override List<SObject> doUpsert(List<SObject> records, SObjectField externalIdField) {
+    global override List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
         return this.doUpsert(records); 
     }
 
-    global override List<SObject> doUndelete(List<SObject> records) {
-        this.undeleted.add(records); 
-        return records;
-    }
-
-    global override void doDelete(List<SObject> records) {
+    // Delete Methods
+    global override List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
         this.deleted.add(records); 
+        return DmlResult.getMockResults(records);
     }
 
-    global override void doHardDelete(List<SObject> records) {
+    // Hard Delete Methods
+    global override List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
         this.doDelete(records); 
+        return DmlResult.getMockResults(records);
     }
 
+    // Undelete Methods
+    global override List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
+        this.undeleted.add(records); 
+        return DmlResult.getMockResults(records);
+    }
+    
     global class DmlHistory {
         // A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
         Map<SObjectType, List<SObject>> recordsBySObjectType = new Map<SObjectType, List<SObject>>(); 
@@ -82,7 +97,6 @@ global virtual class DmlMock extends Dml {
         }
 
         private void add(List<SObject> records) {
-            // Should only be used by the DmlMock class
             for (SObject record : records) {
                 // Map the record by its Id (1:1)
                 this.recordsById.put(record.Id, record); 

@@ -1,8 +1,8 @@
 @IsTest 
-global class MockQuery extends SoqlQuery {
+global class QueryMock extends SoqlQuery {
     List<SObject> mockResults; 
 
-    global MockQuery(SObjectType objectType, List<SObject> mockResults) {
+    global QueryMock(SObjectType objectType, List<SObject> mockResults) {
         super(objectType); 
         this.mockResults = mockResults; 
     }

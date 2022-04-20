@@ -4,7 +4,7 @@ global without sharing class Logger {
     @TestVisible static LoggingLevel threshold;
     @TestVisible static Integer maxPublishCalls; 
     @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
-    @TestVisible static PlatformEventDml dmlEngine = new PlatformEventDml();
+    @TestVisible static IDml dmlEngine = new LoggerDml();
     
     // Indicates how severe something is. A log will only be published
     // if a log's logging level < the current user's "Level" threshold
@@ -21,10 +21,10 @@ global without sharing class Logger {
     };
 
     static {
+        Integer publishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
+        Logger.maxPublishCalls = (publishCalls != null) ? publishCalls : 100;
         Logger.settings = Log_Setting__c.getInstance(UserInfo.getUserId());
         Logger.threshold = loggingLevelValueOf(settings?.Level__c);
-        Logger.maxPublishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
-        Logger.maxPublishCalls = (Logger.maxPublishCalls != null) ? Logger.maxPublishCalls : 100;
     }
 
     // **** PUBLIC **** //
@@ -82,7 +82,7 @@ global without sharing class Logger {
     global static void publish() {
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
         if (currentPublishCalls < Logger.maxPublishCalls) {
-            Logger.dmlEngine.publish(Logger.pendingEvents); 
+            Logger.dmlEngine.doPublish(Logger.pendingEvents); 
             Logger.pendingEvents.clear(); 
         }
     }
@@ -158,5 +158,10 @@ global without sharing class Logger {
             }
             return String.join(stackTraceLines, '\n');
         }
+    }
+
+    @TestVisible
+    private class LoggerDml extends Dml {
+        
     }
 }

@@ -85,7 +85,7 @@ private class LogEventHandler_Test extends TriggerHandler {
         }
 
         Test.startTest();
-        new PlatformEventDml().publish(logEvents); 
+        new Dml().doPublish(logEvents); 
         Test.stopTest();
 
         List<Log_Transaction__c> logTransactions = getLogTransactions();
