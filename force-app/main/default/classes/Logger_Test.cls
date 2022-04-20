@@ -213,10 +213,111 @@ private class Logger_Test {
         System.assert(event.Stack_Trace__c?.contains('Class.Logger.') == false, 'Contains a stack trace line from the logger class: ' + event.Stack_Trace__c);
     }
 
+    @IsTest 
+    static void shouldLogManyEventsFromLightning() {
+        // This method is designed to be used by lightning components.
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        List<Logger.Input> inputs = generateTestInputs();
+        
+        Test.startTest();
+        Logger.logFromLightning(inputs);
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(inputs?.size(), Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
+    @IsTest 
+    static void shouldLogSingleEventFromLightning() {
+        // This method is designed to be used by lightning components.
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        Logger.Input input = generateTestInputs()[0];
+        
+        Test.startTest();
+        Logger.logFromLightning(input);
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(1, Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
+    @IsTest 
+    static void shouldLogManyEventsFromApi() {
+        // This method is designed to be used by external API resources
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        List<Logger.Input> inputs = generateTestInputs();
+        
+        Test.startTest();
+        Logger.logFromApi(inputs);
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(inputs?.size(), Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
+    @IsTest 
+    static void shouldLogSingleEventsromApi() {
+        // This method is designed to be used by external API resources
+        // Unlike logFromLightning(), can't overload to allow single/multiple inputs,
+        // since there can only be one @Http* method of each type per class
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        Logger.Input input = generateTestInputs()[0];
+        
+        Test.startTest();
+        Logger.logFromApi(new List<Logger.Input>{input});
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(1, Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
+    @IsTest 
+    static void shouldLogManyEventsFromFlow() {
+        // This method is designed to be used by Flows
+        // Because of how Flow is bulkified, callers will use this action one log at a time,
+        // but they are always processed in bulk
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        List<Logger.Input> inputs = generateTestInputs();
+        
+        Test.startTest();
+        Logger.logFromFlow(inputs);
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(inputs?.size(), Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
+    @IsTest 
+    static void shouldLogSingleEventFromFlow() {
+        // This method is designed to be used by Flows
+        // Because of how Flow is bulkified, callers will use this action one log at a time,
+        // but they are always processed in bulk
+        setUpTestLogger(LoggingLevel.FINEST, true);
+        Logger.Input input = generateTestInputs()[0];
+        
+        Test.startTest();
+        Logger.logFromFlow(new List<Logger.Input>{input});
+        System.assertEquals(1, Limits.getPublishImmediateDML(), 'Wrong # of publish calls made');
+        Test.stopTest();
+
+        System.assertEquals(1, Logger.dmlEngine.publishedEvents?.size(), 'Wrong # of published events');
+    }
+
     // **** HELPER **** // 
     private static void setUpTestLogger(LoggingLevel level, Boolean enabled) {
         Logger.threshold = level;
         Logger.settings = new Log_Setting__c(Enabled__c = enabled);
+    }
+
+    private static List<Logger.Input> generateTestInputs() {
+        List<Logger.Input> inputs = new List<Logger.Input>();
+        for (Integer i = 0; i < 200; i++) {
+            Logger.Input input = new Logger.Input(); 
+            input.loggingLevel = String.valueOf(LoggingLevel.ERROR);
+            input.message = 'Test Message #' + Crypto.getRandomInteger();
+            inputs.add(input);
+        }
+        return inputs;
     }
 
     private class MyClass {

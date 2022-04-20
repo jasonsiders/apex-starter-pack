@@ -1,3 +1,4 @@
+@RestResource(urlMapping='/log/*')
 global without sharing class Logger {
     @TestVisible static Log_Setting__c settings;
     @TestVisible static LoggingLevel threshold;
@@ -20,13 +21,35 @@ global without sharing class Logger {
     };
 
     static {
-        maxPublishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
-        maxPublishCalls = (maxPublishCalls != null) ? maxPublishCalls : 100; 
-        settings = Log_Setting__c.getInstance(UserInfo.getUserId());
-        threshold = loggingLevelValueOf(settings?.Level__c);
+        Logger.settings = Log_Setting__c.getInstance(UserInfo.getUserId());
+        Logger.threshold = loggingLevelValueOf(settings?.Level__c);
+        Logger.maxPublishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
+        Logger.maxPublishCalls = (Logger.maxPublishCalls != null) ? Logger.maxPublishCalls : 100;
     }
 
     // **** PUBLIC **** //
+    @AuraEnabled
+    global static void logFromLightning(List<Input> inputs) {
+        Logger.logFromExternalSource(inputs); 
+    }
+
+    @AuraEnabled 
+    global static void logFromLightning(Input input) {
+        Logger.logFromLightning(new List<Input>{input});
+    }
+    
+    @HttpPost
+    global static void logFromApi(List<Input> inputs) {
+        // Only one method per type can be defined with: HttpPost, 
+        // so callers must supply an array of Inputs
+        Logger.logFromExternalSource(inputs);
+    }
+
+    @InvocableMethod(label='Post to Log')
+    global static void logFromFlow(List<Input> inputs) {
+        Logger.logFromExternalSource(inputs); 
+    }
+
     global static void log(LoggingLevel level, String message) {
         System.debug(level, message); 
         if (settings?.Enabled__c == true && clearsSeverityThreshold(level)) {
@@ -44,35 +67,56 @@ global without sharing class Logger {
 
     global static void log(String message) {
         // This will default the logging level to the current threshold
-        log(threshold, message); 
+        Logger.log(threshold, message); 
     }
 
     global static void logAndPublish(LoggingLevel level, String message) {
-        log(level, message); 
-        publish(); 
+        Logger.log(level, message); 
+        Logger.publish(); 
     }
 
     global static void logAndPublish(String message) {
-        logAndPublish(threshold, message); 
+        Logger.logAndPublish(threshold, message); 
     }
 
     global static void publish() {
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
-        if (currentPublishCalls < maxPublishCalls) {
-            dmlEngine.publish(pendingEvents); 
-            pendingEvents.clear(); 
+        if (currentPublishCalls < Logger.maxPublishCalls) {
+            Logger.dmlEngine.publish(Logger.pendingEvents); 
+            Logger.pendingEvents.clear(); 
         }
     }
 
     global static void clear() {
-        pendingEvents?.clear(); 
+        Logger.pendingEvents?.clear(); 
     }
 
     // **** PRIVATE **** //
+    static void logFromExternalSource(List<Input> inputs) {
+        // Private, because all apex code should call the log() method directly
+        // External sources (API, Flow, LWC) should call their respective logFrom*() method
+        for (Input input : inputs) {
+            Logger.log(input.getLevel(), input.message);
+        }
+        Logger.publish();
+    }
+
+    static LoggingLevel loggingLevelValueOf(String logLevel) {
+        // Retrieve a LoggingLevel enum from a string value
+        // Enum.valueOf() is supposed to do this,
+        // but it will throw an exception if a null value 
+        // or string that does not match an enum value is supplied
+        try {
+            return LoggingLevel.valueOf(logLevel); 
+        } catch (System.NoSuchElementException error) {
+            return LoggingLevel.NONE; 
+        }
+    }
+
     static Boolean clearsSeverityThreshold(LoggingLevel current) {
         // Returns true if the threshold != 'NONE',
         // and the current level has a lower severity number
-        Integer thresholdSeverity = getSeverity(threshold); 
+        Integer thresholdSeverity = getSeverity(Logger.threshold); 
         Integer currentSeverity = getSeverity(current); 
         return 
             thresholdSeverity > 0 && 
@@ -80,23 +124,8 @@ global without sharing class Logger {
             currentSeverity <= thresholdSeverity;
     }
 
-    @TestVisible
-    static LoggingLevel loggingLevelValueOf(String logLevel) {
-        // Retrieve a LoggingLevel enum from a string value
-        // Enum.valueOf() is supposed to do this,
-        // but it will throw an exception if a null value 
-        // or string that does not match an enum value is supplied
-        LoggingLevel result; 
-        try {
-            result = LoggingLevel.valueOf(settings?.Level__c); 
-        } catch (System.NoSuchElementException error) {
-            result = LoggingLevel.NONE; 
-        }
-        return result; 
-    }
-
     static Integer getSeverity(LoggingLevel logLevel) {
-        Integer severity = SEVERITY_MATRIX.get(logLevel); 
+        Integer severity = Logger.SEVERITY_MATRIX.get(logLevel); 
         return (severity != null) ? severity : 0; 
     }
 
@@ -106,6 +135,18 @@ global without sharing class Logger {
     }
 
     // **** INNER **** //
+    global class Input {
+        @InvocableVariable 
+        global String loggingLevel; 
+
+        @InvocableVariable 
+        global String message; 
+
+        global LoggingLevel getLevel() {
+            return Logger.loggingLevelValueOf(this.loggingLevel); 
+        }
+    }
+    
     private class LogException extends Exception {
         private String sourceStackTrace() {
             List<String> stackTraceLines = new List<String>();
