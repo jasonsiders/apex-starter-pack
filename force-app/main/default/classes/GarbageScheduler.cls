@@ -61,23 +61,13 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     }
 
     private Integer getFlexQueueSize() {
-        // TODO: Amend SOQL Query to accept IN: / NOT IN: 
-        // Until then, will have to add one query per accepted value
         IQuery query = GarbageScheduler.queryEngine
             .newQuery(AsyncApexJob.SObjectType)
             .addFilters(new QueryFilter(
                 AsyncApexJob.Status,
-                QueryFilter.Operator.EQUALS,
-                'Holding'
-            )).addFilters(new QueryFilter(
-                AsyncApexJob.Status,
-                QueryFilter.Operator.EQUALS,
-                'Pending'
-            )).addFilters(new QueryFilter(
-                AsyncApexJob.Status,
-                QueryFilter.Operator.EQUALS,
-                'Processing'
-            )).setFilterLogic('{0} OR {1} OR {2}');
+                QueryFilter.Operator.IN_COLLECTION,
+                new List<String>{'Holding', 'Pending', 'Processing'}
+            ));
         return query.run()?.size(); 
     }
 }

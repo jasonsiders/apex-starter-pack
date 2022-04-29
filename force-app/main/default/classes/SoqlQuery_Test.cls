@@ -177,6 +177,13 @@ private class SoqlQuery_Test {
         }
     }
 
+    @IsTest
+    static void shouldGenerateNewQuery() {
+        IQueryFactory factory = new SoqlQuery.Factory();
+        IQuery query = factory.newQuery(null); 
+        System.assertEquals(true, query instanceOf SoqlQuery, 'Wrong type of IQuery generated');
+    }
+
     static void checkIfQueryIsValid(SoqlQuery query) {
         try {
             query.run();

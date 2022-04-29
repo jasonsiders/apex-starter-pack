@@ -24,4 +24,11 @@ private class QueryMock_Test {
             System.assert(account?.Name?.startsWithIgnoreCase('Test Account'), 'Expected to start with "Test Account", Actual: "' + account?.Name + '"');
         }
     }
+
+    @IsTest
+    static void shouldGenerateNewQuery() {
+        IQueryFactory factory = new QueryMock.Factory();
+        IQuery query = factory.newQuery(null); 
+        System.assertEquals(true, query instanceOf QueryMock, 'Wrong type of IQuery generated');
+    }
 }
