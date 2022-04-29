@@ -155,4 +155,22 @@ private class DmlResult_Test {
             System.assertEquals(0, dmlResult?.errors?.size(), 'Wrong # of errors');
         }
     }
+
+    @IsTest 
+    static void shouldLogErrors() {
+        Logger.settings = new Log_Setting__c(Level__c = 'FINEST', Enabled__c = true);
+        Logger.dmlEngine = new DmlMock(); 
+        Id fakeId = TestUtils.generateFakeId(Account.SObjectType);
+        DmlResult.Error mockError = new DmlResult.Error(new List<String>(), 'Fake Error Message', null);
+        List<DmlResult.Error> mockErrors = new List<DmlResult.Error>{mockError};
+        DmlResult mockResult = new DmlResult(mockErrors, false, fakeId);
+
+        Test.startTest();
+        DmlResult.logErrors(new List<DmlResult>{mockResult});
+        Test.stopTest(); 
+
+        System.assertEquals(1, Logger.dmlEngine.getPublishedEvents()?.size(), 'Wrong # of published events');
+        Log_Event__e logEvent = (Log_Event__e) Logger.dmlEngine.getPublishedEvents()[0];
+        System.assertEquals(JSON.serializePretty(mockErrors), logEvent.Message__c, 'Wrong log message');
+    }
 }

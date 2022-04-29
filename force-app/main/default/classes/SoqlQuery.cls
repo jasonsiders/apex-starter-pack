@@ -160,4 +160,10 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     private String getSpecialTags() {
         return (this.queryTags?.isEmpty() == false) ? ' ' + String.join(this.queryTags, ' ') : '';
     }
+
+    public class Factory implements IQueryFactory {
+        public IQuery newQuery(SObjectType objectType) {
+            return new SoqlQuery(objectType); 
+        }
+    }
 }

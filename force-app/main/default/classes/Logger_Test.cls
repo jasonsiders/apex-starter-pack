@@ -75,7 +75,7 @@ private class Logger_Test {
         Logger.log(LoggingLevel.ERROR, 'Test Message'); 
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Logged when null');
         // If enabled, will log
-        Logger.settings = new Log_Setting__c(Enabled__c = true);
+        setUpTestLogger(LoggingLevel.ERROR, true);
         Logger.log(LoggingLevel.ERROR, 'Test Message');
         System.assertEquals(1, Logger.pendingEvents?.size(), 'Not logged when enabled');
     }
@@ -128,7 +128,7 @@ private class Logger_Test {
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Logged: Threshold: ' + Logger.threshold + ', LogLevel: ' + logLevel);
         Logger.clear();
         // NONE <= NONE, but will never log for NONE
-        Logger.threshold = LoggingLevel.NONE; 
+        Logger.settings.Level__c = String.valueOf(LoggingLevel.NONE);
         Logger.log(logLevel, logMessage); 
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Logged: Threshold: ' + Logger.threshold + ', LogLevel: ' + logLevel);
         Logger.clear();
@@ -145,7 +145,7 @@ private class Logger_Test {
         Exception error; 
         // Both are null;
         logLevel = null; 
-        Logger.threshold = null; 
+        Logger.settings.Level__c = null;
         try { 
             Logger.log(logLevel, logMessage); 
         } catch (Exception caughtError) {
@@ -156,7 +156,7 @@ private class Logger_Test {
         error = null; 
         Logger.clear();
         // Only LoggingLevel is null
-        Logger.threshold = LoggingLevel.ERROR; 
+        Logger.settings.Level__c = String.valueOf(LoggingLevel.ERROR);
         try {
             Logger.log(logLevel, logMessage); 
         } catch (Exception caughtError) {
@@ -168,7 +168,7 @@ private class Logger_Test {
         Logger.clear();
         // Just threshold is null
         logLevel = LoggingLevel.ERROR;
-        Logger.threshold = null; 
+        Logger.settings.Level__c = null; 
         try {
             Logger.log(logLevel, logMessage); 
         } catch (Exception caughtError) {
@@ -327,8 +327,10 @@ private class Logger_Test {
 
     // **** HELPER **** // 
     private static void setUpTestLogger(LoggingLevel level, Boolean enabled) {
-        Logger.threshold = level;
-        Logger.settings = new Log_Setting__c(Enabled__c = enabled);
+        Logger.settings = new Log_Setting__c(
+            Enabled__c = enabled,
+            Level__c = String.valueOf(level)
+        );
     }
 
     private static List<Logger.Input> generateTestInputs() {

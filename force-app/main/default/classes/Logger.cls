@@ -1,10 +1,12 @@
 @RestResource(urlMapping='/log/*')
 global without sharing class Logger {
-    @TestVisible static Log_Setting__c settings;
-    @TestVisible static LoggingLevel threshold;
-    @TestVisible static Integer maxPublishCalls; 
+    @TestVisible static IDml dmlEngine = new Dml();
+    @TestVisible static final Integer maxPublishCalls = Logger.getMaxPublishCalls();  
     @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
-    @TestVisible static IDml dmlEngine = new LoggerDml();
+    @TestVisible static Log_Setting__c settings = Log_Setting__c.getInstance(UserInfo.getUserId());
+    @TestVisible static LoggingLevel threshold { get { 
+        return Logger.loggingLevelValueOf(Logger.settings?.Level__c); 
+    }}
     
     // Indicates how severe something is. A log will only be published
     // if a log's logging level < the current user's "Level" threshold
@@ -19,13 +21,6 @@ global without sharing class Logger {
         LoggingLevel.FINER => 6,
         LoggingLevel.FINEST => 7
     };
-
-    static {
-        Integer publishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
-        Logger.maxPublishCalls = (publishCalls != null) ? publishCalls : 100;
-        Logger.settings = Log_Setting__c.getInstance(UserInfo.getUserId());
-        Logger.threshold = loggingLevelValueOf(settings?.Level__c);
-    }
 
     // **** PUBLIC **** //
     @AuraEnabled
@@ -101,6 +96,11 @@ global without sharing class Logger {
         Logger.publish();
     }
 
+    static Integer getMaxPublishCalls() {
+        Integer publishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
+        return (publishCalls != null) ? publishCalls : 100;
+    }
+
     static LoggingLevel loggingLevelValueOf(String logLevel) {
         // Retrieve a LoggingLevel enum from a string value
         // Enum.valueOf() is supposed to do this,
@@ -158,10 +158,5 @@ global without sharing class Logger {
             }
             return String.join(stackTraceLines, '\n');
         }
-    }
-
-    @TestVisible
-    private class LoggerDml extends Dml {
-        
     }
 }

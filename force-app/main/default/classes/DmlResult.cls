@@ -37,6 +37,20 @@ global class DmlResult {
         this(result.getErrors(), result.isSuccess(), result.getId());
     }
 
+    // Specialized methods to process data
+    global void logError() {
+        if (this.isSuccess == false) {
+            Logger.log(LoggingLevel.ERROR, JSON.serializePretty(this.errors)); 
+        }
+    }
+
+    global static void logErrors(List<DmlResult> results) {
+        for (DmlResult result : results) {
+            result.logError();
+        }
+        Logger.publish();
+    }
+
     // Methods to "wrap" results in bulk
     global static List<DmlResult> wrap(List<Database.DeleteResult> deleteResults) {
         List<DmlResult> dmlResults = new List<DmlResult>();
