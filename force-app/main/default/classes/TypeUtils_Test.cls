@@ -81,5 +81,37 @@ private class TypeUtils_Test {
         System.assertEquals(TypeUtils_Test.Example.class, TypeUtils.getType(new Example()));
     }
 
+    @IsTest 
+    static void shouldDetermineIfList() {
+        System.assertEquals(true, TypeUtils.isList(new List<String>()));
+        System.assertEquals(false, TypeUtils.isList(new Set<String>()));
+        System.assertEquals(false, TypeUtils.isList(new Map<String, String>()));
+        System.assertEquals(false, TypeUtils.isList(new Map<List<String>, String>()));
+    }
+
+    @IsTest 
+    static void shouldDetermineIfSet() {
+        System.assertEquals(false, TypeUtils.isSet(new List<String>()));
+        System.assertEquals(true, TypeUtils.isSet(new Set<String>()));
+        System.assertEquals(false, TypeUtils.isSet(new Map<String, String>()));
+        System.assertEquals(false, TypeUtils.isSet(new Map<List<String>, String>()));
+    }
+
+    @IsTest 
+    static void shouldDetermineIfMap() {
+        System.assertEquals(false, TypeUtils.isMap(new List<String>()));
+        System.assertEquals(false, TypeUtils.isMap(new Set<String>()));
+        System.assertEquals(true, TypeUtils.isMap(new Map<String, String>()));
+        System.assertEquals(true, TypeUtils.isMap(new Map<List<String>, String>()));
+    }
+
+    @IsTest 
+    static void shouldDetermineIfCollection() {
+        System.assertEquals(true, TypeUtils.isCollection(new List<String>()));
+        System.assertEquals(true, TypeUtils.isCollection(new Set<String>()));
+        System.assertEquals(true, TypeUtils.isCollection(new Map<String, String>()));
+        System.assertEquals(true, TypeUtils.isCollection(new Map<List<String>, String>()));
+    }
+
     public class Example {}
 }

@@ -48,89 +48,46 @@ global class QueryFilter {
     }
 
     global override String toString() {
-        return this.fieldName + ' ' + this.getOperatorToken() + ' ' + this.formatValue();
-    }
-
-    private String getOperatorToken() {
-        Operator operator = this.operator; 
-        Boolean isCollectionType = 
-            // TODO: Hide this out in a TypeCollection utility
-            this.value instanceOf List<Object> || 
-            this.value instanceOf Set<Boolean> ||
-            this.value instanceOf Set<Date> ||
-            this.value instanceOf Set<DateTime> ||
-            this.value instanceOf Set<Decimal> ||
-            this.value instanceOf Set<Double> ||
-            this.value instanceOf Set<Integer> || 
-            this.value instanceOf Set<Long> ||
-            this.value instanceOf Set<SObject> ||
-            this.value instanceOf Set<String> ||
-            this.value instanceOf Set<Time>; 
-        if (isCollectionType && operator == QueryFilter.Operator.EQUALS) {
-            operator = QueryFilter.Operator.IN_COLLECTION; 
-        } else if (isCollectionType && operator == QueryFilter.Operator.NOT_EQUALS) {
-            operator = QueryFilter.Operator.NOT_IN_COLLECTION; 
-        }
-        return OPERATOR_TOKENS.get(operator); 
+        return this.fieldName + ' ' + OPERATOR_TOKENS.get(this.operator) + ' ' + this.formatValue();
     }
 
     private String formatValue() {
-        // Note: This is suuuuper ugly. Should probably hide this in a TypeCollection utility method
-        // Check for single types
-        if (this.value == null) {
-            return 'null';
-        } else if (this.value instanceOf Date) {
-            return this.processDateValue((Date) this.value);
-        } else if (this.value instanceOf DateTime) {
-            return this.processDateTimeValue((DateTime) this.value);
-        } else if (this.value instanceOf String) {
-            return this.processStringValue((String) this.value); 
-        } 
-        // Check for List types
-        else if (this.value instanceOf List<Date>) {
-            return this.processDateCollectionValue((List<Date>) this.value);
-        } else if (this.value instanceOf List<DateTime>) {
-            return this.processDateTimeCollectionValue((List<DateTime>) this.value); 
-        } else if (this.value instanceOf List<SObject>) {
-            return this.processSObjectCollectionValues((List<SObject>) this.value);
-        } else if (this.value instanceOf List<String>) {
-            return this.processStringCollectionValue((List<String>) this.value); 
-        } 
-        // Check for Set types
-        else if (this.value instanceOf Set<Boolean>) {
-            List<Boolean> booleans = new List<Boolean>((Set<Boolean>) this.value);
-            return String.valueOf(booleans); 
-        } else if (this.value instanceOf Set<Date>) {
-            Set<Date> dates = (Set<Date>) this.value;
-            return this.processDateCollectionValue(new List<Date>(dates)); 
-        } else if (this.value instanceOf Set<DateTime>) {
-           Set<DateTime> dateTimes = (Set<DateTime>) this.value; 
-           return this.processDateTimeCollectionValue(new List<DateTime>(dateTimes));
-        } else if (this.value instanceOf Set<Decimal>) {
-            List<Decimal> decimals = new List<Decimal>((Set<Decimal>) this.value);
-            return String.valueOf(decimals);
-        } else if (this.value instanceOf Set<Double>) {
-            List<Double> doubles = new List<Double>((Set<Double>) this.value);
-            return String.valueOf(doubles);
-        } else if (this.value instanceOf Set<Id>) {
-            return this.processStringCollectionValue(new List<Id>((Set<Id>) this.value));
-        } else if (this.value instanceOf Set<Integer>) {
-            List<Integer> integers = new List<Integer>((Set<Integer>) this.value);
-            return String.valueOf(integers);
-        } else if (this.value instanceOf Set<SObject>) {
-            return this.processSObjectCollectionValues(new List<SObject>((Set<SObject>) this.value));
-        } else if (this.value instanceOf Set<String>) {
-            Set<String> strings = (Set<String>) this.value; 
-            return this.processStringCollectionValue(new List<String>(strings)); 
-        } else if (this.value instanceOf Set<Time>) {
-            List<Time> times = new List<Time>((Set<Time>) this.value);
-            return String.valueOf(times);
-        } else {
-            return String.valueOf(this.value); 
+        // Note: System.Type is not a valid switch expression type :(
+        switch on TypeUtils.getType(this.value)?.getName().toUpperCase() {
+            when null {
+                return 'null';
+            } when 'DATE' {
+                return this.processDate((Date) this.value); 
+            } when 'LIST<DATE>' {
+                return this.processDateList((List<Date>) this.value);
+            } when 'SET<DATE>' {
+                return this.processDateList(new List<Date>((Set<Date>) this.value));
+            } when 'DATETIME' {
+                return this.processDateTime((DateTime) this.value); 
+            } when 'LIST<DATETIME>' {
+                return this.processDateTimeList((List<DateTime>) this.value);
+            } when 'SET<DATETIME>' {
+                return this.processDateTimeList(new List<DateTime>((Set<DateTime>) this.value));
+            } when 'ID', 'STRING' {
+                return this.processString((String) this.value);
+            } when 'LIST<ID>', 'LIST<STRING>' {
+                return this.processStringList((List<String>) this.value);
+            } when 'SET<ID>' {
+                // Note: For some reason, can't convert Set<Id> => Set<String> directly, 
+                // but we can convert Set<Id> => List<Id> => List<String>
+                return this.processStringList((List<String>) new List<Id>((Set<Id>) this.value));
+            } when 'SET<STRING>' {
+                return this.processStringList(new List<String>((Set<String>) this.value));
+            } when else {
+                // Can't convert from Set<ANY> to List<Object>, so this is the best we can do
+                return (TypeUtils.isSet(this.value))
+                    ? String.valueOf(this.value)?.replace('{', '(')?.replace('}', ')')
+                    : String.valueOf(this.value); 
+            }
         }
     }
 
-    private String processStringValue(String stringValue) {
+    private String processString(String stringValue) {
         // First, check if the string is actually checking a relative date value
         if (stringValue.startsWithIgnoreCase('LAST_N_DAYS:')) {
             return stringValue; 
@@ -149,18 +106,18 @@ global class QueryFilter {
         }
     }
 
-    private String processDateValue(Date dateValue) {
+    private String processDate(Date dateValue) {
         final String soqlFormat = 'yyyy-MM-dd';
         DateTime dateTimeValue = DateTime.newInstance(dateValue.year(), dateValue.month(), dateValue.day());
         return dateTimeValue.formatGmt(soqlFormat);
     }
 
-    private String processDateTimeValue(DateTime dateTimeValue) {
+    private String processDateTime(DateTime dateTimeValue) {
         final String soqlFormat = 'yyyy-MM-dd\'T\'HH:mm:ss\'Z\'';
         return dateTimeValue.formatGmt(soqlFormat); 
     }
 
-    private String processStringCollectionValue(List<String> items) {
+    private String processStringList(List<String> items) {
         List<String> results = new List<String>();
         for (String item : items) {
             String result = '\'' + item + '\'';
@@ -169,24 +126,19 @@ global class QueryFilter {
         return '(' + String.join(results, ', ') + ')';
     }
 
-    private String processDateCollectionValue(List<Date> items) {
+    private String processDateList(List<Date> items) {
         List<String> results = new List<String>(); 
         for (Date item : items) {
-            results.add(this.processDateValue(item));
+            results.add(this.processDate(item));
         }
         return '(' + String.join(results, ', ') + ')';
     }
 
-    private String processDateTimeCollectionValue(List<DateTime> items) {
+    private String processDateTimeList(List<DateTime> items) {
         List<String> results = new List<String>(); 
         for (DateTime item : items) {
-            results.add(this.processDateTimeValue(item));
+            results.add(this.processDateTime(item));
         }
         return '(' + String.join(results, ', ') + ')';
-    }
-
-    private String processSObjectCollectionValues(List<SObject> records) {
-        Set<Id> recordIds = new Map<Id, SObject>(records).keySet(); 
-        return this.processStringCollectionValue(new List<Id>(recordIds)); 
     }
 }

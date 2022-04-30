@@ -13,5 +13,26 @@ public class TypeUtils {
         return null;
     }
 
+    public static Boolean isList(Object obj) {
+        return TypeUtils.getType(obj)?.getName()?.startsWith('List<');
+    }
+
+    public static Boolean isSet(Object obj) {
+        return TypeUtils.getType(obj)?.getName()?.startsWith('Set<');
+    }
+
+    public static Boolean isMap(Object obj) {
+        return TypeUtils.getType(obj)?.getName()?.startsWith('Map<');
+    }
+
+    public static Boolean isCollection(Object obj) {
+        String typeName = TypeUtils.getType(obj)?.getName(); 
+        return (
+            typeName?.startsWith('List<') == true || 
+            typeName?.startsWith('Set<') == true || 
+            typeName?.startsWith('Map<') == true
+        );
+    }
+
     private class UnknownType {}
 }
