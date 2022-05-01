@@ -2,8 +2,6 @@ global class DmlResult {
     // Database.*Result classes do not share a common interface, and they cannot be manually constructed
     // This makes testing/mocking especially difficult
     // This class wraps all of those result types
-    static IDml dmlEngine = new Dml(); 
-
     global List<Error> errors { get; private set; }
     global Boolean isSuccess { get; private set; }
     global Id recordId { get; private set; }

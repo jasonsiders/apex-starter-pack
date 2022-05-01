@@ -94,7 +94,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunBeforeUpdate() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.BEFORE_UPDATE;
         handler.triggerNew = accounts;
@@ -112,7 +112,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunBeforeDelete() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.BEFORE_DELETE;
         handler.triggerNew = accounts;
@@ -130,7 +130,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunAfterInsert() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.AFTER_INSERT;
         handler.triggerNew = accounts;
@@ -146,7 +146,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunAfterUpdate() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.AFTER_UPDATE;
         handler.triggerNew = accounts;
@@ -164,7 +164,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunAfterDelete() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.AFTER_DELETE;
         handler.triggerNew = accounts;
@@ -182,7 +182,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldRunAfterUndelete() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.AFTER_UNDELETE;
         handler.triggerNew = accounts;
@@ -201,7 +201,7 @@ private class TriggerHandler_Test extends TriggerHandler {
     @isTest 
     static void shouldDetermineIsNew() {
         // Returns true if the record in question is found in the handler's triggerOldMap
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
         Account otherAccount = accounts[1];
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -216,7 +216,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldDetermineIsChanged() {
-        List<Account> accounts = [SELECT Id, AccountNumber, Name FROM Account];
+        List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
         TriggerHandler handler = new ExampleTriggerHandler(); 
         // Note: If the handler doesn't contain the account, this method will return true
@@ -234,7 +234,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldDetermineIfChangedFrom() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
         final String originalAccountName = testAccount.Name; 
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -256,7 +256,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest
     static void shouldDetermineIfChangedTo() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
         final String originalAccountName = testAccount.Name; 
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -278,7 +278,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     @isTest 
     static void shouldDetermineIfChangedFromTo() {
-        List<Account> accounts = [SELECT Id, Name FROM Account];
+        List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
         final String originalAccountName = testAccount.Name; 
         final String newAccountName = 'My Test Account';
@@ -311,6 +311,15 @@ private class TriggerHandler_Test extends TriggerHandler {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
         return accounts;
+    }
+
+    static List<Account> getAccounts() {
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .addFields(new List<SObjectField>{
+                Account.AccountNumber,
+                Account.Name  
+            });
+        return (List<Account>) query.run(); 
     }
 
     private class ExampleTriggerHandler extends TriggerHandler {

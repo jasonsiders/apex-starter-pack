@@ -3,9 +3,8 @@ private class DmlResult_Test {
     @IsTest 
     static void shouldConvertDeleteResults() {
         // This type can't be mocked without performing dml - hence the reason for the wrapper class
-        Dml dmlEngine = new Dml();
         List<Account> records = new List<Account>{new Account(Name = 'Test')};
-        dmlEngine.doInsert(records); 
+        DatabaseLayer.DmlEngine.doInsert(records); 
         List<Database.DeleteResult> deleteResults = Database.delete(records, false); 
 
         Test.startTest();
@@ -45,10 +44,9 @@ private class DmlResult_Test {
     @IsTest 
     static void shouldConvertUndeleteResults() {
         // This type can't be mocked without performing dml - hence the reason for the wrapper class
-        Dml dmlEngine = new Dml(); 
         List<Account> records = new List<Account>{new Account(Name = 'Test')};
-        dmlEngine.doInsert(records); 
-        dmlEngine.doDelete(records); 
+        DatabaseLayer.DmlEngine.doInsert(records); 
+        DatabaseLayer.DmlEngine.doDelete(records); 
         List<Database.UndeleteResult> undeleteResults = Database.undelete(records, false); 
 
         Test.startTest();
@@ -113,8 +111,9 @@ private class DmlResult_Test {
 
     @IsTest 
     static void shouldAllowMockResults() {
+        DatabaseLayer.setDmlEngine(new DmlMock()); 
         Account mockAccount = new Account(Name = 'Test Account');
-        new DmlMock().doInsert(mockAccount); 
+        DatabaseLayer.DmlEngine.doInsert(mockAccount); 
         final String mockErrorMessage = 'cannot specify Id in an insert call';
         final StatusCode mockStatusCode = StatusCode.INVALID_FIELD_FOR_INSERT_UPDATE;
         List<DmlResult.Error> mockErrors = new List<DmlResult.Error>{
@@ -158,8 +157,8 @@ private class DmlResult_Test {
 
     @IsTest 
     static void shouldLogErrors() {
+        DatabaseLayer.setDmlEngine(new DmlMock());
         Logger.settings = new Log_Setting__c(Level__c = 'FINEST', Enabled__c = true);
-        Logger.dmlEngine = new DmlMock(); 
         Id fakeId = TestUtils.generateFakeId(Account.SObjectType);
         DmlResult.Error mockError = new DmlResult.Error(new List<String>(), 'Fake Error Message', null);
         List<DmlResult.Error> mockErrors = new List<DmlResult.Error>{mockError};
@@ -169,8 +168,8 @@ private class DmlResult_Test {
         DmlResult.logErrors(new List<DmlResult>{mockResult});
         Test.stopTest(); 
 
-        System.assertEquals(1, Logger.dmlEngine.getPublishedEvents()?.size(), 'Wrong # of published events');
-        Log_Event__e logEvent = (Log_Event__e) Logger.dmlEngine.getPublishedEvents()[0];
+        System.assertEquals(1, DatabaseLayer.DmlEngine.getPublishedEvents()?.size(), 'Wrong # of published events');
+        Log_Event__e logEvent = (Log_Event__e) DatabaseLayer.DmlEngine.getPublishedEvents()[0];
         System.assertEquals(JSON.serializePretty(mockErrors), logEvent.Message__c, 'Wrong log message');
     }
 }

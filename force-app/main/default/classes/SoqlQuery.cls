@@ -15,7 +15,15 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     global virtual List<SObject> run() {
         // Run the current query object through the database
         String soql = this.getQueryString(); 
-        return Database.query(soql); 
+        List<SObject> results; 
+        try {
+            results = Database.query(soql); 
+        } catch (System.QueryException queryError) {
+            final String newMessage = queryError.getMessage() + '. Query: [' + soql + ']';
+            queryError.setMessage(newMessage); 
+            throw queryError;
+        }
+        return results;
     }
 
     global String getQueryString() {

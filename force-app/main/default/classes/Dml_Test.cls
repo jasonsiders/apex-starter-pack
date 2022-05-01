@@ -15,7 +15,7 @@ private class Dml_Test {
     static void shouldDoInsert() {
         Account account = new Account(Name = 'Test Account #0');
         Test.startTest();
-        DmlResult dmlResult = new Dml().doInsert(account);
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doInsert(account);
         Test.stopTest();
         System.assertNotEquals(null, account?.Id, 'Account was not inserted');
         System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
@@ -25,11 +25,11 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoUpdate() {
-        Account account = [SELECT Id, Name FROM Account LIMIT 1];
+        Account account = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
         final String newName = 'Some other name';
         account.Name = newName; 
         Test.startTest();
-        DmlResult dmlResult = new Dml().doUpdate(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpdate(account); 
         Test.stopTest();
         System.assertEquals(newName, account.Name, 'Account was not updated');
         System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
@@ -40,11 +40,11 @@ private class Dml_Test {
     @IsTest 
     static void shouldDoUpsert() {
         Account account = new Account(Name = 'Test Account #0'); 
-        new Dml().doUpsert(account); 
+        DatabaseLayer.DmlEngine.doUpsert(account); 
         System.assertNotEquals(null, account.Id, 'Account was not inserted'); 
         final String newName = 'Some other name';
         account.Name = newName; 
-        DmlResult dmlResult = new Dml().doUpsert(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpsert(account); 
         System.assertEquals(newName, account.Name, 'Account was not updated'); 
         System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
         System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
@@ -56,11 +56,11 @@ private class Dml_Test {
         // The upsert key is set to the *.Id by default, so we'd never actually run something like this
         // But there isn't a way to test this functioanlity without first defining a custom external Id field
         Account testAccount = new Account(Name = 'Test Account #0'); 
-        new Dml().doUpsert(testAccount, Account.Id); 
+        DatabaseLayer.DmlEngine.doUpsert(testAccount, Account.Id); 
         System.assertNotEquals(null, account.Id, 'Account was not inserted'); 
         final String newName = 'Some other name';
         testAccount.Name = newName; 
-        DmlResult dmlResult = new Dml().doUpsert(testAccount, Account.Id); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpsert(testAccount, Account.Id); 
         System.assertEquals(newName, testAccount.Name, 'Account was not updated');
         System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
         System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
@@ -69,38 +69,56 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoUndelete() {
-        Account account = [SELECT Id FROM Account LIMIT 1];
-        delete account; 
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
+        delete testAccount; 
         Test.startTest();
-        DmlResult dmlResult = new Dml().doUndelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(testAccount); 
         Test.stopTest();
-        System.assertEquals(false, [SELECT Id FROM Account WHERE Id = :account.Id]?.isEmpty(), 'Account was not undeleted'); 
-        System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .addFilters(new QueryFilter(
+                Account.Id, 
+                QueryFilter.Operator.EQUALS, 
+                testAccount.Id
+            ));
+        List<Account> accounts = (List<Account>) query.run(); 
+        System.assertEquals(false, accounts?.isEmpty(), 'Account was not undeleted'); 
+        System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
         System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
     }
 
     @IsTest 
     static void shouldDoDelete() {
-        Account account = [SELECT Id FROM Account LIMIT 1];
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
         Test.startTest();
-        DmlResult dmlResult = new Dml().doDelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doDelete(testAccount); 
         Test.stopTest(); 
-        System.assertEquals(true, [SELECT Id FROM Account WHERE Id = :account.Id]?.isEmpty(), 'Account was not deleted'); 
-        System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .addFilters(new QueryFilter(
+                Account.Id, 
+                QueryFilter.Operator.EQUALS, 
+                testAccount.Id
+            ));
+        List<Account> accounts = (List<Account>) query.run();
+        System.assertEquals(true, accounts?.isEmpty(), 'Account was not deleted'); 
+        System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
         System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
     }
 
     @IsTest 
     static void shouldDoHardDelete() {
-        Account account = [SELECT Id FROM Account LIMIT 1];
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
         Test.startTest();
-        DmlResult dmlResult = new Dml().doHardDelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doHardDelete(testAccount); 
         Test.stopTest(); 
-        account = [SELECT Id, IsDeleted FROM Account WHERE Id = :account.Id ALL ROWS];
-        System.assertEquals(true, account.IsDeleted, 'Account was not hard deleted'); 
-        System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)   
+            .addFields(Account.IsDeleted)
+            .addFilters(new QueryFilter(Account.Id, QueryFilter.Operator.EQUALS, testAccount.Id))
+            .addTags('ALL ROWS');
+        testAccount = (Account) query.run()[0];
+        System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard deleted'); 
+        System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
         System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
     }
@@ -114,8 +132,7 @@ private class Dml_Test {
             Transaction_Id__c = '1234'
         );
         Test.startTest();
-        Dml dml = new Dml(); 
-        DmlResult result = dml.doPublish(event);
+        DmlResult result = DatabaseLayer.DmlEngine.doPublish(event);
         Test.stopTest();
         Test.getEventBus().deliver();
         // Unlike "normal" DML, platform events are not given an ID after insert/publish
@@ -130,7 +147,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doInsert(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doInsert(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -146,7 +163,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doUpdate(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doUpdate(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -162,7 +179,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doUpsert(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doUpsert(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -178,7 +195,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doDelete(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doDelete(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -194,7 +211,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doHardDelete(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doHardDelete(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -210,7 +227,7 @@ private class Dml_Test {
         Test.startTest();
         Exception caughtError; 
         try { 
-            new Dml().doUndelete(new List<Account>{account});
+            DatabaseLayer.DmlEngine.doUndelete(new List<Account>{account});
         } catch (Exception thrownError) {
             caughtError = thrownError;
         }
@@ -226,7 +243,7 @@ private class Dml_Test {
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = new Dml().doInsert(account, false);
+            dmlResult = DatabaseLayer.DmlEngine.doInsert(account, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -243,7 +260,7 @@ private class Dml_Test {
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = new Dml().doUpdate(account, false);
+            dmlResult = DatabaseLayer.DmlEngine.doUpdate(account, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -260,7 +277,7 @@ private class Dml_Test {
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = new Dml().doUpsert(account, false);
+            dmlResult = DatabaseLayer.DmlEngine.doUpsert(account, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -273,16 +290,15 @@ private class Dml_Test {
     @IsTest 
     static void shouldBypassErrorOnDelete() {
         // SFDC never lets you delete Contacts w/Cases!
-        Dml dmlEngine = new Dml();
         Contact contact = new Contact(LastName = 'Test');
-        dmlEngine.doInsert(contact);
+        DatabaseLayer.DmlEngine.doInsert(contact);
         Case theCase = new Case(ContactId = contact.Id);
-        dmlEngine.doInsert(theCase);
+        DatabaseLayer.DmlEngine.doInsert(theCase);
         
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = dmlEngine.doDelete(contact, false);
+            dmlResult = DatabaseLayer.DmlEngine.doDelete(contact, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -295,16 +311,15 @@ private class Dml_Test {
     @IsTest 
     static void shouldBypassErrorOnHardDelete() {
         // SFDC never lets you delete Contacts w/Cases!
-        Dml dmlEngine = new Dml();
         Contact contact = new Contact(LastName = 'Test');
-        dmlEngine.doInsert(contact);
+        DatabaseLayer.DmlEngine.doInsert(contact);
         Case theCase = new Case(ContactId = contact.Id);
-        dmlEngine.doInsert(theCase);
+        DatabaseLayer.DmlEngine.doInsert(theCase);
         
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = dmlEngine.doHardDelete(contact, false);
+            dmlResult = DatabaseLayer.DmlEngine.doHardDelete(contact, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -317,15 +332,14 @@ private class Dml_Test {
     @IsTest 
     static void shouldBypassErrorOnUndelete() {
         // You can't undelete something once if it's no longer in the recycle bin
-        Dml dmlEngine = new Dml();
         Account account = new Account(Name = 'Test');
-        dmlEngine.doInsert(account);
-        dmlEngine.doHardDelete(account);
+        DatabaseLayer.DmlEngine.doInsert(account);
+        DatabaseLayer.DmlEngine.doHardDelete(account);
         
         Test.startTest();
         DmlResult dmlResult; 
         try { 
-            dmlResult = new Dml().doUndelete(account, false);
+            dmlResult = DatabaseLayer.DmlEngine.doUndelete(account, false);
         } catch (Exception thrownError) {
             System.assert(false, 'An error was thrown: ' + thrownError);
         }
@@ -342,19 +356,24 @@ private class Dml_Test {
         // EventBus.publish by default will insert "normal" SObjects instead of publish them
         // but by no means should we actually go try and do this in real life!
         Account notAnEvent = new Account(Name = 'Test'); 
-        DmlResult result = new Dml().doPublish(notAnEvent);
+        DmlResult result = DatabaseLayer.DmlEngine.doPublish(notAnEvent);
         System.assertEquals(true, result.isSuccess, 'Account publish failed: ' + JSON.serialize(result));
-        System.assertEquals(false, [SELECT Id FROM Account WHERE Id = :result.recordId]?.isEmpty(), 'Account was not inserted');
+        List<SObject> accounts = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .addFilters(new QueryFilter(
+                Account.Id, 
+                QueryFilter.Operator.EQUALS, 
+                result.recordId
+            )).run();
+        System.assertEquals(false, accounts.isEmpty(), 'Account was not inserted');
     }
 
     @IsTest 
     static void shouldReturnPublishedEvents() {
         Log_Event__e event = new Log_Event__e(Message__c = 'Testing 123'); 
-        Dml dml = new Dml(); 
-        DmlResult dmlResult = dml.doPublish(event); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doPublish(event); 
 
         Test.startTest();
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) dml.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
         Test.stopTest();
         
         System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');

@@ -1,5 +1,4 @@
 public without sharing class GarbageScheduler implements System.Schedulable {    
-    @TestVisible static IQueryFactory queryEngine = new SoqlQuery.Factory(); 
     @TestVisible static final Integer FLEX_QUEUE_LIMIT = 100; 
     
     @TestVisible List<Garbage_Collection_Job__mdt> activeJobs = this.getActiveJobs();
@@ -42,7 +41,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     }
 
     private List<Garbage_Collection_Job__mdt> getActiveJobs() {
-        IQuery query = GarbageScheduler.queryEngine
+        IQuery query = DatabaseLayer.QueryEngine
             .newQuery(Garbage_Collection_Job__mdt.SObjectType)
             .addFields(new List<SObjectField>{
                 Garbage_Collection_Job__mdt.Apex_Class_Name__c,
@@ -61,7 +60,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     }
 
     private Integer getFlexQueueSize() {
-        IQuery query = GarbageScheduler.queryEngine
+        IQuery query = DatabaseLayer.QueryEngine
             .newQuery(AsyncApexJob.SObjectType)
             .addFilters(new QueryFilter(
                 AsyncApexJob.Status,

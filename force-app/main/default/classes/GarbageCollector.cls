@@ -1,7 +1,6 @@
 global abstract inherited sharing class GarbageCollector implements Database.Batchable<SObject>, GarbageCollector.IGarbageCollector {
     public Id jobId { get; private set; }
     public Integer batchSize { get; private set; }
-    @TestVisible static IDml dmlEngine = new Dml(); 
 
     static final String INTERFACE_NAME = String.valueOf(GarbageCollector.IGarbageCollector.class);
     static final Set<String> VALID_APEX_CLASSES = GarbageCollector.getExtendingTypes();
@@ -24,7 +23,7 @@ global abstract inherited sharing class GarbageCollector implements Database.Bat
     // **** BATCHABLE **** //
     public virtual void execute(Database.BatchableContext context, List<SObject> scope) {
         try {
-            List<DmlResult> results = dmlEngine.doDelete(scope, false); 
+            List<DmlResult> results = DatabaseLayer.DmlEngine.doDelete(scope, false); 
             DmlResult.logErrors(results);
         } catch (Exception caughtError) {
             final String message = 
@@ -36,10 +35,15 @@ global abstract inherited sharing class GarbageCollector implements Database.Bat
     }
 
     public virtual void finish(Database.BatchableContext context) {
-        List<AsyncApexJob> jobDetails = [
-            SELECT JobItemsProcessed, TotalJobItems
-            FROM AsyncApexJob WHERE Id = :context.getJobId()
-        ];
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
+            .addFields(AsyncApexJob.JobItemsProcessed)
+            .addFields(AsyncApexJob.TotalJobItems)
+            .addFilters(new QueryFilter(
+                AsyncApexJob.Id, 
+                QueryFilter.Operator.EQUALS, 
+                context.getJobId()
+            ));
+        List<AsyncApexJob> jobDetails = (List<AsyncApexJob>) query.run(); 
         AsyncApexJob currentJob = (jobDetails?.isEmpty() == false) ? jobDetails[0] : null; 
         Integer numCompletedBatches = currentJob?.JobItemsProcessed; 
         Integer numTotalBatches = currentJob?.TotalJobItems; 
@@ -71,10 +75,18 @@ global abstract inherited sharing class GarbageCollector implements Database.Bat
 
     private static Set<String> getExtendingTypes() {
         Set<String> extendingTypeNames = new Set<String>();
-        for (ApexTypeImplementor apexClass : [
-            SELECT ClassName FROM ApexTypeImplementor 
-            WHERE InterfaceName = :INTERFACE_NAME AND IsConcrete = true
-        ]) {
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
+            .addFields(ApexTypeImplementor.ClassName)
+            .addFilters(new QueryFilter(
+                ApexTypeImplementor.InterfaceName, 
+                QueryFilter.Operator.EQUALS, 
+                INTERFACE_NAME
+            )).addFilters(new QueryFilter(
+                ApexTypeImplementor.IsConcrete, 
+                QueryFilter.Operator.EQUALS, 
+                true
+            ));
+        for (ApexTypeImplementor apexClass : (List<ApexTypeImplementor>) query.run()) {
             extendingTypeNames.add(apexClass.ClassName);
         }
         return extendingTypeNames;

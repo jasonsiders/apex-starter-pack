@@ -55,8 +55,8 @@ private class GarbageCollector_Test {
         Test.stopTest();
 
         System.assertNotEquals(null, batchJob?.jobId, 'A job was not created');
-        System.assertEquals(0, [SELECT Id FROM Account]?.size(), 'Accounts were not deleted');
-        System.assertEquals(100, [SELECT Id FROM Lead]?.size(), 'Leads were deleted');
+        System.assertEquals(0, queryRecords(Account.SObjectType)?.size(), 'Accounts were not deleted');
+        System.assertEquals(100, queryRecords(Lead.SObjectType)?.size(), 'Leads were deleted');
     }
 
     @IsTest 
@@ -132,8 +132,8 @@ private class GarbageCollector_Test {
         instance.execute(mockContext, scope);
         Test.stopTest();
 
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) Logger.dmlEngine.getPublishedEvents();
-        System.assertEquals(scope?.size(), logEvents?.size(), 'Wrong # of log events: ' + Logger.dmlEngine);
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
+        System.assertEquals(scope?.size(), logEvents?.size(), 'Wrong # of log events: ' + DatabaseLayer.DmlEngine);
     }
 
     @IsTest 
@@ -156,14 +156,13 @@ private class GarbageCollector_Test {
         }
         Test.stopTest();
 
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) Logger.dmlEngine.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
         System.assertEquals(1, logEvents?.size(), 'Wrong # of log events');
         System.assert(logEvents[0].Message__c?.startsWith('Unexpected error'), 'Wrong event logged');
     }
 
     @TestSetup 
     static void setup() {
-        IDml dml = new Dml(); 
         List<SObject> records = new List<SObject>(); 
         for (Integer i = 0; i < 100; i++) {
             records.add(new Account(
@@ -176,15 +175,19 @@ private class GarbageCollector_Test {
             )); 
         }
         records.sort();
-        dml.doInsert(records); 
+        DatabaseLayer.DmlEngine.doInsert(records); 
     }
+
+    static List<SObject> queryRecords(SObjectType objectType) {
+        return DatabaseLayer.QueryEngine.newQuery(objectType).run();
+    }   
 
     public class TestExtension extends GarbageCollector {
         // Will delete both Leads & Accounts
         public List<SObject> start(Database.BatchableContext context) {
             List<SObject> records = new List<SObject>(); 
-            records.addAll([SELECT Id FROM Account]);
-            records.addAll([SELECT Id FROM Lead]);
+            records.addAll(queryRecords(Account.SObjectType));
+            records.addAll(queryRecords(Lead.SObjectType));
             return records;
         }
     }

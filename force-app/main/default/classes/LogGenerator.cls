@@ -1,6 +1,5 @@
 public without sharing class LogGenerator {
     final List<Log_Event__e> events; 
-    @TestVisible static IDml dmlEngine = new Dml(); 
 
     public LogGenerator(List<Log_Event__e> events) {
         this.events = events;
@@ -11,10 +10,10 @@ public without sharing class LogGenerator {
         Map<String, LogGroup> logGroups = this.groupLogsByTransactionId(); 
         // Generate & upsert a Log_Transaction__c record for each unique TransactionId
         List<Log_Transaction__c> logTransactions = this.generateLogTransactions(logGroups.values()); 
-        dmlEngine.doUpsert(logTransactions, Log_Transaction__c.Transaction_Id__c); 
+        DatabaseLayer.DmlEngine.doUpsert(logTransactions, Log_Transaction__c.Transaction_Id__c); 
         // Generate & Insert a Log__c record for each Log Event
         List<Log__c> logRecords = this.generateLogs(logGroups.values());
-        dmlEngine.doInsert(logRecords); 
+        DatabaseLayer.DmlEngine.doInsert(logRecords); 
     }
 
     private Map<String, LogGroup> groupLogsByTransactionId() {

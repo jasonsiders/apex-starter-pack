@@ -5,14 +5,13 @@ private class Logger_Test {
         System.assertEquals(Log_Setting__c.getInstance(UserInfo.getUserId()), Logger.settings, 'Wrong settings'); 
         System.assertNotEquals(null, Logger.threshold, 'Logging Level not set');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Not an empty list');
-        System.assertNotEquals(null, Logger.dmlEngine, 'dmlEngine not initialized');
     }
 
     @IsTest 
     static void shouldGenerateLogEvent() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         final String logMessage = 'Testing 123';
 
         Test.startTest();
@@ -32,15 +31,15 @@ private class Logger_Test {
     @IsTest 
     static void shouldGenerateAndPublishLogEvent() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
 
         Test.startTest();
         // Setting publishImmediately flag to 'true' will publish the log
         Logger.logAndPublish(LoggingLevel.FINEST, 'Testing 123');
         Test.stopTest();
 
-        System.assertEquals(1, dmlEngine?.published?.getAll()?.size(), 'Event not published');
+        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Event not published');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Event still pending');
     }
 
@@ -52,22 +51,22 @@ private class Logger_Test {
         for (Integer i = 0; i < Logger.maxPublishCalls; i++) {
             Logger.logAndPublish(LoggingLevel.FINEST, 'Testing 123');
         }
-        System.assertEquals(Logger.maxPublishCalls, Logger.dmlEngine?.getPublishedEvents()?.size(), 'Wrong number of events published');
+        System.assertEquals(Logger.maxPublishCalls, DatabaseLayer.DmlEngine?.getPublishedEvents()?.size(), 'Wrong number of events published');
         System.assertEquals(Logger.maxPublishCalls, Limits.getPublishImmediateDml(), 'Wrong number of publish calls');
         // Now that we've hit our limit, subsequent calls to publish() will not do anything
         Logger.log(LoggingLevel.FINEST, 'Testing 123');
         Logger.publish(); 
         System.assertEquals(1, Logger.pendingEvents?.size());
-        System.assertEquals(Logger.maxPublishCalls, Logger.dmlEngine?.getPublishedEvents()?.size());
+        System.assertEquals(Logger.maxPublishCalls, DatabaseLayer.DmlEngine?.getPublishedEvents()?.size());
         Test.stopTest();
     }
 
     @IsTest 
     static void shouldNotLogIfDisabled() {
         // If disabled, will not log
-        setUpTestLogger(LoggingLevel.ERROR, false); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        setUpTestLogger(LoggingLevel.ERROR, false);
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         Logger.log(LoggingLevel.ERROR, 'Test Message'); 
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Logged when disabled');
         // If null, should default to false, and will not throw an error
@@ -83,8 +82,8 @@ private class Logger_Test {
     @IsTest 
     static void shouldOnlyLogForAppropriateLogLevel() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         LoggingLevel logLevel = LoggingLevel.FINEST;
         String logMessage = 'Testing 123';
         // FINEST <= FINEST, so this will log
@@ -138,8 +137,8 @@ private class Logger_Test {
     static void shouldNotLogIfNullLoggingLevel() {
         // If one or both are null, will not log
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         LoggingLevel logLevel;
         String logMessage = 'Testing 123';
         Exception error; 
@@ -181,8 +180,8 @@ private class Logger_Test {
     @IsTest 
     static void shouldLogAtThresholdLevel() {
         setupTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         String message = 'Testing 123';
 
         Test.startTest();
@@ -196,14 +195,14 @@ private class Logger_Test {
     @IsTest 
     static void shouldLogAndPublishAtThresholdLevel() {
         setupTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
 
         Test.startTest();
         Logger.logAndPublish('Testing 123'); 
         Test.stopTest(); 
 
-        System.assertEquals(1, dmlEngine?.published?.getAll()?.size(), 'Event not published');
+        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Event not published');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Event still pending');
     }
 
@@ -213,8 +212,8 @@ private class Logger_Test {
         // from where the Logger class is called from;
         // not the Logger class itself
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         // Try logging from directly in the test class
         Logger.log(LoggingLevel.FINEST, 'Test Message');
         System.assertEquals(1, Logger.pendingEvents?.size(), 'Did not log');
@@ -233,45 +232,45 @@ private class Logger_Test {
     static void shouldLogManyEventsFromLightning() {
         // This method is designed to be used by lightning components.
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
         Logger.logFromLightning(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
     static void shouldLogSingleEventFromLightning() {
         // This method is designed to be used by lightning components.
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();
         Logger.logFromLightning(input);
         Test.stopTest();
 
-        System.assertEquals(1, dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
     static void shouldLogManyEventsFromApi() {
         // This method is designed to be used by external API resources
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
         Logger.logFromApi(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -280,15 +279,15 @@ private class Logger_Test {
         // Unlike logFromLightning(), can't overload to allow single/multiple inputs,
         // since there can only be one @Http* method of each type per class
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();
         Logger.logFromApi(new List<Logger.Input>{input});
         Test.stopTest();
 
-        System.assertEquals(1, dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -297,15 +296,15 @@ private class Logger_Test {
         // Because of how Flow is bulkified, callers will use this action one log at a time,
         // but they are always processed in bulk
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
         Logger.logFromFlow(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -314,15 +313,15 @@ private class Logger_Test {
         // Because of how Flow is bulkified, callers will use this action one log at a time,
         // but they are always processed in bulk
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlEngine = new DmlMock();
-        Logger.dmlEngine = dmlEngine; 
+        DmlMock dmlMock = new DmlMock();
+        DatabaseLayer.setDmlEngine(dmlMock);
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();
         Logger.logFromFlow(new List<Logger.Input>{input});
         Test.stopTest();
 
-        System.assertEquals(1, dmlEngine.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     // **** HELPER **** // 

@@ -10,10 +10,7 @@ private class SoqlQuery_Test {
     static void shouldGenerateQueryWithOneWhereClause() {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFilters(new QueryFilter(Account.AnnualRevenue, QueryFilter.Operator.GREATER_THAN, 1000));
-        System.assertEquals(
-            'SELECT Id FROM Account WHERE AnnualRevenue > 1000', 
-            query.getQueryString()
-        ); 
+        System.assertEquals('SELECT Id FROM Account WHERE AnnualRevenue > 1000', query.getQueryString()); 
         checkIfQueryIsValid(query); 
     }
 
@@ -184,17 +181,24 @@ private class SoqlQuery_Test {
         System.assertEquals(true, query instanceOf SoqlQuery, 'Wrong type of IQuery generated');
     }
 
+    @IsTest 
+    static void shouldThrowErrorIfInvalidQuery() {
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).addFields('lajksdf');
+        Test.startTest();
+        Exception caughtError; 
+        try {
+            query.run(); 
+        } catch (System.QueryException thrownError) {
+            caughtError = thrownError; 
+        }
+        System.assertNotEquals(null, caughtError, 'An error was not thrown for an invalid query');
+    }
+
     static void checkIfQueryIsValid(SoqlQuery query) {
         try {
             query.run();
         } catch (System.QueryException queryError) {
-            System.assert(
-                false, 
-                'An error was thrown during the query: ' 
-                    + queryError 
-                    + '\nOriginal Query: '
-                    + query.getQueryString()
-            ); 
+            System.assert(false, queryError);
         }
     }
 }

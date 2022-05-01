@@ -1,6 +1,5 @@
 @RestResource(urlMapping='/log/*')
 global without sharing class Logger {
-    @TestVisible static IDml dmlEngine = new Dml();
     @TestVisible static final Integer maxPublishCalls = Logger.getMaxPublishCalls();  
     @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
     @TestVisible static Log_Setting__c settings = Log_Setting__c.getInstance(UserInfo.getUserId());
@@ -77,7 +76,7 @@ global without sharing class Logger {
     global static void publish() {
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
         if (currentPublishCalls < Logger.maxPublishCalls) {
-            Logger.dmlEngine.doPublish(Logger.pendingEvents); 
+            DatabaseLayer.DmlEngine.doPublish(Logger.pendingEvents); 
             Logger.pendingEvents.clear(); 
         }
     }

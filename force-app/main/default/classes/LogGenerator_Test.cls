@@ -15,12 +15,13 @@ private class LogGenerator_Test {
                 Severity__c = 'FINEST',
                 Transaction_Id__c = transactionId
             ));
+
         }
 
         Test.startTest();
         DmlMock dmlMock = new DmlMock(); 
         LogGenerator generator = new LogGenerator(logEvents); 
-        LogGenerator.dmlEngine = dmlMock;
+        DatabaseLayer.setDmlEngine(dmlMock); 
         generator.generateLogs(); 
         Test.stopTest(); 
         
@@ -48,7 +49,7 @@ private class LogGenerator_Test {
         Test.startTest();
         DmlMock dmlMock = new DmlMock(); 
         LogGenerator generator = new LogGenerator(logEvents); 
-        LogGenerator.dmlEngine = dmlMock;
+        DatabaseLayer.setDmlEngine(dmlMock);
         generator.generateLogs(); 
         Test.stopTest(); 
 

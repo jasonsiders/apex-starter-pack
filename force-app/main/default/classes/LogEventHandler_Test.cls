@@ -85,7 +85,7 @@ private class LogEventHandler_Test extends TriggerHandler {
         }
 
         Test.startTest();
-        new Dml().doPublish(logEvents); 
+        DatabaseLayer.DmlEngine.doPublish(logEvents); 
         Test.stopTest();
 
         List<Log_Transaction__c> logTransactions = getLogTransactions();
@@ -102,6 +102,7 @@ private class LogEventHandler_Test extends TriggerHandler {
     }
 
     private static List<Log_Transaction__c> getLogTransactions() {
+        // TODO: Eventually replace with QueryEngine; doesn't yet support child queries
         return [
             SELECT Id, OwnerId, Transaction_Id__c,
                 (SELECT Id, Message__c, Severity__c, Source__c, Stack_Trace__c FROM Logs__r)
