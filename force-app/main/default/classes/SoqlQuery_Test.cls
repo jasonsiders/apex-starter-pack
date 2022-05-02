@@ -157,7 +157,7 @@ private class SoqlQuery_Test {
         for (Integer i = 0; i < 200; i++) {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
-        insert accounts;
+        DatabaseLayer.DmlEngine.doInsert(accounts);
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
             .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'))
@@ -192,6 +192,22 @@ private class SoqlQuery_Test {
             caughtError = thrownError; 
         }
         System.assertNotEquals(null, caughtError, 'An error was not thrown for an invalid query');
+    }
+
+    @IsTest 
+    static void shouldAllowSubqueries() {
+        Schema.ChildRelationship contactsRelationship = Describes.getChildRelationship(Account.SObjectType, 'Contacts');
+        SubQuery subQuery = new SubQuery(contactsRelationship); 
+
+        Test.startTest();
+        SoqlQuery query = new SoqlQuery(Account.SObjectType).addSubQueries(subQuery);
+        System.assertEquals('SELECT Id, (SELECT Id FROM Contacts) FROM Account', query.getQueryString(), 'Unexpected query string');
+        try {
+            query.run();
+        } catch (System.QueryException thrownError) {
+            System.assert(false, 'Invalid Query: ' + thrownError);
+        }
+        Test.stopTest();
     }
 
     static void checkIfQueryIsValid(SoqlQuery query) {

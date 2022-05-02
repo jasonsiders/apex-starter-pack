@@ -8,12 +8,14 @@ public inherited sharing abstract class DatabaseLayer {
     }
 
     @TestVisible
-    static void setDmlEngine(IDml dmlEngine) {
+    static IDml setDmlEngine(IDml dmlEngine) {
         DatabaseLayer.DmlEngine = dmlEngine;
+        return dmlEngine; 
     }
 
     @TestVisible
-    static void setQueryEngine(IQueryFactory queryEngine) {
+    static IQueryFactory setQueryEngine(IQueryFactory queryEngine) {
         DatabaseLayer.QueryEngine = queryEngine; 
+        return queryEngine;
     }
 }

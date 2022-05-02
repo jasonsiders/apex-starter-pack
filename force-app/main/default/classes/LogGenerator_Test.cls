@@ -2,6 +2,7 @@
 private class LogGenerator_Test {
     @IsTest 
     static void shouldGenerateOneTransactionRecordPerTransactionId() { 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Set<String> transactionIds = new Set<String>(); 
         List<Log_Event__e> logEvents = new List<Log_Event__e>(); 
         // Generate 200 transaction Ids - should generate 200 Log Transaction records
@@ -19,9 +20,7 @@ private class LogGenerator_Test {
         }
 
         Test.startTest();
-        DmlMock dmlMock = new DmlMock(); 
         LogGenerator generator = new LogGenerator(logEvents); 
-        DatabaseLayer.setDmlEngine(dmlMock); 
         generator.generateLogs(); 
         Test.stopTest(); 
         
@@ -33,6 +32,7 @@ private class LogGenerator_Test {
 
     @IsTest 
     static void shouldGenerateOneLogRecordPerEvent() {
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Request context = Request.getCurrent(); 
         List<Log_Event__e> logEvents = new List<Log_Event__e>();
         for (Integer i = 0; i < 200; i++) {
@@ -47,9 +47,7 @@ private class LogGenerator_Test {
         }
         
         Test.startTest();
-        DmlMock dmlMock = new DmlMock(); 
         LogGenerator generator = new LogGenerator(logEvents); 
-        DatabaseLayer.setDmlEngine(dmlMock);
         generator.generateLogs(); 
         Test.stopTest(); 
 

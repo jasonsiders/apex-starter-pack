@@ -10,6 +10,10 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     global SoqlQuery(SObjectType targetObject) {
         this.setTargetSObject(targetObject); 
     }
+
+    protected SoqlQuery() {
+        // This constructor allows extending types to call super() methods
+    }
     
     // **** Running a Query **** // 
     global virtual List<SObject> run() {
@@ -26,13 +30,13 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return results;
     }
 
-    global String getQueryString() {
+    global virtual String getQueryString() {
         // Output the current SoqlQuery object as a SOQL Query string
         // SELECT {fields} FROM {targetObject} {WHERE filters} {ORDER BY orderBy} {LIMIT limit} {queryTags}
         String template = 'SELECT {0} FROM {1}{2}{3}{4}{5}';
         return String.format(template, new String[]{
             String.join(new List<String>(this.fields), ', '),
-            String.valueOf(this.targetObject),
+            this.getTargetObject(),
             this.getWhereClause(),
             this.getSpecialTags(),
             this.getOrderByClause(),
@@ -65,6 +69,18 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
 
     global SoqlQuery addFields(String field) {
         return this.addFields(new List<String>{field});
+    }
+
+    global SoqlQuery addSubQueries(List<SubQuery> subQueries) {
+        List<String> childQueryStrings = new List<String>();
+        for (SubQuery subQuery : subQueries) {
+            childQueryStrings.add(subQuery.getQueryString());
+        }
+        return this.addFields(childQueryStrings); 
+    }
+
+    global SoqlQuery addSubQueries(SubQuery subQuery) {
+        return this.addSubQueries(new List<SubQuery>{subQuery});
     }
 
     global SoqlQuery resetFields() {
@@ -141,6 +157,10 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     }
 
     // **** PRIVATE **** // 
+    protected virtual String getTargetObject() {
+        return String.valueOf(this.targetObject);
+    }
+
     private String getWhereClause() {
         return (this.filters?.isEmpty() == false)
             ? ' WHERE ' + this.joinFilters()

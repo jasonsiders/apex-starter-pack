@@ -10,8 +10,7 @@ private class Logger_Test {
     @IsTest 
     static void shouldGenerateLogEvent() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         final String logMessage = 'Testing 123';
 
         Test.startTest();
@@ -31,8 +30,7 @@ private class Logger_Test {
     @IsTest 
     static void shouldGenerateAndPublishLogEvent() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
 
         Test.startTest();
         // Setting publishImmediately flag to 'true' will publish the log
@@ -65,8 +63,7 @@ private class Logger_Test {
     static void shouldNotLogIfDisabled() {
         // If disabled, will not log
         setUpTestLogger(LoggingLevel.ERROR, false);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Logger.log(LoggingLevel.ERROR, 'Test Message'); 
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Logged when disabled');
         // If null, should default to false, and will not throw an error
@@ -82,8 +79,7 @@ private class Logger_Test {
     @IsTest 
     static void shouldOnlyLogForAppropriateLogLevel() {
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         LoggingLevel logLevel = LoggingLevel.FINEST;
         String logMessage = 'Testing 123';
         // FINEST <= FINEST, so this will log
@@ -137,8 +133,7 @@ private class Logger_Test {
     static void shouldNotLogIfNullLoggingLevel() {
         // If one or both are null, will not log
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         LoggingLevel logLevel;
         String logMessage = 'Testing 123';
         Exception error; 
@@ -180,8 +175,7 @@ private class Logger_Test {
     @IsTest 
     static void shouldLogAtThresholdLevel() {
         setupTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         String message = 'Testing 123';
 
         Test.startTest();
@@ -195,8 +189,7 @@ private class Logger_Test {
     @IsTest 
     static void shouldLogAndPublishAtThresholdLevel() {
         setupTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
 
         Test.startTest();
         Logger.logAndPublish('Testing 123'); 
@@ -212,8 +205,7 @@ private class Logger_Test {
         // from where the Logger class is called from;
         // not the Logger class itself
         setUpTestLogger(LoggingLevel.FINEST, true); 
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         // Try logging from directly in the test class
         Logger.log(LoggingLevel.FINEST, 'Test Message');
         System.assertEquals(1, Logger.pendingEvents?.size(), 'Did not log');
@@ -232,8 +224,7 @@ private class Logger_Test {
     static void shouldLogManyEventsFromLightning() {
         // This method is designed to be used by lightning components.
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
@@ -247,8 +238,7 @@ private class Logger_Test {
     static void shouldLogSingleEventFromLightning() {
         // This method is designed to be used by lightning components.
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();
@@ -262,8 +252,7 @@ private class Logger_Test {
     static void shouldLogManyEventsFromApi() {
         // This method is designed to be used by external API resources
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
@@ -279,8 +268,7 @@ private class Logger_Test {
         // Unlike logFromLightning(), can't overload to allow single/multiple inputs,
         // since there can only be one @Http* method of each type per class
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();
@@ -296,8 +284,7 @@ private class Logger_Test {
         // Because of how Flow is bulkified, callers will use this action one log at a time,
         // but they are always processed in bulk
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         List<Logger.Input> inputs = generateTestInputs();
         
         Test.startTest();
@@ -313,8 +300,7 @@ private class Logger_Test {
         // Because of how Flow is bulkified, callers will use this action one log at a time,
         // but they are always processed in bulk
         setUpTestLogger(LoggingLevel.FINEST, true);
-        DmlMock dmlMock = new DmlMock();
-        DatabaseLayer.setDmlEngine(dmlMock);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Logger.Input input = generateTestInputs()[0];
         
         Test.startTest();

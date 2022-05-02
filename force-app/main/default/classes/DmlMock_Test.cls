@@ -2,11 +2,11 @@
 private class DmlMock_Test {
     @IsTest
     static void shouldMockInsert() {
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Account account = new Account(Name = 'Test Account'); 
 
         Test.startTest();
-        DmlMock dmlMock = new DmlMock(); 
-        DmlResult dmlResult = dmlMock.doInsert(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doInsert(account); 
         Test.stopTest();
 
         System.assertNotEquals(null, account.Id, 'Id was not added'); 
@@ -19,14 +19,14 @@ private class DmlMock_Test {
 
     @IsTest 
     static void shouldMockUpdate() {
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Account testAccount = new Account(Name = 'Test Account'); 
-        new DmlMock().doInsert(testAccount); 
+        DatabaseLayer.DmlEngine.doInsert(testAccount); 
         final String newName = 'Some other name';
         testAccount.Name = newName; 
 
         Test.startTest();
-        DmlMock dmlMock = new DmlMock();
-        DmlResult dmlResult = dmlMock.doUpdate(testAccount); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpdate(testAccount); 
         Test.stopTest();
 
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
@@ -41,15 +41,15 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockUpsert() {
         Account testAccount = new Account(Name = 'Test Account'); 
-        DmlMock dmlMock = new DmlMock(); 
-        dmlMock.doUpsert(testAccount); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
+        DatabaseLayer.DmlEngine.doUpsert(testAccount); 
         System.assertNotEquals(null, testAccount.Id, 'Id was not added'); 
         System.assertEquals(true, dmlMock.upserted.containsRecord(testAccount.Id), 'Not upserted');
         final String newName = 'Some other name';
         testAccount.Name = newName; 
 
         Test.startTest(); 
-        DmlResult dmlResult = dmlMock.doUpsert(testAccount); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpsert(testAccount); 
         Test.stopTest();
 
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
@@ -63,16 +63,16 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockUpsertByExternalId() {
         // Name isn't an actual external Id field, so this will only work with a Mock class
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         Account testAccount = new Account(Name = 'Test Account'); 
-        DmlMock dmlMock = new DmlMock(); 
-        dmlMock.doUpsert(testAccount, Account.Name); 
+        DatabaseLayer.DmlEngine.doUpsert(testAccount, Account.Name); 
         System.assertNotEquals(null, testAccount.Id, 'Id was not added'); 
         System.assertEquals(true, dmlMock.upserted.containsRecord(testAccount.Id), 'Not upserted');
         final String newName = 'Some other name';
         testAccount.Name = newName; 
 
         Test.startTest();
-        DmlResult dmlResult = dmlMock.doUpsert(testAccount, Account.Name); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUpsert(testAccount, Account.Name); 
         Test.stopTest();
 
         System.assertEquals(newName, testAccount.Name, 'Wrong name value');
@@ -86,12 +86,12 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockUndelete() {
         Account account = new Account(Name = 'Test');
-        DmlMock dmlMock = new DmlMock(); 
-        dmlMock.doInsert(account);
-        dmlMock.doDelete(account);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
+        DatabaseLayer.DmlEngine.doInsert(account);
+        DatabaseLayer.DmlEngine.doDelete(account);
 
         Test.startTest();
-        DmlResult dmlResult = dmlMock.doUndelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(account); 
         Test.stopTest();
 
         System.assertEquals(true, dmlMock.undeleted.containsRecord(account.Id)); 
@@ -104,11 +104,11 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockDelete() {
         Account account = new Account(Name = 'Test');
-        DmlMock dmlMock = new DmlMock();
-        dmlMock.doInsert(account);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
+        DatabaseLayer.DmlEngine.doInsert(account);
 
         Test.startTest();
-        DmlResult dmlResult = dmlMock.doDelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doDelete(account); 
         Test.stopTest(); 
 
         System.assertEquals(true, dmlMock.deleted.containsRecord(account.Id)); 
@@ -121,11 +121,11 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockHardDelete() {
         Account account = new Account(Name = 'Test');
-        DmlMock dmlMock = new DmlMock();
-        dmlMock.doInsert(account);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
+        DatabaseLayer.DmlEngine.doInsert(account);
 
         Test.startTest();
-        DmlResult dmlResult = dmlMock.doHardDelete(account); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doHardDelete(account); 
         Test.stopTest(); 
 
         System.assertEquals(true, dmlMock.deleted.containsRecord(account.Id)); 
@@ -138,10 +138,10 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldMockPublish() {
         Log_Event__e event = new Log_Event__e(Message__c = 'Testing 123'); 
-        DmlMock dmlMock = new DmlMock();
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         
         Test.startTest();
-        DmlResult dmlResult = dmlMock.doPublish(event); 
+        DmlResult dmlResult = DatabaseLayer.DmlEngine.doPublish(event); 
         Test.stopTest();
 
         List<Log_Event__e> logEvents = (List<Log_Event__e>) dmlMock.published.getRecords(Log_Event__e.SObjectType); 
@@ -154,11 +154,11 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldReturnPublishedEvents() {
         Log_Event__e event = new Log_Event__e(Message__c = 'Testing 123'); 
-        DmlMock dmlMock = new DmlMock(); 
-        dmlMock.doPublish(event); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
+        DatabaseLayer.DmlEngine.doPublish(event); 
 
         Test.startTest();
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) dmlMock.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
         Test.stopTest();
         
         System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');
@@ -169,10 +169,10 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldDetermineIfRecordWasProcessed() {
         Account account = new Account(Name = 'Test Account'); 
-        DmlMock dmlMock = new DmlMock(); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
 
         Test.startTest();
-        dmlMock.doInsert(account); 
+        DatabaseLayer.DmlEngine.doInsert(account); 
         Test.stopTest();
 
         System.assertEquals(true, dmlMock.inserted?.containsRecord(account)); 
@@ -187,10 +187,10 @@ private class DmlMock_Test {
     @IsTest 
     static void shouldReturnRecordIfProcessed() {
         Account account = new Account(Name = 'Test Account'); 
-        DmlMock dmlMock = new DmlMock(); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
 
         Test.startTest();
-        dmlMock.doInsert(account); 
+        DatabaseLayer.DmlEngine.doInsert(account); 
         Test.stopTest();
 
         System.assertEquals(account, dmlMock.inserted?.getRecord(account)); 
@@ -208,10 +208,10 @@ private class DmlMock_Test {
         for (Integer i = 0; i < 200; i++) {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
-        DmlMock dmlMock = new DmlMock(); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
 
         Test.startTest();
-        dmlMock.doInsert(accounts); 
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
         Test.stopTest();
 
         System.assertEquals(accounts, dmlMock.inserted.getRecords(Account.SObjectType));
@@ -225,11 +225,11 @@ private class DmlMock_Test {
 
     @IsTest 
     static void shouldReturnAllProcessedRecords() {
-        DmlMock dmlMock = new DmlMock(); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
         Account account = new Account(Name = 'Test Account');
-        dmlMock.doInsert(account); 
+        DatabaseLayer.DmlEngine.doInsert(account); 
         Contact contact = new Contact(AccountId = account.Id, LastName = 'Test'); 
-        dmlMock.doInsert(contact); 
+        DatabaseLayer.DmlEngine.doInsert(contact); 
         
         Test.startTest();
         List<SObject> insertedRecords = dmlMock.inserted.getAll();
@@ -247,8 +247,8 @@ private class DmlMock_Test {
         for (Integer i = 0; i < 200; i++) {
             accounts.add(new Account(Name = 'Test Account'));
         }
-        DmlMock dmlMock = new DmlMock();
-        dmlMock.doInsert(accounts); 
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
         System.assertEquals(200, dmlMock.inserted?.getAll()?.size(), 'Wrong # of records inserted'); 
         
         Test.startTest();

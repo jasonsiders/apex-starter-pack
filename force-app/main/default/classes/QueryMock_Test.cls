@@ -3,6 +3,7 @@ private class QueryMock_Test {
     @IsTest 
     static void shouldQueryMock() {
         // Generate a stupid amount of records, insert them via mock Dml, then retrieve them via mock query
+        DatabaseLayer.setDmlEngine(new DmlMock());
         List<Account> accounts = new List<Account>(); 
         for (Integer i = 0; i < 10000; i++) {
             accounts.add(new Account(
@@ -10,7 +11,7 @@ private class QueryMock_Test {
                 AnnualRevenue = (i * i)
             )); 
         }
-        new DmlMock().doInsert(accounts); 
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
         Test.startTest();
         IQuery query = new QueryMock(Account.SObjectType, accounts)
             .addFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})

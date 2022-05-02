@@ -122,8 +122,8 @@ private class GarbageCollector_Test {
             Level__c = 'FINEST'
         );
         Contact contact = new Contact(LastName = 'Test');
-        insert contact;
-        insert new Case(ContactId = contact.Id); 
+        DatabaseLayer.DmlEngine.doInsert(contact);
+        DatabaseLayer.DmlEngine.doInsert(new Case(ContactId = contact.Id));
         GarbageCollector instance = new TestExtension(); 
         Database.BatchableContext mockContext = null; 
         List<SObject> scope = new List<SObject>{contact};

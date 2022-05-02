@@ -1,8 +1,8 @@
 @isTest
 private class Describes_Test {
     @isTest
-    static void itShouldReturnAFieldDesecribeFromAField() {
-        DescribeFieldResult expected = Account.OwnerId.getDescribe(); 
+    static void shouldReturnAFieldDesecribeFromAField() {
+        Schema.DescribeFieldResult expected = Account.OwnerId.getDescribe(); 
         Decimal start = Limits.getCpuTime(); 
         for (Integer i = 0; i < 200; i++) {
             System.assertEquals(expected, Describes.getFieldDescribe(Account.OwnerId), 'Describe does not match');
@@ -12,8 +12,8 @@ private class Describes_Test {
     }
 
     @isTest
-    static void itShouldReturnAFieldDescribeFromAString() {
-        DescribeFieldResult expected = Account.OwnerId.getDescribe(); 
+    static void shouldReturnAFieldDescribeFromAString() {
+        Schema.DescribeFieldResult expected = Account.OwnerId.getDescribe(); 
         Decimal start = Limits.getCpuTime(); 
         for (Integer i = 0; i < 200; i++) {
             System.assertEquals(expected, Describes.getFieldDescribe(Account.SObjectType, 'OwnerId'), 'Describe does not match');
@@ -23,14 +23,14 @@ private class Describes_Test {
     }
 
     @isTest
-    static void itShouldReturnAnSObjectField() {
-        SObjectField field = Account.OwnerId;
+    static void shouldReturnAnSObjectField() {
+        Schema.SObjectField field = Account.OwnerId;
         System.assertEquals(field, Describes.getSObjectFieldByName(Account.SObjectType, 'OwnerId'), 'Field does not match'); 
     }
 
     @isTest
-    static void itShouldReturnAnSObjectDescribeFromAnSObjectType() {
-        DescribeSObjectResult expected = SObjectType.Account; 
+    static void shouldReturnAnSObjectDescribeFromAnSObjectType() {
+        Schema.DescribeSObjectResult expected = SObjectType.Account; 
         Decimal start = Limits.getCpuTime(); 
         for (Integer i = 0; i < 200; i++) {
             System.assertEquals(expected, Describes.getSObjectDescribe(Account.SObjectType), 'Describe does not match');
@@ -40,8 +40,8 @@ private class Describes_Test {
     }
 
     @isTest
-    static void itShouldReturnAnSObjectDescribeFromAString() {
-        DescribeSObjectResult expected = SObjectType.Account; 
+    static void shouldReturnAnSObjectDescribeFromAString() {
+        Schema.DescribeSObjectResult expected = SObjectType.Account; 
         Decimal start = Limits.getCpuTime(); 
         for (Integer i = 0; i < 200; i++) {
             System.assertEquals(expected, Describes.getSObjectDescribe('Account'), 'Describe does not match');
@@ -51,8 +51,24 @@ private class Describes_Test {
     }
 
     @isTest
-    static void itShouldReturnAnSObjectType() {
-        SObjectType objectType = Account.SObjectType; 
+    static void shouldReturnAnSObjectType() {
+        Schema.SObjectType objectType = Account.SObjectType; 
         System.assertEquals(objectType, Describes.getSObjectTypeByName('Account'), 'SObjectType does not match'); 
+    }
+
+    @IsTest 
+    static void shouldReturnChildRelationship() {
+        final String relationshipName = 'Contacts';
+        Schema.ChildRelationship contactRelationship = Describes.getChildRelationship(Account.SObjectType, relationshipName);
+        System.assertEquals(Contact.SObjectType, contactRelationship.getChildSObject(), 'Wrong Child SObject');
+        System.assertEquals(relationshipName, contactRelationship.getRelationshipName(), 'Wrong relationship name');
+    }
+
+    @IsTest 
+    static void shouldReturnChildRelationshipFromAString() {
+        final String relationshipName = 'Contacts';
+        Schema.ChildRelationship contactRelationship = Describes.getChildRelationship('Account', relationshipName);
+        System.assertEquals(Contact.SObjectType, contactRelationship.getChildSObject(), 'Wrong Child SObject');
+        System.assertEquals(relationshipName, contactRelationship.getRelationshipName(), 'Wrong relationship name');
     }
 }

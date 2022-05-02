@@ -8,7 +8,7 @@ private class Dml_Test {
         for (Integer i = 0; i < TEST_SIZE; i++) {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
-        insert accounts;
+        DatabaseLayer.DmlEngine.doInsert(accounts);
     }
 
     @IsTest 
@@ -70,7 +70,7 @@ private class Dml_Test {
     @IsTest 
     static void shouldDoUndelete() {
         Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
-        delete testAccount; 
+        DatabaseLayer.DmlEngine.doDelete(testAccount);
         Test.startTest();
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(testAccount); 
         Test.stopTest();

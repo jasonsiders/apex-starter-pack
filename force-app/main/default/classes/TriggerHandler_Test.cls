@@ -300,7 +300,7 @@ private class TriggerHandler_Test extends TriggerHandler {
     // **** HELPER **** // 
     @testSetup 
     static void setup() {
-        insert initAccounts(); 
+        DatabaseLayer.DmlEngine.doInsert(initAccounts());
     }
 
     static final Integer TEST_SIZE = 200;

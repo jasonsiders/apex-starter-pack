@@ -135,11 +135,12 @@ private class DmlResult_Test {
 
     @IsTest 
     static void shouldGenerateMockResultsFromSObjects() {
+        DatabaseLayer.setDmlEngine(new DmlMock());
         List<Account> accounts = new List<Account>();
         for (Integer i = 0; i < 200; i++) {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
-        new DmlMock().doInsert(accounts); 
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
 
         Test.startTest();
         List<DmlResult> dmlResults = DmlResult.getMockResults(accounts);
