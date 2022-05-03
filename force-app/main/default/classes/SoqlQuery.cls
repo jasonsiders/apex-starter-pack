@@ -71,6 +71,12 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return this.addFields(new List<String>{field});
     }
 
+    global SoqlQuery addAllFields() {
+        // Replicates SELECT * in SQL
+        List<SObjectField> allFields = Describes.getSObjectDescribe(this.targetObject)?.fields?.getMap()?.values();
+        return this.addFields(allFields); 
+    }
+
     global SoqlQuery addSubQueries(List<SubQuery> subQueries) {
         List<String> childQueryStrings = new List<String>();
         for (SubQuery subQuery : subQueries) {

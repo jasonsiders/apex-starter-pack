@@ -210,6 +210,16 @@ private class SoqlQuery_Test {
         Test.stopTest();
     }
 
+    @IsTest 
+    static void shouldAddAllFields() {
+        SoqlQuery query = new SoqlQuery(Account.SObjectType).addAllFields();
+        for (SObjectField field : Describes.getSObjectDescribe(Account.SObjectType)?.fields?.getMap()?.values()) {
+            String fieldName = String.valueOf(field); 
+            System.assert(query.fields?.contains(fieldName), 'Missing field (' + fieldName + '): ' + JSON.serialize(query.fields));
+        }
+        checkIfQueryIsValid(query); 
+    }
+
     static void checkIfQueryIsValid(SoqlQuery query) {
         try {
             query.run();

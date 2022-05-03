@@ -3,6 +3,7 @@ global interface IQuery {
     IQuery addFields(SObjectField field);
     IQuery addFields(List<String> fields); 
     IQuery addFields(String field);
+    IQuery addAllFields();
     IQuery resetFields();
 
     IQuery setTargetSObject(SObjectType targetObject);
