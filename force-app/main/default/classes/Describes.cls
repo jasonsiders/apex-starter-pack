@@ -38,6 +38,11 @@ public class Describes {
         return Describes.getSObjectDescribe(objectType)?.fields?.getMap().get(fieldName); 
     }
 
+    public static Schema.SObjectField getSObjectFieldByName(String objectName, String fieldName) {
+        Schema.SObjectType objectType = Describes.getSObjectTypeByName(objectName); 
+        return Describes.getSObjectFieldByName(objectType, fieldName); 
+    }
+
     public static Schema.ChildRelationship getChildRelationship(SObjectType objectType, String relationshipName) {
         if (Describes.childRelationships.containsKey(objectType) == false) {
             Map<String, ChildRelationship> relationshipsByName = new Map<String, ChildRelationship>(); 

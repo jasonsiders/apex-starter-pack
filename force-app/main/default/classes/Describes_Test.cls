@@ -24,8 +24,7 @@ private class Describes_Test {
 
     @isTest
     static void shouldReturnAnSObjectField() {
-        Schema.SObjectField field = Account.OwnerId;
-        System.assertEquals(field, Describes.getSObjectFieldByName(Account.SObjectType, 'OwnerId'), 'Field does not match'); 
+        System.assertEquals(Account.OwnerId, Describes.getSObjectFieldByName('Account', 'OwnerId'), 'Field does not match'); 
     }
 
     @isTest

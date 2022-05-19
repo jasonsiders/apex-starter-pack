@@ -5,11 +5,14 @@ global interface IQuery {
     IQuery addFields(String field);
     IQuery addAllFields();
     IQuery resetFields();
+    
+    IQuery addSubQueries(List<SubQuery> subQuery);
+    IQuery addSubQueries(SubQuery subQuery);
 
     IQuery setTargetSObject(SObjectType targetObject);
 
-    IQuery addFilters(List<QueryFilter> filters);
-    IQuery addFilters(QueryFilter filter);
+    IQuery addFilters(List<Filter> filters);
+    IQuery addFilters(Filter filter);
     IQuery resetFilters();
 
     IQuery setFilterLogic(String logicString);

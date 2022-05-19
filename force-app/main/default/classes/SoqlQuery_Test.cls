@@ -9,7 +9,7 @@ private class SoqlQuery_Test {
     @IsTest 
     static void shouldGenerateQueryWithOneWhereClause() {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(Account.AnnualRevenue, QueryFilter.Operator.GREATER_THAN, 1000));
+            .addFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000));
         System.assertEquals('SELECT Id FROM Account WHERE AnnualRevenue > 1000', query.getQueryString()); 
         checkIfQueryIsValid(query); 
     }
@@ -17,8 +17,8 @@ private class SoqlQuery_Test {
     @IsTest
     static void shouldGenerateQueryWithMultipleWhereClauses() {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(Account.AnnualRevenue, QueryFilter.Operator.GREATER_THAN, 1000))
-            .addFilters(new QueryFilter(Account.OwnerId, QueryFilter.Operator.EQUALS, UserInfo.getUserId()));
+            .addFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+            .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()));
         System.assertEquals(
             'SELECT Id FROM Account WHERE AnnualRevenue > 1000 AND OwnerId = \'' + UserInfo.getUserId() + '\'', 
             query.getQueryString()
@@ -29,9 +29,9 @@ private class SoqlQuery_Test {
     @IsTest 
     static void shouldGenerateQueryWithFilterLogic() {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(Account.AnnualRevenue, QueryFilter.Operator.GREATER_THAN, 1000))
-            .addFilters(new QueryFilter(Account.OwnerId, QueryFilter.Operator.EQUALS, UserInfo.getUserId()))
-            .addFilters(new QueryFilter(Account.CreatedDate, QueryFilter.Operator.LESS_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
+            .addFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+            .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+            .addFilters(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
             .setFilterLogic('{0} AND ({1} OR {2})');
         final String expected = 
             'SELECT Id FROM Account ' + 
@@ -46,7 +46,7 @@ private class SoqlQuery_Test {
     @IsTest 
     static void shouldGenerateQueryWithParentFields() {
         SoqlQuery query = new SoqlQuery(Opportunity.SObjectType)
-            .addFilters(new QueryFilter('Account.AnnualRevenue', QueryFilter.Operator.GREATER_THAN, 1000));
+            .addFilters(new Filter('Account.AnnualRevenue', Filter.GREATER_THAN, 1000));
         System.assertEquals('SELECT Id FROM Opportunity WHERE Account.AnnualRevenue > 1000', query.getQueryString()); 
         checkIfQueryIsValid(query); 
     }
@@ -91,7 +91,7 @@ private class SoqlQuery_Test {
     @IsTest 
     static void shouldHandleRelativeDateQuery() {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(Account.CreatedDate, QueryFilter.Operator.EQUALS, 'LAST_N_DAYS:10'));
+            .addFilters(new Filter(Account.CreatedDate, Filter.EQUALS, 'LAST_N_DAYS:10'));
         System.assertEquals('SELECT Id FROM Account WHERE CreatedDate = LAST_N_DAYS:10', query.getQueryString());
         checkIfQueryIsValid(query); 
     }
@@ -101,9 +101,9 @@ private class SoqlQuery_Test {
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
             .addFields('Owner.ProfileId')
-            .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'))
-            .addFilters(new QueryFilter(Account.CreatedDate, QueryFilter.Operator.GREATER_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
-            .addFilters(new QueryFilter(Account.OwnerId, QueryFilter.Operator.EQUALS, UserInfo.getUserId()))
+            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+            .addFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
+            .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
             .setFilterLogic('{0} AND ({1} OR {2})')
             .setOrderBy(new QuerySort(new List<String>{'CreatedDate', 'AnnualRevenue'}, QuerySort.Order.DESCENDING))
             .setLimit(200)
@@ -126,9 +126,9 @@ private class SoqlQuery_Test {
         final String filterLogic = '{0} AND ({1} OR {2})';
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
-            .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'))
-            .addFilters(new QueryFilter(Account.CreatedDate, QueryFilter.Operator.GREATER_THAN, Date.today()))
-            .addFilters(new QueryFilter(Account.OwnerId, QueryFilter.Operator.EQUALS, UserInfo.getUserId()))
+            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+            .addFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, Date.today()))
+            .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
             .setFilterLogic(filterLogic)
             .setOrderBy(new QuerySort(Account.CreatedDate, QuerySort.Order.DESCENDING))
             .setLimit(200)
@@ -160,7 +160,7 @@ private class SoqlQuery_Test {
         DatabaseLayer.DmlEngine.doInsert(accounts);
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
-            .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'))
+            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .setOrderBy(new QuerySort(Account.CreatedDate, QuerySort.Order.DESCENDING))
             .setLimit(200);
         Test.startTest();

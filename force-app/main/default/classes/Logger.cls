@@ -81,6 +81,11 @@ global without sharing class Logger {
         }
     }
 
+    global static void logException(Exception error) {
+        String message = error?.getTypeName() + ': ' + error?.getMessage() + '\n' + error?.getStackTraceString();
+        Logger.logAndPublish(LoggingLevel.ERROR, message);
+    }
+
     global static void clear() {
         Logger.pendingEvents?.clear(); 
     }

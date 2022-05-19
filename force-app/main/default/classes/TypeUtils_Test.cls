@@ -111,6 +111,95 @@ private class TypeUtils_Test {
         System.assertEquals(true, TypeUtils.isCollection(new Set<String>()));
         System.assertEquals(true, TypeUtils.isCollection(new Map<String, String>()));
         System.assertEquals(true, TypeUtils.isCollection(new Map<List<String>, String>()));
+        System.assertEquals(false, TypeUtils.isCollection('Not a collection!'));
+    }
+
+    @IsTest 
+    static void shouldDetemineIfDateGreaterThan() {
+        Object value1 = Date.newInstance(2022, 01, 01);
+        Object value2 = Date.newInstance(2022, 01, 02);
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2);
+        value1 = Date.newInstance(2022, 01, 02);
+        value2 = Date.newInstance(2022, 01, 01);
+        System.assertEquals(true, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2);
+        value1 = null;
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2);
+        value1 = DateTime.newInstanceGmt(2022, 01, 01);
+        value2 = DateTime.newInstanceGmt(2022, 01, 02); 
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2);
+        value1 = DateTime.newInstanceGmt(2022, 01, 02);
+        value2 = DateTime.newInstanceGmt(2022, 01, 01); 
+        System.assertEquals(true, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2); 
+        value1 = null;
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2); 
+    }
+
+    @IsTest 
+    static void shouldDetemineIfDateLessThan() {
+        Object value1 = Date.newInstance(2022, 01, 01);
+        Object value2 = Date.newInstance(2022, 01, 02);
+        System.assertEquals(true, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2);
+        value1 = Date.newInstance(2022, 01, 02);
+        value2 = Date.newInstance(2022, 01, 01);
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2);
+        value1 = null;
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2);
+        value1 = DateTime.newInstanceGmt(2022, 01, 01);
+        value2 = DateTime.newInstanceGmt(2022, 01, 02);
+        System.assertEquals(true, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+        value1 = DateTime.newInstanceGmt(2022, 01, 02);
+        value2 = DateTime.newInstanceGmt(2022, 01, 01); 
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+        value1 = null;
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+    }
+
+    @IsTest 
+    static void shouldDetemineIfNumberGreaterThan() {
+        Object value1 = 1;
+        Object value2 = 2;
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2); 
+        value2 = 0;
+        System.assertEquals(true, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2); 
+        value2 = null;
+        System.assertEquals(false, TypeUtils.greaterThan(value1, value2), value1 + ' > ' + value2); 
+    }
+
+    @IsTest 
+    static void shouldDetemineIfNumberLessThan() {
+        Object value1 = 1;
+        Object value2 = 2;
+        System.assertEquals(true, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+        value2 = 0;
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+        value2 = null;
+        System.assertEquals(false, TypeUtils.lessThan(value1, value2), value1 + ' < ' + value2); 
+    }
+
+    @IsTest 
+    static void shouldDetemineIfInvalidDataTypeGreaterThan() {
+        for (Object value : new List<Object>{
+            Blob.valueOf(JSON.serialize(new Account())),
+            true, 
+            UserInfo.getUserId(),
+            Crypto.getRandomLong(),
+            'Hello world!'
+        }) {
+            System.assertEquals(false, TypeUtils.greaterThan(value, 1), value + ' > 1');
+        }
+    }
+
+    @IsTest 
+    static void shouldDetemineIfInvalidDataTypeLessThan() {
+        for (Object value : new List<Object>{
+            Blob.valueOf(JSON.serialize(new Account())),
+            true, 
+            UserInfo.getUserId(),
+            Crypto.getRandomLong(),
+            'Hello world!'
+        }) {
+            System.assertEquals(false, TypeUtils.lessThan(value, 1), value + ' < 1');
+        }
     }
 
     public class Example {}

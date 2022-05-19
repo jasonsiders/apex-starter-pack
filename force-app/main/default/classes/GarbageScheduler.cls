@@ -48,9 +48,9 @@ public without sharing class GarbageScheduler implements System.Schedulable {
                 Garbage_Collection_Job__mdt.Batch_Size__c,
                 Garbage_Collection_Job__mdt.DeveloperName,
                 Garbage_Collection_Job__mdt.SOQL_Filter__c
-            }).addFilters(new QueryFilter(
+            }).addFilters(new Filter(
                 Garbage_Collection_Job__mdt.Active__c,
-                QueryFilter.Operator.EQUALS,
+                Filter.EQUALS,
                 true
             )).setOrderBy(new QuerySort(
                 Garbage_Collection_Job__mdt.Priority__c,
@@ -62,9 +62,9 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     private Integer getFlexQueueSize() {
         IQuery query = DatabaseLayer.QueryEngine
             .newQuery(AsyncApexJob.SObjectType)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 AsyncApexJob.Status,
-                QueryFilter.Operator.IN_COLLECTION,
+                Filter.IN_COLLECTION,
                 new List<String>{'Holding', 'Pending', 'Processing'}
             ));
         return query.run()?.size(); 

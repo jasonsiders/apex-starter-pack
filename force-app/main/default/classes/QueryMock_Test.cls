@@ -15,7 +15,7 @@ private class QueryMock_Test {
         Test.startTest();
         IQuery query = new QueryMock(Account.SObjectType, accounts)
             .addFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
-            .addFilters(new QueryFilter(Account.Name, QueryFilter.Operator.STARTS_WITH, 'Test Account'));
+            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
         List<Account> results = (List<Account>) query.run(); 
         Test.stopTest();
         System.assertEquals(results?.size(), accounts?.size(), 'Wrong # of results'); 

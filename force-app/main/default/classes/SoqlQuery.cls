@@ -1,7 +1,7 @@
 global inherited sharing virtual class SoqlQuery implements IQuery {
     @TestVisible Set<String> fields = new Set<String>{'Id'};
     @TestVisible SObjectType targetObject;
-    @TestVisible List<QueryFilter> filters = new List<QueryFilter>();
+    @TestVisible List<Filter> filters = new List<Filter>();
     @TestVisible QuerySort orderBy;
     @TestVisible List<String> queryTags = new List<String>(); 
     @TestVisible Integer queryLimit; 
@@ -53,7 +53,9 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     global SoqlQuery addFields(List<SObjectField> fields) {
         List<String> fieldStrings = new List<String>();
         for (SObjectField field : fields) {
-            fieldStrings.add(String.valueOf(field));
+            if (field != null) {
+                fieldStrings.add(String.valueOf(field));
+            }
         }
         return this.addFields(fieldStrings); 
     }
@@ -94,13 +96,13 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return this; 
     }
 
-    global SoqlQuery addFilters(List<QueryFilter> filters) {
+    global SoqlQuery addFilters(List<Filter> filters) {
         this.filters.addAll(filters); 
         return this;
     }
 
-    global SoqlQuery addFilters(QueryFilter filter) {
-        return this.addFilters(new List<QueryFilter>{filter});
+    global SoqlQuery addFilters(Filter filter) {
+        return this.addFilters(new List<Filter>{filter});
     }
 
     global SoqlQuery resetFilters() {
@@ -175,7 +177,7 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
 
     private String joinFilters() {
         List<String> filterStrings = new List<String>(); 
-        for (QueryFilter filter : this.filters) {
+        for (Filter filter : this.filters) {
             filterStrings.add(filter.toString()); 
         }
         return (this.filterLogic != null) 

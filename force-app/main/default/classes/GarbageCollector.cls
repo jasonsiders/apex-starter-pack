@@ -38,9 +38,9 @@ global abstract inherited sharing class GarbageCollector implements Database.Bat
         IQuery query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
             .addFields(AsyncApexJob.JobItemsProcessed)
             .addFields(AsyncApexJob.TotalJobItems)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 AsyncApexJob.Id, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 context.getJobId()
             ));
         List<AsyncApexJob> jobDetails = (List<AsyncApexJob>) query.run(); 
@@ -77,13 +77,13 @@ global abstract inherited sharing class GarbageCollector implements Database.Bat
         Set<String> extendingTypeNames = new Set<String>();
         IQuery query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
             .addFields(ApexTypeImplementor.ClassName)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 ApexTypeImplementor.InterfaceName, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 INTERFACE_NAME
-            )).addFilters(new QueryFilter(
+            )).addFilters(new Filter(
                 ApexTypeImplementor.IsConcrete, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 true
             ));
         for (ApexTypeImplementor apexClass : (List<ApexTypeImplementor>) query.run()) {

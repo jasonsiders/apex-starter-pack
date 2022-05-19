@@ -310,6 +310,22 @@ private class Logger_Test {
         System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
     }
 
+    @IsTest 
+    static void shouldLogExceptions() {
+        setUpTestLogger(LoggingLevel.ERROR, true);
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
+        
+        Test.startTest();
+        Exception error = new CustomException();
+        Logger.logException(error); 
+        Test.stopTest();
+
+        System.assertEquals(1, dmlMock?.published?.getAll()?.size(), 'Wrong # of published events'); 
+        Log_Event__e event = (Log_Event__e) dmlMock?.published?.getAll()[0];
+        String expected = error?.getTypeName() + ': ' + error.getMessage() + '\n' + error.getStackTraceString();
+        System.assertEquals(expected, event.Message__c, 'Wrong log message');
+    }
+
     // **** HELPER **** // 
     private static void setUpTestLogger(LoggingLevel level, Boolean enabled) {
         Logger.settings = new Log_Setting__c(
@@ -334,4 +350,6 @@ private class Logger_Test {
             Logger.log(LoggingLevel.FINEST, 'Test Message');
         }
     }
+
+    private class CustomException extends Exception {}
 }

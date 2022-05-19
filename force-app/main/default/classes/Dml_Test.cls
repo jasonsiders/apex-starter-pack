@@ -75,9 +75,9 @@ private class Dml_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(testAccount); 
         Test.stopTest();
         IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 Account.Id, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 testAccount.Id
             ));
         List<Account> accounts = (List<Account>) query.run(); 
@@ -94,9 +94,9 @@ private class Dml_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doDelete(testAccount); 
         Test.stopTest(); 
         IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 Account.Id, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 testAccount.Id
             ));
         List<Account> accounts = (List<Account>) query.run();
@@ -114,7 +114,7 @@ private class Dml_Test {
         Test.stopTest(); 
         IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)   
             .addFields(Account.IsDeleted)
-            .addFilters(new QueryFilter(Account.Id, QueryFilter.Operator.EQUALS, testAccount.Id))
+            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id))
             .addTags('ALL ROWS');
         testAccount = (Account) query.run()[0];
         System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard deleted'); 
@@ -359,9 +359,9 @@ private class Dml_Test {
         DmlResult result = DatabaseLayer.DmlEngine.doPublish(notAnEvent);
         System.assertEquals(true, result.isSuccess, 'Account publish failed: ' + JSON.serialize(result));
         List<SObject> accounts = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new QueryFilter(
+            .addFilters(new Filter(
                 Account.Id, 
-                QueryFilter.Operator.EQUALS, 
+                Filter.EQUALS, 
                 result.recordId
             )).run();
         System.assertEquals(false, accounts.isEmpty(), 'Account was not inserted');

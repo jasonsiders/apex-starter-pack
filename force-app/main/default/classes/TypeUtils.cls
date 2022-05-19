@@ -1,6 +1,9 @@
 public class TypeUtils {
     static final String TYPE_ERROR_PREFIX = 'Invalid conversion from runtime type ';
     static final String TYPE_ERROR_SUFFIX = ' to ' + UnknownType.class.getName();
+    static final String LIST_PREFIX = 'List<';
+    static final String MAP_PREFIX = 'Map<';
+    static final String SET_PREFIX = 'Set<';
 
     public static Type getType(Object obj) {
         String typeName = TypeUtils.getTypeName(obj);
@@ -21,24 +24,63 @@ public class TypeUtils {
     }
 
     public static Boolean isList(Object obj) {
-        return TypeUtils.getType(obj)?.getName()?.startsWith('List<');
-    }
-
-    public static Boolean isSet(Object obj) {
-        return TypeUtils.getType(obj)?.getName()?.startsWith('Set<');
+        return TypeUtils.getType(obj)?.getName()?.startsWith(LIST_PREFIX);
     }
 
     public static Boolean isMap(Object obj) {
-        return TypeUtils.getType(obj)?.getName()?.startsWith('Map<');
+        return TypeUtils.getType(obj)?.getName()?.startsWith(MAP_PREFIX);
+    }
+
+    public static Boolean isSet(Object obj) {
+        return TypeUtils.getType(obj)?.getName()?.startsWith(SET_PREFIX);
     }
 
     public static Boolean isCollection(Object obj) {
         String typeName = TypeUtils.getType(obj)?.getName(); 
-        return (
-            typeName?.startsWith('List<') == true || 
-            typeName?.startsWith('Set<') == true || 
-            typeName?.startsWith('Map<') == true
-        );
+        for (String token : new List<String>{LIST_PREFIX, MAP_PREFIX, SET_PREFIX}) {
+            if (typeName?.contains(token)) {
+                return true; 
+            }
+        }
+        return false;
+    }
+
+    // Attempting to use < or > symbols directly on Objects will generate a compile error:
+    // ! Inequality operator not allowed for this type: Object
+    // Note: Blob, Boolean, Id, Long, String, and complex types are not supported in greater/less than operations
+    public static Boolean greaterThan(Object value, Object comparison) {
+        if (value != null && comparison != null) {
+            switch on TypeUtils.getTypeName(value)?.toUpperCase() {
+                when 'DATE', 'DATETIME' {
+                    DateTime dateValue = (DateTime) value; 
+                    DateTime comparisonDate = (DateTime) comparison; 
+                    Boolean result = dateValue > comparisonDate;
+                    return result;
+                } when 'INTEGER', 'DECIMAL', 'DOUBLE' {
+                    Decimal decimalValue = (Decimal) value; 
+                    Decimal comparisonDecimal = (Decimal) comparison;
+                    return decimalValue > comparisonDecimal; 
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Boolean lessThan(Object value, Object comparison) {
+        if (value != null && comparison != null) {
+            switch on TypeUtils.getTypeName(value)?.toUpperCase() {
+                when 'DATE', 'DATETIME' {
+                    DateTime dateValue = (DateTime) value; 
+                    DateTime comparisonDate = (DateTime) comparison; 
+                    return dateValue < comparisonDate;
+                } when 'INTEGER', 'DECIMAL', 'DOUBLE' {
+                    Decimal decimalValue = (Decimal) value; 
+                    Decimal comparisonDecimal = (Decimal) comparison;
+                    return decimalValue < comparisonDecimal; 
+                }
+            }
+        }
+        return false;
     }
 
     private class UnknownType {}
