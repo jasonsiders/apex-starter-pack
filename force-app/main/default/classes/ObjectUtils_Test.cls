@@ -91,6 +91,45 @@ private class ObjectUtils_Test {
         System.assertNotEquals(null, caughtError, 'An error was not thrown/caught. Instance: ' + instance); 
     }
 
+    @IsTest 
+    static void shouldSetReadOnlyField() {
+        Opportunity testOpp = new Opportunity(); 
+
+        Test.startTest();
+        // Can't normally set the 'IsClosed' field
+        testOpp = (Opportunity) ObjectUtils.setReadOnlyField(testOpp, Opportunity.IsClosed, true);
+        Test.stopTest();
+
+        System.assertEquals(true, testOpp.IsClosed, 'Did not set read only field');
+    }
+
+    @IsTest 
+    static void shouldSetChildObjectList() {
+        // Child Object relationships (like Account.Contacts) are read-only fields too!
+        DatabaseLayer.setDmlEngine(new DmlMock());
+        Account testAccount = new Account(Name = 'Test Account');
+        DatabaseLayer.DmlEngine.doInsert(testAccount);
+        List<Contact> contacts = new List<Contact>();
+        for (Integer i = 0; i < 3; i++) {
+            contacts.add(new Contact(
+                AccountId = testAccount.Id,
+                FirstName = 'Test',
+                LastName = 'Contact #' + (i + 1)
+            ));
+        }
+        DatabaseLayer.DmlEngine.doInsert(contacts); 
+        Schema.ChildRelationship contactRelationship = 
+            Describes.getChildRelationship(Account.SObjectType, 'Contacts');
+
+        Test.startTest();
+        testAccount = (Account) ObjectUtils.setReadOnlyField(testAccount, contactRelationship, contacts); 
+        Test.stopTest();
+        
+        System.assertEquals(contacts?.size(), testAccount.Contacts?.size(), 'Wrong # of child records');
+        System.assertEquals(contacts, testAccount.Contacts, 'Does not match the supplied child records');
+    }
+
+    // **** HELPER **** // 
     public virtual class ExampleObject {
         Boolean boolValue;
         Date dateValue;
