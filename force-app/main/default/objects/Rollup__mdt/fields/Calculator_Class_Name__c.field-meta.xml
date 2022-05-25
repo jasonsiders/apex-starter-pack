@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Calculator_Class_Name__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>The name of an apex class which will handle the rollup calculation
+This class must have a default constructor, and implement the Rollup.Calculator interface.
+Either a Calculation Type, or this field must be provided.</inlineHelpText>
+    <label>Calculator Class Name</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

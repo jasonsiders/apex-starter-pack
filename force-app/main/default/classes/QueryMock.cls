@@ -1,28 +1,22 @@
 @IsTest 
-global class QueryMock extends SoqlQuery {
-    List<SObject> mockResults; 
+public class QueryMock extends SoqlQuery {
+    static List<SObject> mockResults; 
 
-    global QueryMock(SObjectType objectType, List<SObject> mockResults) {
+    public QueryMock(SObjectType objectType) {
         super(objectType);
-        this.setMockResults(mockResults); 
     }
 
-    global QueryMock(SObjectType objectType) {
-        this(objectType, null); 
-    }
-
-    global QueryMock setMockResults(List<SObject> mockResults) {
-        this.mockResults = mockResults; 
-        return this; 
-    }
-
-    global override List<SObject> run() {
-        return this.mockResults; 
+    public override List<SObject> run() {
+        return QueryMock.mockResults; 
     }
 
     public class Factory implements IQueryFactory {
         public IQuery newQuery(SObjectType objectType) {
             return new QueryMock(objectType); 
+        }
+
+        public void setMockResults(List<SObject> mockResults) {
+            QueryMock.mockResults = mockResults; 
         }
     }   
 }

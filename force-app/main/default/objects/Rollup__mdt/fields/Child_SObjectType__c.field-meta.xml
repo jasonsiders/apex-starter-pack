@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Child_SObjectType__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>The source SObject used in calculations</inlineHelpText>
+    <label>Child SObjectType</label>
+    <referenceTo>EntityDefinition</referenceTo>
+    <relationshipLabel>Child Rollups</relationshipLabel>
+    <relationshipName>Child Rollups</relationshipName>
+    <required>true</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

@@ -39,5 +39,6 @@ $RECYCLE.BIN/
 # Local environment variables
 .env
 
-# SFDC Profiles
+# SFDC Metadata
+force-app/main/default/customMetadata*
 force-app/main/default/profiles*

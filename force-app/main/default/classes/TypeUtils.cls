@@ -45,6 +45,24 @@ public class TypeUtils {
         return false;
     }
 
+    public static Object parseStringValue(String stringValue) {
+        // Convert any string to an object of a specific type
+        Object value = ((Map<String, Object>) JSON.deserializeUntyped('{"value":' + stringValue + '}')).values()[0];
+        if (TypeUtils.getType(value) == String.class) {
+            // Date/DateTimesare deserialized as Strings - must check for these manually
+            for (Type typeCheck : new List<Type>{Date.class, DateTime.class}) {
+                try {
+                    value = JSON.deserialize(stringValue, typeCheck);
+                    break;
+                } catch (System.JSONException error) {
+                    Logger.log(LoggingLevel.FINEST, value + ' is not a ' + typeCheck);
+                }
+            }
+        }
+        Logger.log(LoggingLevel.FINEST, stringValue + ' is a ' + TypeUtils.getTypeName(value));
+        return value;
+    }
+
     // Attempting to use < or > symbols directly on Objects will generate a compile error:
     // ! Inequality operator not allowed for this type: Object
     // Note: Blob, Boolean, Id, Long, String, and complex types are not supported in greater/less than operations

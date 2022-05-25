@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 private class TriggerHandler_Test extends TriggerHandler {
-    @isTest 
+    @IsTest 
     static void shouldDoNothingIfBaseClass() {
         // The base class's virtual trigger methods all do nothing. No changes will be made
         List<Account> accounts = initAccounts(); 
@@ -51,7 +51,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         Test.stopTest();
     }
 
-    @isTest
+    @IsTest
     static void shouldDoNothingIfDisabled() {
         TriggerHandler handler = new ExampleTriggerHandler(); 
         handler.operation = System.TriggerOperation.BEFORE_INSERT; 
@@ -77,7 +77,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
     
-    @isTest 
+    @IsTest 
     static void shouldRunBeforeInsert() {
         List<Account> accounts = initAccounts(); 
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -92,7 +92,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunBeforeUpdate() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -110,7 +110,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunBeforeDelete() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -128,7 +128,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunAfterInsert() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -144,7 +144,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunAfterUpdate() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -162,7 +162,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunAfterDelete() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -180,7 +180,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
 
-    @isTest 
+    @IsTest 
     static void shouldRunAfterUndelete() {
         List<Account> accounts = getAccounts();
         TriggerHandler handler = new ExampleTriggerHandler(); 
@@ -198,7 +198,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
     }
     
-    @isTest 
+    @IsTest 
     static void shouldDetermineIsNew() {
         // Returns true if the record in question is found in the handler's triggerOldMap
         List<Account> accounts = getAccounts();
@@ -214,7 +214,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         System.assertEquals(false, handler.isNew(testAccount));
     }
 
-    @isTest 
+    @IsTest 
     static void shouldDetermineIsChanged() {
         List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
@@ -232,7 +232,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         System.assertEquals(true, handler.isChanged(testAccount, Account.Name));
     }
 
-    @isTest 
+    @IsTest 
     static void shouldDetermineIfChangedFrom() {
         List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
@@ -254,7 +254,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, 'Some other name'));
     }
 
-    @isTest
+    @IsTest
     static void shouldDetermineIfChangedTo() {
         List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];
@@ -276,7 +276,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, 'Test'));
     }
 
-    @isTest 
+    @IsTest 
     static void shouldDetermineIfChangedFromTo() {
         List<Account> accounts = getAccounts();
         Account testAccount = accounts[0];

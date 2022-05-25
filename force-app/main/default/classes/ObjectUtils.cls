@@ -1,4 +1,8 @@
 public class ObjectUtils {
+    // Surprisingly, there's not an easy way to get this dynamically
+    // Requires an API call; TODO evaluate if we can use platform cache or something to solve
+    static final String SFDC_API_VERSION = '54.0'; 
+
     public static Object setParams(Object target, Map<String, Object> newValues) {
         Map<String, Object> parameters = ObjectUtils.toMap(target);
         parameters.putAll(newValues);
@@ -32,6 +36,8 @@ public class ObjectUtils {
     }
 
     public static SObject setReadOnlyField(SObject target, String fieldName, Object value) {
+        // Allows us to (mostly) get around Apex restrictions around certain SObjectFields,
+        // along with 
         String jsonString = JSON.serialize(target);
         Map<String, Object> targetMap = (Map<String, Object>) JSON.deserializeUntyped(jsonString);
         if (value instanceOf List<SObject>) {
@@ -48,5 +54,29 @@ public class ObjectUtils {
         targetMap.put(fieldName, value); 
         jsonString = JSON.serializePretty(targetMap); 
         return (SObject) JSON.deserialize(jsonString, SObject.class);
+    }
+
+    public static SObject setLookupField(SObject target, SObjectField field, SObject parent) {
+        // Allows us to set lookup fields, complete with parent object values
+        // This is especially useful in mocking without the need for SOQL
+        String serializedTarget = JSON.serialize(target);
+        Map<String, Object> mappedTarget = (Map<String, Object>) JSON.deserializeUntyped(serializedTarget); 
+        mappedTarget.put(String.valueOf(field), parent?.Id); 
+        // Note: When populating parent records via JSON, must also include a "hidden" relationship object
+        String parentSObjectName = String.valueOf(parent?.getSObjectType());
+        String serializedParent = JSON.serialize(parent); 
+        Map<String, Object> mappedParent = (Map<String, Object>) JSON.deserializeUntyped(serializedParent);
+        mappedParent.put('attributes', new Map<String, Object>{
+            'type' => parentSObjectName,
+            'url' => String.format('/services/data/{0}/sobjects/{1}/{2}', new List<String>{
+                SFDC_API_VERSION,
+                parentSObjectName,
+                parent?.Id
+            })
+        });
+        // The relationship object's key is the same as the Id field, minus "Id"/"__c" (depending if Standard/Custom)
+        String relationshipName = Describes.getFieldDescribe(field)?.getRelationshipName();
+        mappedTarget.put(relationshipName, mappedParent);
+        return (SObject) JSON.deserialize(JSON.serialize(mappedTarget), SObject.class);
     }
 }

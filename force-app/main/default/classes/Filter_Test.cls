@@ -366,7 +366,7 @@ private class Filter_Test {
             Exception caughtError;
             try {
                 testFilter?.meetsCriteria(testOpp);
-            } catch (Filter.CollectionException thrownError) {
+            } catch (Filter.FilterException thrownError) {
                 caughtError = thrownError;
             }
             System.assertNotEquals(null, caughtError, 'No error was thrown');
@@ -713,5 +713,133 @@ private class Filter_Test {
         System.assertEquals(true, testFilter?.meetsCriteria(testOpp), testOpp.Name + ' notContains "!"');
         testFilter = new Filter(Opportunity.Name, Filter.NOT_CONTAINS, null);
         System.assertEquals(false, testFilter?.meetsCriteria(testOpp), testOpp.Name + ' notContains null');
+    }
+
+    @IsTest 
+    static void shouldConstructFromMdt() {
+        // SObjectField provided
+        Filter__mdt filterMdt = new Filter__mdt(
+            Field_Name__c = null,
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.IsClosed',
+            SObjectType__c = 'Opportunity',
+            Value__c = null
+        ); 
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(String.valueOf(Opportunity.IsClosed), filter.fieldName, 'Wrong field name');
+        System.assertEquals(0, filter?.relationships?.size(), 'Wrong # of relationships'); 
+        System.assertEquals('=', filter?.operator?.getToken(), 'Wrong operator'); 
+        System.assertEquals(null, filter?.value, 'Wrong value'); 
+        // Field Name provided - allows for multi-level filtering
+        filterMdt.Field_Name__c = 'Opportunity.Owner.Profile.Name';
+        filterMdt.SObjectField__c = null;
+        filter = new Filter(filterMdt);
+        System.assertEquals('Name', filter?.fieldName, 'Wrong field name');
+        System.assertEquals(new List<String>{'Opportunity', 'Owner', 'Profile'}, filter?.relationships, 'Wrong relationships'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithBooleanValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.IsClosed',
+            SObjectType__c = 'Opportunity',
+            Value__c = 'true'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(true, filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithDateValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.CloseDate',
+            SObjectType__c = 'Opportunity',
+            Value__c = '"2022-01-01"'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(Date.newInstance(2022, 01, 01), filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithDateTimeValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.CreatedDate',
+            SObjectType__c = 'Opportunity',
+            Value__c = '"2022-01-01T00:00:00.000Z"'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(DateTime.newInstanceGmt(2022, 01, 01, 00, 00, 00), filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithDecimalValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.Amount',
+            SObjectType__c = 'Opportunity',
+            Value__c = '99.99'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(99.99, filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithIntegerValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.Amount',
+            SObjectType__c = 'Opportunity',
+            Value__c = '100'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(100, filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithNullValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.Description',
+            SObjectType__c = 'Opportunity',
+            Value__c = null
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(null, filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldConstructFilterWithStringValueFromMdt() {
+        Filter__mdt filterMdt = new Filter__mdt(
+            Operator__c = 'EQUALS',
+            SObjectField__c = 'Opportunity.OwnerId',
+            SObjectType__c = 'Opportunity',
+            Value__c = '"' + UserInfo.getUserId() + '"'
+        );
+        Filter filter = new Filter(filterMdt); 
+        System.assertEquals(UserInfo.getUserId(), filter?.value, 'Wrong value'); 
+    }
+
+    @IsTest 
+    static void shouldThrowErrorIfInvalidArgsProvided() {
+        // Null field
+        Exception caughtError; 
+        try {
+            String fieldName; 
+            Filter filter = new Filter(fieldName, Filter.EQUALS, 1);
+        } catch (Filter.FilterException thrownError) {
+            caughtError = thrownError; 
+        }
+        System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
+        // Null operator
+        caughtError = null; 
+        try {
+            Filter filter = new Filter('OwnerId', null, 1);
+        } catch (Filter.FilterException thrownError) {
+            caughtError = thrownError; 
+        }
+        System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
     }
 }

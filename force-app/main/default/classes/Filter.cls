@@ -15,23 +15,52 @@ global class Filter {
     public static final Type CONTAINS = ContainsOperator.class; 
     public static final Type NOT_CONTAINS = NotContainsOperator.class;
 
-    final String fieldName;
-    final List<String> relationships; 
-    final Operator operator;
-    final Object value;
+    static final Map<String, Type> OPERATOR_ABBREVIATIONS = new Map<String, Type>{
+        // This is terribly verbose, but necessary until apex supports reflection
+        'EQUALS' => Filter.EQUALS,
+        'NOT_EQUALS' => Filter.NOT_EQUALS,
+        'IN_COLLECTION' => Filter.IN_COLLECTION,
+        'NOT_IN_COLLECTION' => Filter.NOT_IN_COLLECTION,
+        'GREATER_THAN' => Filter.GREATER_THAN,
+        'GREATER_OR_EQUAL' => Filter.GREATER_OR_EQUAL,
+        'LESS_THAN' => Filter.LESS_THAN,
+        'LESS_OR_EQUAL' => Filter.LESS_OR_EQUAL,
+        'STARTS_WITH' => Filter.STARTS_WITH,
+        'NOT_STARTS_WITH' => Filter.NOT_STARTS_WITH,
+        'ENDS_WITH' => Filter.ENDS_WITH,
+        'NOT_ENDS_WITH' => Filter.NOT_ENDS_WITH,
+        'CONTAINS' => Filter.CONTAINS,
+        'NOT_CONTAINS' => Filter.NOT_CONTAINS
+    };
 
-    global Filter(String fieldName, Type operatorType, Object value) {
-        List<String> fieldParts = fieldName?.split('\\.');
-        Integer fieldNameIndex = fieldParts?.size() - 1;
-        this.fieldName = fieldParts[fieldNameIndex];
-        fieldParts.remove(fieldNameIndex); 
-        this.relationships = fieldParts;
+    public final String fieldName { get; private set; }
+    public final List<String> relationships { get; private set; }
+    public final Operator operator { get; private set; }
+    public final Object value { get; private set; }
+
+    global Filter(String fieldReference, Type operatorType, Object value) {
+        List<String> fieldParts = fieldReference?.split('\\.');
+        if (fieldParts != null) {
+            Integer fieldNameIndex = fieldParts?.size() - 1;
+            this.fieldName = fieldParts[fieldNameIndex];
+            fieldParts.remove(fieldNameIndex); 
+            this.relationships = fieldParts;
+        }
         this.operator = (Operator) operatorType?.newInstance();
         this.value = value; 
+        this.validate(); 
     }
 
     global Filter(SObjectField field, Type operatorType, Object value) {
         this(String.valueOf(field), operatorType, value); 
+    }
+
+    global Filter(Filter__mdt filterRecord) {
+        this(
+            Filter.getFieldReferenceFromMdt(filterRecord),
+            Filter.getOperationByItsAbbreviation(filterRecord?.Operator__c),
+            TypeUtils.parseStringValue(filterRecord?.Value__c)
+        );
     }
 
     global override String toString() {
@@ -39,8 +68,8 @@ global class Filter {
     }
 
     public String getFieldName() {
-        List<String> fieldParts = this.relationships.clone();
-        fieldParts.add(this.fieldName); 
+        List<String> fieldParts = this.relationships?.clone();
+        fieldParts?.add(this.fieldName); 
         return String.join(fieldParts, '.');
     }
 
@@ -132,10 +161,31 @@ global class Filter {
         return '(' + String.join(results, ', ') + ')';
     }
 
+    private void validate() {
+        if (this.fieldName == null || this.operator == null) {
+            Exception error = new FilterException('Missing required fields: ' + JSON.serialize(this));
+            Logger.logException(error);
+            throw error;
+        }
+    }
+
+    // **** STATIC **** //
+    public static String getFieldReferenceFromMdt(Filter__mdt filterRecord) {
+        return (filterRecord?.SObjectField__c != null) 
+            ? String.valueOf(Describes.getSObjectFieldByName(filterRecord?.SObjectField__c))
+            : filterRecord?.Field_Name__c;
+    }
+
+    private static Type getOperationByItsAbbreviation(String abbreviation) {
+        return Filter.OPERATOR_ABBREVIATIONS?.get(abbreviation);
+    }
+
     // **** INNER **** // 
     // Note: In the future, may consider breaking out into its own file
     // But I like being able to refer to the enumerated types almost like an enum (see top of file)
+    @TestVisible 
     private abstract class Operator {
+        @TestVisible
         private abstract String getToken();
 
         private abstract Boolean meetsCriteria(Object value, Object comparison); 
@@ -180,7 +230,7 @@ global class Filter {
                 // ! Invalid conversion from runtime type Map<Id,Opportunity> to Map<ANY,ANY>  
                 // Unfortunately, Apex's type system seems to be "broken": https://salesforce.stackexchange.com/questions/106068/apex-string-instanceof-object
                 // ...but it still works for lists! If a non-list collection is provided, throw an error
-                Exception error = new CollectionException('IN_COLLECTION operations must use a List type');
+                Exception error = new FilterException('IN_COLLECTION operations must use a List type');
                 Logger.logException(error); 
                 throw error; 
             }
@@ -345,5 +395,5 @@ global class Filter {
         }
     }
 
-    public class CollectionException extends Exception {}
+    public class FilterException extends Exception {}
 }

@@ -202,5 +202,17 @@ private class TypeUtils_Test {
         }
     }
 
+    @IsTest 
+    static void shouldConvertStringToCorrectDataType() {
+        System.assertEquals(true, TypeUtils.parseStringValue('true'), 'Did not return true');
+        System.assertEquals(Date.newInstance(2022, 01, 01), TypeUtils.parseStringValue('"2022-01-01"'), 'Wrong Date');
+        System.assertEquals(DateTime.newInstanceGmt(2022, 01, 01), TypeUtils.parseStringValue('"2022-01-01T00:00:00Z"'), 'Wrong DateTime');
+        System.assertEquals(99.99, TypeUtils.parseStringValue('99.99'), 'Wrong Decimal');
+        System.assertEquals(99, TypeUtils.parseStringValue('99'), 'Wrong Integer'); 
+        System.assertEquals('Hello world!', TypeUtils.parseStringValue('"Hello world!"'), 'Wrong string value');
+        System.assertEquals(null, TypeUtils.parseStringValue('null'), 'Not null');
+        System.assertEquals(null, TypeUtils.parseStringValue(null), 'Not null');
+    }
+
     public class Example {}
 }

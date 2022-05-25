@@ -129,6 +129,24 @@ private class ObjectUtils_Test {
         System.assertEquals(contacts, testAccount.Contacts, 'Does not match the supplied child records');
     }
 
+    @IsTest 
+    static void shouldSetLookupFieldWithParentValues() {
+        DatabaseLayer.setDmlEngine(new DmlMock());
+        Account testAccount = new Account(Name = 'Test Account');
+        DatabaseLayer.DmlEngine.doInsert(testAccount);
+
+        Test.startTest();
+        Contact testContact = new Contact(
+            AccountId = testAccount.Id, 
+            LastName = 'Test Contact'
+        );
+        testContact = (Contact) ObjectUtils.setLookupField(testContact, Contact.AccountId, testAccount);
+        Test.stopTest();
+        
+        System.assertEquals(testAccount?.Id, testContact?.AccountId, 'Wrong AccountId');
+        System.assertEquals(testAccount?.Name, testContact?.Account?.Name, 'Wrong Account.Name');
+    }
+
     // **** HELPER **** // 
     public virtual class ExampleObject {
         Boolean boolValue;
