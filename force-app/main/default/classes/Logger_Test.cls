@@ -1,9 +1,9 @@
 @IsTest 
 private class Logger_Test {
     @IsTest 
-    static void shouldInitializeStatically() {
+    static void shouldUseStaticConstructor() {
         System.assertEquals(Log_Setting__c.getInstance(UserInfo.getUserId()), Logger.settings, 'Wrong settings'); 
-        System.assertNotEquals(null, Logger.threshold, 'Logging Level not set');
+        System.assertEquals(EnumUtils.valueOf(Logger.settings?.Level__c, LoggingLevel.class), Logger.threshold, 'Logging Level not set');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Not an empty list');
     }
 

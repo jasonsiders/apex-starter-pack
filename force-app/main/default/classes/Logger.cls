@@ -4,7 +4,10 @@ global without sharing class Logger {
     @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
     @TestVisible static Log_Setting__c settings = Log_Setting__c.getInstance(UserInfo.getUserId());
     @TestVisible static LoggingLevel threshold { get { 
-        return Logger.loggingLevelValueOf(Logger.settings?.Level__c); 
+        return (LoggingLevel) EnumUtils.valueOf(
+            Logger.settings?.Level__c, 
+            LoggingLevel.class
+        );
     }}
     
     // Indicates how severe something is. A log will only be published
@@ -105,18 +108,6 @@ global without sharing class Logger {
         return (publishCalls != null) ? publishCalls : 100;
     }
 
-    static LoggingLevel loggingLevelValueOf(String logLevel) {
-        // Retrieve a LoggingLevel enum from a string value
-        // Enum.valueOf() is supposed to do this,
-        // but it will throw an exception if a null value 
-        // or string that does not match an enum value is supplied
-        try {
-            return LoggingLevel.valueOf(logLevel); 
-        } catch (System.NoSuchElementException error) {
-            return LoggingLevel.NONE; 
-        }
-    }
-
     static Boolean clearsSeverityThreshold(LoggingLevel current) {
         // Returns true if the threshold != 'NONE',
         // and the current level has a lower severity number
@@ -147,7 +138,7 @@ global without sharing class Logger {
         global String message; 
 
         global LoggingLevel getLevel() {
-            return Logger.loggingLevelValueOf(this.loggingLevel); 
+            return (LoggingLevel) EnumUtils.valueOf(this.loggingLevel, LoggingLevel.class);
         }
     }
     

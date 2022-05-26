@@ -84,15 +84,8 @@ public without sharing class Rollup {
     public static IQuery getChildRollupsQuery(SObjectType childObjectType) {
         Schema.ChildRelationship rollupFilters = Describes.getChildRelationship(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
         return DatabaseLayer.QueryEngine.newQuery(Rollup__mdt.SObjectType)
-            .addFields(new List<SObjectField>{
-                Rollup__mdt.Calculation_Field__c,
-                Rollup__mdt.Calculation_Type__c,
-                Rollup__mdt.Calculator_Class_Name__c,
-                Rollup__mdt.Child_Relationship_Name__c,
-                Rollup__mdt.Child_SObjectType__c,
-                Rollup__mdt.Parent_SObjectType__c,
-                Rollup__mdt.Target_Field__c
-            }).addSubQueries((SubQuery) new SubQuery(rollupFilters)
+            .addAllFields()
+            .addSubQueries((SubQuery) new SubQuery(rollupFilters)
                 .addFields(new List<String>{
                     'Filter__r.' + Filter__mdt.Field_Name__c,
                     'Filter__r.' + Filter__mdt.Operator__c,

@@ -455,25 +455,6 @@ private class Rollup_Test {
         }
     }
 
-    @IsTest 
-    static void shouldReturnValidChildObjectQuery() {
-        // CMDTs are hard to test against with real soql, because no way to insert in a test context
-        // For this reason, we can only validate that the query is constructed correctly
-        Test.startTest();
-        IQuery query = Rollup.getChildRollupsQuery(Opportunity.SObjectType); 
-        Test.stopTest(); 
-
-        String expected = 
-            'SELECT Id, Calculation_Field__c, Calculation_Type__c, Calculator_Class_Name__c, ' + 
-            'Child_Relationship_Name__c, Child_SObjectType__c, Parent_SObjectType__c, Target_Field__c, (' + 
-                'SELECT Id, Filter__r.Field_Name__c, Filter__r.Operator__c, ' + 
-                'Filter__r.SObjectField__c, Filter__r.SObjectType__c, Filter__r.Value__c ' + 
-                'FROM Rollup_Filters__r WHERE Active__c = true' + 
-            ') ' + 
-            'FROM Rollup__mdt WHERE Active__c = true AND Child_SObjectType__c = \'Opportunity\'';
-        System.assertEquals(expected, query.getQueryString(), 'Wrong query');
-    }
-
     // **** HELPER **** // 
     @TestSetup 
     static void setup() {
