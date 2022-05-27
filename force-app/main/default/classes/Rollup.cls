@@ -79,13 +79,19 @@ public without sharing class Rollup {
 
     // **** STATIC **** //
     public static List<Rollup> getRollupsForTrigger(SObjectType triggerObjectType) {
-        IQuery query = Rollup.getChildRollupsQuery(triggerObjectType)?.setQueryKey(MDT_QUERY_KEY);
+        IQuery query = Rollup.rollupMdtQuery().addFilters(new Filter(
+            Rollup__mdt.Child_SObjectType__c,
+            Filter.EQUALS,
+            String.valueOf(triggerObjectType)
+        ));
         List<Rollup__mdt> rollupRecords = (List<Rollup__mdt>) query.run(); 
         return Rollup.generateFromMetadata(rollupRecords); 
     }
 
-    public static IQuery getChildRollupsQuery(SObjectType childObjectType) {
-        Schema.ChildRelationship rollupFilters = Describes.getChildRelationship(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
+    public static IQuery rollupMdtQuery() {
+        // A base query which can be built off of by other jobs.
+        // It includes all necessary fields, and excludes inactive Filters/Rollups
+        ChildRelationship rollupFilters = Describes.getChildRelationship(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
         return DatabaseLayer.QueryEngine.newQuery(Rollup__mdt.SObjectType)
             .addAllFields()
             .addSubQueries((SubQuery) new SubQuery(rollupFilters)
@@ -104,11 +110,7 @@ public without sharing class Rollup {
                 Rollup__mdt.Active__c,
                 Filter.EQUALS,
                 true
-            )).addFilters(new Filter(
-                Rollup__mdt.Child_SObjectType__c,
-                Filter.EQUALS,
-                String.valueOf(childObjectType)
-            ));
+            )).setQueryKey(MDT_QUERY_KEY);
     }
 
     public static List<Rollup> generateFromMetadata(List<Rollup__mdt> rollupRecords) {
