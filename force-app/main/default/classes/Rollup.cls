@@ -1,6 +1,8 @@
 public without sharing class Rollup {
     public SObjectType targetObject { get; private set; }
     public List<Relationship> relationships { get; private set;  }
+    @TestVisible static final String ROLLUP_QUERY_KEY = 'Rollup_Records';
+    @TestVisible static final String MDT_QUERY_KEY = 'Rollup_MDTs';
 
     public static final Map<String, Type> calculatorsByToken = new Map<String, Type>{
         'AVG' => AvgCalculator.class,
@@ -22,6 +24,7 @@ public without sharing class Rollup {
 
     public List<SObject> run(Set<Id> targetRecordIds) {
         IQuery query = DatabaseLayer.QueryEngine.newQuery(this.targetObject)
+            .setQueryKey(ROLLUP_QUERY_KEY)
             .addFilters(new Filter(
                 'Id', 
                 Filter.IN_COLLECTION, 
@@ -76,7 +79,7 @@ public without sharing class Rollup {
 
     // **** STATIC **** //
     public static List<Rollup> getRollupsForTrigger(SObjectType triggerObjectType) {
-        IQuery query = Rollup.getChildRollupsQuery(triggerObjectType); 
+        IQuery query = Rollup.getChildRollupsQuery(triggerObjectType)?.setQueryKey(MDT_QUERY_KEY);
         List<Rollup__mdt> rollupRecords = (List<Rollup__mdt>) query.run(); 
         return Rollup.generateFromMetadata(rollupRecords); 
     }

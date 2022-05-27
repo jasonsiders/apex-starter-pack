@@ -220,6 +220,15 @@ private class SoqlQuery_Test {
         checkIfQueryIsValid(query); 
     }
 
+    @IsTest 
+    static void shouldSetMockKey() {
+        DatabaseLayer.setQueryEngine(new QueryMock.Factory()); 
+        String key = 'My_Cool_Query';
+        SoqlQuery query = (SoqlQuery) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)?.setQueryKey(key); 
+        System.assertEquals(key, query?.queryKey, 'queryKey was not set');  
+    }
+
+    // **** HELPER **** // 
     static void checkIfQueryIsValid(SoqlQuery query) {
         try {
             query.run();

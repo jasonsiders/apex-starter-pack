@@ -29,6 +29,7 @@ global interface IQuery {
     IQuery resetTags(); 
     
     IQuery reset();
+    IQuery setQueryKey(String queryKey); 
 
     String getQueryString();
     List<SObject> run();

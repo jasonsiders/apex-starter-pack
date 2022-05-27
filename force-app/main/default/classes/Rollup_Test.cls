@@ -390,7 +390,7 @@ private class Rollup_Test {
     @IsTest 
     static void shouldGetMdtRollupsForUseInTrigger() {
         DatabaseLayer.setDmlEngine(new DmlMock());
-        QueryMock.Factory queryEngine = (QueryMock.Factory) DatabaseLayer.setQueryEngine(new QueryMock.Factory());
+        DatabaseLayer.setQueryEngine(new QueryMock.Factory());
         List<Rollup__mdt> rollupMdts = new List<Rollup__mdt>{
             new Rollup__mdt(
                 Active__c = true,
@@ -429,7 +429,7 @@ private class Rollup_Test {
                 new List<Rollup_Filter__mdt>{rollupFilter}
             ));
         }
-        queryEngine.setMockResults(rollupRecords); 
+        QueryMock.setMockResults(Rollup.MDT_QUERY_KEY, rollupRecords); 
 
         Test.startTest();
         List<Rollup> rollups = Rollup.getRollupsForTrigger(Opportunity.SObjectType); 

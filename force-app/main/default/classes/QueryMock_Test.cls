@@ -1,7 +1,7 @@
 @IsTest
 private class QueryMock_Test {
     @IsTest 
-    static void shouldQueryMock() {
+    static void shouldMockQuery() {
         // Generate a stupid amount of records, insert them via mock Dml, then retrieve them via mock query
         QueryMock.Factory queryFactory = (QueryMock.Factory) DatabaseLayer.setQueryEngine(new QueryMock.Factory()); 
         DatabaseLayer.setDmlEngine(new DmlMock());
@@ -13,12 +13,14 @@ private class QueryMock_Test {
             )); 
         } 
         DatabaseLayer.DmlEngine.doInsert(accounts); 
-        queryFactory.setMockResults(accounts); 
+        final String queryKey = 'MOCK_QUERY';
+        QueryMock.setMockResults(queryKey, accounts); 
         
         Test.startTest();
         IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
-            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
+            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+            .setQueryKey(queryKey); 
         List<Account> results = (List<Account>) query.run(); 
         Test.stopTest();
         System.assertEquals(results?.size(), accounts?.size(), 'Wrong # of results'); 
@@ -27,6 +29,20 @@ private class QueryMock_Test {
             System.assertNotEquals(null, account.AnnualRevenue); 
             System.assert(account?.Name?.startsWithIgnoreCase('Test Account'), 'Expected to start with "Test Account", Actual: "' + account?.Name + '"');
         }
+    }
+
+    @IsTest 
+    static void shouldMockQueryResults() {
+        DatabaseLayer.setQueryEngine(new QueryMock.Factory()); 
+        String key = 'My_Cool_Query';
+        SoqlQuery query = (SoqlQuery) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)?.setQueryKey(key); 
+        // In test environments, no Accounts exist
+        // Without setting mock data, this will return an empty List<SObject>
+        System.assertEquals(0, query?.run()?.size(), 'Wrong # of results'); 
+        // Add some mock data to the query, indirectly. Now it should return those results
+        List<Account> mockData = new List<Account>{new Account(Name = 'Test Account')};
+        QueryMock.setMockResults(key, mockData);
+        System.assertEquals(mockData, query?.run(), 'Did not return mockData'); 
     }
 
     @IsTest

@@ -1,4 +1,4 @@
-global inherited sharing virtual class SoqlQuery implements IQuery {
+public inherited sharing virtual class SoqlQuery implements IQuery {
     @TestVisible Set<String> fields = new Set<String>{'Id'};
     @TestVisible SObjectType targetObject;
     @TestVisible List<Filter> filters = new List<Filter>();
@@ -6,8 +6,9 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     @TestVisible List<String> queryTags = new List<String>(); 
     @TestVisible Integer queryLimit; 
     @TestVisible String filterLogic; 
+    public String queryKey { get; private set; }
     
-    global SoqlQuery(SObjectType targetObject) {
+    public SoqlQuery(SObjectType targetObject) {
         this.setTargetSObject(targetObject); 
     }
 
@@ -16,7 +17,7 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     }
     
     // **** Running a Query **** // 
-    global virtual List<SObject> run() {
+    public virtual List<SObject> run() {
         // Run the current query object through the database
         String soql = this.getQueryString(); 
         List<SObject> results; 
@@ -30,7 +31,7 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return results;
     }
 
-    global virtual String getQueryString() {
+    public virtual String getQueryString() {
         // Output the current SoqlQuery object as a SOQL Query string
         // SELECT {fields} FROM {targetObject} {WHERE filters} {ORDER BY orderBy} {LIMIT limit} {queryTags}
         String template = 'SELECT {0} FROM {1}{2}{3}{4}{5}';
@@ -45,12 +46,12 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
     }
 
     // **** Building a Query **** //
-    global SoqlQuery setTargetSObject(SObjectType targetObject) {
+    public SoqlQuery setTargetSObject(SObjectType targetObject) {
         this.targetObject = targetObject; 
         return this; 
     }
 
-    global SoqlQuery addFields(List<SObjectField> fields) {
+    public SoqlQuery addFields(List<SObjectField> fields) {
         List<String> fieldStrings = new List<String>();
         for (SObjectField field : fields) {
             if (field != null) {
@@ -60,26 +61,26 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return this.addFields(fieldStrings); 
     }
 
-    global SoqlQuery addFields(SObjectField field) {
+    public SoqlQuery addFields(SObjectField field) {
         return this.addFields(new List<SObjectField>{field});
     }
 
-    global SoqlQuery addFields(List<String> fields) {
+    public SoqlQuery addFields(List<String> fields) {
         this.fields.addAll(fields); 
         return this; 
     }
 
-    global SoqlQuery addFields(String field) {
+    public SoqlQuery addFields(String field) {
         return this.addFields(new List<String>{field});
     }
 
-    global SoqlQuery addAllFields() {
+    public SoqlQuery addAllFields() {
         // Replicates SELECT * in SQL
         List<SObjectField> allFields = Describes.getSObjectDescribe(this.targetObject)?.fields?.getMap()?.values();
         return this.addFields(allFields); 
     }
 
-    global SoqlQuery addSubQueries(List<SubQuery> subQueries) {
+    public SoqlQuery addSubQueries(List<SubQuery> subQueries) {
         List<String> childQueryStrings = new List<String>();
         for (SubQuery subQuery : subQueries) {
             childQueryStrings.add(subQuery.getQueryString());
@@ -87,80 +88,86 @@ global inherited sharing virtual class SoqlQuery implements IQuery {
         return this.addFields(childQueryStrings); 
     }
 
-    global SoqlQuery addSubQueries(SubQuery subQuery) {
+    public SoqlQuery addSubQueries(SubQuery subQuery) {
         return this.addSubQueries(new List<SubQuery>{subQuery});
     }
 
-    global SoqlQuery resetFields() {
+    public SoqlQuery resetFields() {
         this.fields = new Set<String>{'Id'};
         return this; 
     }
 
-    global SoqlQuery addFilters(List<Filter> filters) {
+    public SoqlQuery addFilters(List<Filter> filters) {
         this.filters.addAll(filters); 
         return this;
     }
 
-    global SoqlQuery addFilters(Filter filter) {
+    public SoqlQuery addFilters(Filter filter) {
         return this.addFilters(new List<Filter>{filter});
     }
 
-    global SoqlQuery resetFilters() {
+    public SoqlQuery resetFilters() {
         this.filters.clear();
         return this;
     }
 
-    global SoqlQuery setFilterLogic(String formattedLogicString) {
+    public SoqlQuery setFilterLogic(String formattedLogicString) {
         // Expects a String.format() template with and/or logic in between
         // i.e., '{0} AND {1} AND ({2} OR {3})'
         this.filterLogic = formattedLogicString;
         return this;
     }
 
-    global SoqlQuery resetFilterLogic() {
+    public SoqlQuery resetFilterLogic() {
         return this.setFilterLogic(null); 
     }
 
-    global SoqlQuery setOrderBy(QuerySort orderBy) {
+    public SoqlQuery setOrderBy(QuerySort orderBy) {
         this.orderBy = orderBy;
         return this; 
     }
 
-    global SoqlQuery resetOrderBy() {
+    public SoqlQuery resetOrderBy() {
         this.orderBy = null; 
         return this; 
     }
 
-    global SoqlQuery setLimit(Integer queryLimit) {
+    public SoqlQuery setLimit(Integer queryLimit) {
         this.queryLimit = queryLimit; 
         return this;
     }
 
-    global SoqlQuery resetLimit() {
+    public SoqlQuery resetLimit() {
         return this.setLimit(null); 
     }
 
-    global SoqlQuery addTags(List<String> queryTags) {
+    public SoqlQuery addTags(List<String> queryTags) {
         this.queryTags.addAll(queryTags);
         return this; 
     }
 
-    global SoqlQuery addTags(String queryTag) {
+    public SoqlQuery addTags(String queryTag) {
         return this.addTags(new List<String>{queryTag});
     }
 
-    global SoqlQuery resetTags() {
+    public SoqlQuery resetTags() {
         this.queryTags.clear();
         return this; 
     }
     
-    global SoqlQuery reset() {
+    public SoqlQuery reset() {
         this.resetFields();
         this.resetFilters();
         this.resetFilterLogic(); 
         this.resetOrderBy(); 
         this.resetLimit();
         this.resetTags(); 
+        return this; 
+    }
+
+    public SoqlQuery setQueryKey(String queryKey) {
+        // Adds a queryKey, which tests can use to supply individual queries with mock data
+        this.queryKey = queryKey; 
         return this; 
     }
 
