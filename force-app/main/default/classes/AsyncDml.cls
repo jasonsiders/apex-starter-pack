@@ -33,7 +33,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 
     public void execute(System.QueueableContext context) {
         for (Request request : this.requests) {
-            request.doDml(); 
+            request.process(); 
         }
     }
 
@@ -44,7 +44,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
         return true; 
     }
 
-    public class Request {
+    public virtual class Request {
         @TestVisible Dml.Operation operation;
         @TestVisible List<SObject> records;
         @TestVisible SObjectField externalIdField;
@@ -86,29 +86,51 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
             this(operation, new List<SObject>{record}); 
         }
 
+        protected Request() {
+            // Needed for inheritance
+        }
+
         public Request skipTriggers() {
             this.skipTriggers = true; 
             return this; 
         }
 
-        public List<DmlResult> doDml() {
-            return (this.skipTriggers) ? this.doDmlWithoutTriggers() : this.doDmlWithTriggers();
+        public List<DmlResult> process() {
+            return (this.skipTriggers) ? this.doDmlWithoutTriggers() : this.doDml();
         }
 
         private List<DmlResult> doDmlWithoutTriggers() {
             TriggerHandler.disable(); 
-            List<DmlResult> results = this.doDmlWithTriggers(); 
+            List<DmlResult> results = this.doDml(); 
             TriggerHandler.enable(); 
             return results;
         }
 
-        private List<DmlResult> doDmlWithTriggers() {
+        protected virtual List<DmlResult> doDml() {
             return DatabaseLayer.DmlEngine.doDml(
                 this.operation, 
                 this.records, 
                 this.externalIdField, 
                 this.allOrNone
             ); 
+        }
+    }
+
+    public class Conversion extends Request {
+        // Database.LeadConvert objects cannot be deserialized/used as a member of a Queueable instance
+        List<SerializableLeadConvert> wrappers;
+
+        public Conversion(List<Database.LeadConvert> leadConverts) {
+            this.wrappers = SerializableLeadConvert.wrap(leadConverts); 
+        }
+
+        public Conversion(Database.LeadConvert leadConvert) {
+            this(new List<Database.LeadConvert>{leadConvert});
+        }
+
+        public override List<DmlResult> doDml() {
+            List<Database.LeadConvert> leadConverts = SerializableLeadConvert.unwrap(this.wrappers); 
+            return DatabaseLayer.DmlEngine.doConvert(leadConverts); 
         }
     }
 }

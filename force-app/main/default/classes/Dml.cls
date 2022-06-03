@@ -5,6 +5,7 @@ public virtual inherited sharing class Dml {
     public static History Deleted = new History(); 
     public static History Undeleted = new History(); 
     public static History Published = new History().setAlternateIdField('ReplayId');
+    public static History Converted = new History(); 
 
     // Operation-based methods
     public List<DmlResult> doDml(Operation operation, List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
@@ -66,10 +67,6 @@ public virtual inherited sharing class Dml {
 
     public virtual DmlResult doPublish(SObject event) {
         return this.doPublish(new List<SObject>{event})[0];
-    }
-
-    public virtual List<SObject> getPublishedEvents() {
-        return Dml.Published.getAll(); 
     }
 
     // Insert Methods
@@ -207,6 +204,24 @@ public virtual inherited sharing class Dml {
         return this.doUndelete(record, true); 
     }
 
+    // Lead Convert Methods
+    public virtual List<DmlResult> doConvert(List<Database.LeadConvert> leadConvertObjs) {
+        List<ConversionResult> results = new List<ConversionResult>();
+        for (Database.LeadConvertResult convertResult : Database.convertLead(leadConvertObjs)) {
+            ConversionResult result = new ConversionResult(convertResult); 
+            results.add(result); 
+            if (result?.isSuccess == true) {
+                Lead lead = new Lead(Id = result.getLeadId());
+                Dml.Converted.add(new List<Lead>{lead}); 
+            }
+        }
+        return results; 
+    } 
+
+    public virtual DmlResult doConvert(Database.LeadConvert leadConvertObj) {
+        return this.doConvert(new List<Database.LeadConvert>{leadConvertObj})[0];
+    }
+
     // **** INNER **** //
     public enum Operation {
         DO_PUBLISH,
@@ -271,12 +286,13 @@ public virtual inherited sharing class Dml {
             for (SObject record : records) {
                 // Map the record by its Id (1:1)
                 Id idField = (Id) record?.get(this.idField); 
-                this.recordsById.put(idField, record); 
+                SObject clone = record.clone(true, true, true, true); 
+                this.recordsById.put(idField, clone); 
                 // Map the record by its SObjectType (1:many)
                 SObjectType objectType = record?.getSObjectType();
                 List<SObject> matchingRecords = this.recordsBySObjectType.get(objectType); 
                 matchingRecords = (matchingRecords != null) ? matchingRecords : new List<SObject>();
-                matchingRecords?.add(record);
+                matchingRecords?.add(clone);
                 this.recordsBySObjectType.put(objectType, matchingRecords); 
             }
         }

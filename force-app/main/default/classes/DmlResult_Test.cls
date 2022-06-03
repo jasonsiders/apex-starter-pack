@@ -110,53 +110,6 @@ private class DmlResult_Test {
     }
 
     @IsTest 
-    static void shouldAllowMockResults() {
-        DatabaseLayer.setDmlEngine(new DmlMock()); 
-        Account mockAccount = new Account(Name = 'Test Account');
-        DatabaseLayer.DmlEngine.doInsert(mockAccount); 
-        final String mockErrorMessage = 'cannot specify Id in an insert call';
-        final StatusCode mockStatusCode = StatusCode.INVALID_FIELD_FOR_INSERT_UPDATE;
-        List<DmlResult.Error> mockErrors = new List<DmlResult.Error>{
-            new DmlResult.Error(
-                new List<String>{String.valueOf(Account.Id)},
-                mockErrorMessage,
-                mockStatusCode
-            )
-        };
-
-        Test.startTest();
-        DmlResult result = new DmlResult(mockErrors, false, mockAccount?.Id);
-        Test.stopTest();
-
-        System.assertEquals(false, result.isSuccess, 'Wrong isSuccess');
-        System.assertEquals(mockAccount.Id, result.recordId, 'Wrong recordId');
-        System.assertEquals(mockErrors, result.errors, 'Wrong errors');
-    }
-
-    @IsTest 
-    static void shouldGenerateMockResultsFromSObjects() {
-        DatabaseLayer.setDmlEngine(new DmlMock());
-        List<Account> accounts = new List<Account>();
-        for (Integer i = 0; i < 200; i++) {
-            accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
-        }
-        DatabaseLayer.DmlEngine.doInsert(accounts); 
-
-        Test.startTest();
-        List<DmlResult> dmlResults = DmlResult.getMockResults(accounts);
-        Test.stopTest();
-
-        System.assertEquals(accounts?.size(), dmlResults?.size(), 'Wrong # of results');
-        for (Integer i = 0; i < dmlResults?.size(); i++) {
-            DmlResult dmlResult = dmlResults[i];
-            Account account = accounts[i];
-            System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess');
-            System.assertEquals(account.Id, dmlResult.recordId, 'Wrong recordId');
-            System.assertEquals(0, dmlResult?.errors?.size(), 'Wrong # of errors');
-        }
-    }
-
-    @IsTest 
     static void shouldLogErrors() {
         DatabaseLayer.setDmlEngine(new DmlMock());
         Logger.settings = new Log_Setting__c(Level__c = 'FINEST', Enabled__c = true);
@@ -169,8 +122,19 @@ private class DmlResult_Test {
         DmlResult.logErrors(new List<DmlResult>{mockResult});
         Test.stopTest(); 
 
-        System.assertEquals(1, DatabaseLayer.DmlEngine.getPublishedEvents()?.size(), 'Wrong # of published events');
-        Log_Event__e logEvent = (Log_Event__e) DatabaseLayer.DmlEngine.getPublishedEvents()[0];
+        System.assertEquals(1, Dml.Published.getAll()?.size(), 'Wrong # of published events');
+        Log_Event__e logEvent = (Log_Event__e) Dml.Published.getAll()[0];
         System.assertEquals(JSON.serializePretty(mockErrors), logEvent.Message__c, 'Wrong log message');
     }
+
+    @IsTest 
+    static void shouldBeExtendable() {
+        // For some reason, the default constructor must be visible for extending types to exist
+        // ...even if those types don't use the default constructor?
+        Object obj = new Example(); 
+        System.assertEquals(true, obj instanceOf DmlResult, 'Did not inherit properly');
+    }
+
+    // **** INNER **** // 
+    private class Example extends DmlResult {}
 }

@@ -49,13 +49,13 @@ private class Logger_Test {
         for (Integer i = 0; i < Logger.maxPublishCalls; i++) {
             Logger.logAndPublish(LoggingLevel.FINEST, 'Testing 123');
         }
-        System.assertEquals(Logger.maxPublishCalls, DatabaseLayer.DmlEngine?.getPublishedEvents()?.size(), 'Wrong number of events published');
+        System.assertEquals(Logger.maxPublishCalls, Dml.Published.getAll()?.size(), 'Wrong number of events published');
         System.assertEquals(Logger.maxPublishCalls, Limits.getPublishImmediateDml(), 'Wrong number of publish calls');
         // Now that we've hit our limit, subsequent calls to publish() will not do anything
         Logger.log(LoggingLevel.FINEST, 'Testing 123');
         Logger.publish(); 
         System.assertEquals(1, Logger.pendingEvents?.size());
-        System.assertEquals(Logger.maxPublishCalls, DatabaseLayer.DmlEngine?.getPublishedEvents()?.size());
+        System.assertEquals(Logger.maxPublishCalls, Dml.Published.getAll()?.size());
         Test.stopTest();
     }
 

@@ -151,6 +151,37 @@ private class Dml_Test {
     }
 
     @IsTest 
+    static void shouldDoLeadConvert() {
+        Lead testLead = new Lead(
+            Company = 'Acme Inc.',
+            Email = 'john.doe@test.com.invalid',
+            FirstName = 'John',
+            LastName = 'Doe',
+            Phone = '+15555555555'
+        );
+        DatabaseLayer.DmlEngine.doInsert(testLead); 
+        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .addFields(LeadStatus.MasterLabel)
+            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setLimit(1);
+        String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
+        Database.LeadConvert leadConvertObj = new Database.LeadConvert();
+        leadConvertObj.setLeadId(testLead.Id); 
+        leadConvertObj.setConvertedStatus(status);
+
+        Test.startTest();
+        ConversionResult result = (ConversionResult) DatabaseLayer.DmlEngine.doConvert(leadConvertObj); 
+        Test.stopTest(); 
+
+        System.assertEquals(true, result.isSuccess, 'LeadConvert was not a success: ' + JSON.serialize(result.errors));
+        System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
+        System.assertNotEquals(null, result.getAccountId(), 'Null accountId');
+        System.assertNotEquals(null, result.getContactId(), 'Null contactId');
+        System.assertNotEquals(null, result.getOpportunityId(), 'Null opportunityId');
+        System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+    }
+
+    @IsTest 
     static void shouldThrowErrorOnInsert() {
         Account account = new Account(); // Missing a required field
         
@@ -398,7 +429,7 @@ private class Dml_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doPublish(event); 
 
         Test.startTest();
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
         Test.stopTest();
         
         System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');
@@ -413,7 +444,7 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_PUBLISH, platformEvent); 
         Test.stopTest();
 
-        System.assertEquals(1, DatabaseLayer.DmlEngine.getPublishedEvents()?.size(), 'Event was not Published');
+        System.assertEquals(1, Dml.Published.getAll()?.size(), 'Event was not Published');
     }
 
     @IsTest 

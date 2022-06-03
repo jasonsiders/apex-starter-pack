@@ -1,20 +1,49 @@
 @IsTest 
 private class AsyncDml_Test {
     @IsTest 
-    static void shouldProcessAsynchronously() {
+    static void shouldProcessDmlAsynchronously() {
         List<Account> testAccounts = new List<Account>();
         for (Integer i = 0; i < 10; i++) {
             testAccounts.add(new Account(Name = 'Test Account')); 
         }
 
         Test.startTest();
-        AsyncDml.getInstance()
-            .addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, testAccounts))
-            .runJob(); 
+        AsyncDml.getInstance().addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, testAccounts)).runJob();
         Test.stopTest(); 
 
         List<Account> inserted = (List<Account>) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).run();
         System.assertEquals(testAccounts?.size(), inserted?.size(), 'Wrong # of accounts inserted'); 
+    }
+
+    @IsTest 
+    static void shouldConvertLeadAsynchronously() {
+        Lead testLead = new Lead(
+            Company = 'Acme Inc.',
+            Email = 'john.doe@test.com.invalid',
+            FirstName = 'John',
+            LastName = 'Doe',
+            Phone = '+15555555555'
+        );
+        DatabaseLayer.DmlEngine.doInsert(testLead); 
+        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .addFields(LeadStatus.MasterLabel)
+            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setLimit(1);
+        String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
+        Database.LeadConvert leadConvertObj = new Database.LeadConvert();
+        leadConvertObj.setLeadId(testLead.Id); 
+        leadConvertObj.setConvertedStatus(status);
+
+        Test.startTest();
+        AsyncDml.getInstance().addRequest(new AsyncDml.Conversion(leadConvertObj)).runJob();
+        Test.stopTest();
+
+        IQuery query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType).addFilters(new Filter(
+            Lead.IsConverted,
+            Filter.EQUALS, 
+            true
+        ));
+        System.assertEquals(1, query.run().size(), 'Wrong # of converted leads');
     }
 
     @IsTest 

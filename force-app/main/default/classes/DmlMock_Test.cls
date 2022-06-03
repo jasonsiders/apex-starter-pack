@@ -152,13 +152,95 @@ private class DmlMock_Test {
     }
 
     @IsTest 
+    static void shouldMockNewLeadConversion() {
+        DatabaseLayer.setDmlEngine(new DmlMock());
+        Lead testLead = new Lead(
+            Company = 'Acme Inc.',
+            Email = 'john.doe@test.com.invalid',
+            FirstName = 'John',
+            LastName = 'Doe',
+            Phone = '+15555555555'
+        );
+        DatabaseLayer.DmlEngine.doInsert(testLead); 
+        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .addFields(LeadStatus.MasterLabel)
+            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setLimit(1);
+        String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
+        Database.LeadConvert leadConvertObj = new Database.LeadConvert();
+        leadConvertObj.setLeadId(testLead.Id); 
+        leadConvertObj.setConvertedStatus(status);
+        List<Database.LeadConvert> leadConverts = new List<Database.LeadConvert>{leadConvertObj};
+
+        Test.startTest();
+        List<ConversionResult> results = (List<ConversionResult>) DatabaseLayer.DmlEngine.doConvert(leadConverts);
+        Test.stopTest(); 
+
+        System.assertEquals(1, results?.size(), 'Wrong # of conversion results');
+        ConversionResult result = results[0];
+        System.assertEquals(true, result.isSuccess, 'Wrong isSuccess');
+        System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
+        System.assertNotEquals(null, result.getAccountId(), 'Wrong accountId');
+        System.assertNotEquals(null, result.getContactId(), 'Wrong contactId');
+        System.assertNotEquals(null, result.getOpportunityId(), 'Wrong opportunityId');
+        System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+    }  
+    
+    @IsTest
+    static void shouldMockLeadMergeConversion() {
+        DatabaseLayer.setDmlEngine(new DmlMock());
+        Account testAccount = new Account(Name = 'Test');
+        DatabaseLayer.DmlEngine.doInsert(testAccount); 
+        Contact testContact = new Contact(AccountId = testAccount.Id);
+        DatabaseLayer.DmlEngine.doInsert(testContact); 
+        Opportunity testOpportunity = new Opportunity(
+            AccountId = testAccount.Id,
+            Name = 'Test Opportunity'
+        );
+        DatabaseLayer.DmlEngine.doInsert(testOpportunity); 
+        Lead testLead = new Lead(
+            Company = 'Acme Inc.',
+            Email = 'john.doe@test.com.invalid',
+            FirstName = 'John',
+            LastName = 'Doe',
+            Phone = '+15555555555'
+        );
+        DatabaseLayer.DmlEngine.doInsert(testLead); 
+        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .addFields(LeadStatus.MasterLabel)
+            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setLimit(1);
+        String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
+        Database.LeadConvert leadConvertObj = new Database.LeadConvert();
+        leadConvertObj.setLeadId(testLead.Id); 
+        leadConvertObj.setConvertedStatus(status);
+        leadConvertObj.setAccountId(testAccount.Id); 
+        leadConvertObj.setContactId(testContact.Id);
+        leadConvertObj.setOpportunityId(testOpportunity.Id);
+        List<Database.LeadConvert> leadConverts = new List<Database.LeadConvert>{leadConvertObj};
+
+        Test.startTest();
+        List<ConversionResult> results = (List<ConversionResult>) DatabaseLayer.DmlEngine.doConvert(leadConverts);
+        Test.stopTest(); 
+
+        System.assertEquals(1, results?.size(), 'Wrong # of conversion results');
+        ConversionResult result = results[0];
+        System.assertEquals(true, result.isSuccess, 'Wrong isSuccess');
+        System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
+        System.assertEquals(testAccount.Id, result.getAccountId(), 'Wrong accountId');
+        System.assertEquals(testContact.Id, result.getContactId(), 'Wrong contactId');
+        System.assertEquals(testOpportunity.Id, result.getOpportunityId(), 'Wrong opportunityId');
+        System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+    }
+
+    @IsTest 
     static void shouldReturnPublishedEvents() {
         Log_Event__e event = new Log_Event__e(Message__c = 'Testing 123'); 
         DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
         DatabaseLayer.DmlEngine.doPublish(event); 
 
         Test.startTest();
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
         Test.stopTest();
         
         System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');
@@ -178,5 +260,28 @@ private class DmlMock_Test {
         System.assertNotEquals(null, testAccount.Id, 'Account was not mock inserted');
         System.assertEquals(true, Dml.Inserted.containsRecord(testAccount), 'Account was not added to Inserted');
         System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML Statements');
+    }
+
+    @IsTest 
+    static void shouldGenerateMockResultsFromSObjects() {
+        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 200; i++) {
+            accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
+        }
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
+
+        Test.startTest();
+        List<DmlResult> dmlResults = dmlMock.mockDmlResults(accounts);
+        Test.stopTest();
+
+        System.assertEquals(accounts?.size(), dmlResults?.size(), 'Wrong # of results');
+        for (Integer i = 0; i < dmlResults?.size(); i++) {
+            DmlResult dmlResult = dmlResults[i];
+            Account account = accounts[i];
+            System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess');
+            System.assertEquals(account.Id, dmlResult.recordId, 'Wrong recordId');
+            System.assertEquals(0, dmlResult?.errors?.size(), 'Wrong # of errors');
+        }
     }
 }

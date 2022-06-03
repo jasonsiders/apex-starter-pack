@@ -132,7 +132,7 @@ private class GarbageCollector_Test {
         instance.execute(mockContext, scope);
         Test.stopTest();
 
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
         System.assertEquals(scope?.size(), logEvents?.size(), 'Wrong # of log events: ' + DatabaseLayer.DmlEngine);
     }
 
@@ -156,7 +156,7 @@ private class GarbageCollector_Test {
         }
         Test.stopTest();
 
-        List<Log_Event__e> logEvents = (List<Log_Event__e>) DatabaseLayer.DmlEngine.getPublishedEvents();
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
         System.assertEquals(1, logEvents?.size(), 'Wrong # of log events');
         System.assert(logEvents[0].Message__c?.startsWith('Unexpected error'), 'Wrong event logged');
     }

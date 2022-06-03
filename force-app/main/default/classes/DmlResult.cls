@@ -1,21 +1,25 @@
-public class DmlResult {
+public virtual class DmlResult {
     // Database.*Result classes do not share a common interface, and they cannot be manually constructed
     // This makes testing/mocking especially difficult
     // This class wraps all of those result types
-    public List<Error> errors { get; private set; }
-    public Boolean isSuccess { get; private set; }
-    public Id recordId { get; private set; }
+    public List<Error> errors { get; protected set; }
+    public Boolean isSuccess { get; protected set; }
+    public Id recordId { get; protected set; }
 
     @TestVisible
-    private DmlResult(List<Error> errors, Boolean isSuccess, Id recordId) {
+    protected DmlResult(List<Error> errors, Boolean isSuccess, Id recordId) {
         this.errors = errors;
         this.isSuccess = isSuccess;
         this.recordId = recordId; 
     }
 
     @TestVisible
-    private DmlResult(List<Database.Error> errors, Boolean isSuccess, Id recordId) {
+    protected DmlResult(List<Database.Error> errors, Boolean isSuccess, Id recordId) {
         this(DmlResult.wrap(errors), isSuccess, recordId);
+    }
+
+    protected DmlResult() {
+        // Required for inheritance purposes
     }
 
     // Constructors wrap a single Result object
@@ -89,19 +93,6 @@ public class DmlResult {
             dmlErrors.add(new Error(error));
         }
         return dmlErrors;
-    }
-
-    @TestVisible
-    static List<DmlResult> getMockResults(List<SObject> records) {
-        List<DmlResult> dmlResults = new List<DmlResult>();
-        for (SObject record : records) {
-            dmlResults.add(new DmlResult(
-                new List<Error>(), 
-                true, 
-                record.Id
-            ));
-        }
-        return dmlResults;
     }
 
     public class Error {
