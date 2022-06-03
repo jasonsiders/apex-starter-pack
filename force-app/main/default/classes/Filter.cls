@@ -1,4 +1,4 @@
-global class Filter {
+public class Filter {
     // Note: Normally, I'd use an enum instead, but each item here has special logic behind it
     public static final Type EQUALS = EqualsOperator.class; 
     public static final Type NOT_EQUALS = NotEqualsOperator.class; 
@@ -38,7 +38,7 @@ global class Filter {
     public final Operator operator { get; private set; }
     public final Object value { get; private set; }
 
-    global Filter(String fieldReference, Type operatorType, Object value) {
+    public Filter(String fieldReference, Type operatorType, Object value) {
         List<String> fieldParts = fieldReference?.split('\\.');
         if (fieldParts != null) {
             Integer fieldNameIndex = fieldParts?.size() - 1;
@@ -51,11 +51,11 @@ global class Filter {
         this.validate(); 
     }
 
-    global Filter(SObjectField field, Type operatorType, Object value) {
+    public Filter(SObjectField field, Type operatorType, Object value) {
         this(String.valueOf(field), operatorType, value); 
     }
 
-    global Filter(Filter__mdt filterRecord) {
+    public Filter(Filter__mdt filterRecord) {
         this(
             Filter.getFieldReferenceFromMdt(filterRecord),
             Filter.getOperationByItsAbbreviation(filterRecord?.Operator__c),
@@ -63,7 +63,7 @@ global class Filter {
         );
     }
 
-    global override String toString() {
+    public override String toString() {
         return this.getFieldName() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
     }
 

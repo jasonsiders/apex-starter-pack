@@ -1,8 +1,8 @@
-global abstract class TriggerHandler {  
-    global List<SObject> triggerNew { get; protected set; } 
-    global List<SObject> triggerOld { get; protected set; }
-    global Map<Id, SObject> triggerNewMap { get; protected set; } 
-    global Map<Id, SObject> triggerOldMap { get; protected set; }
+public abstract class TriggerHandler {  
+    public List<SObject> triggerNew { get; protected set; } 
+    public List<SObject> triggerOld { get; protected set; }
+    public Map<Id, SObject> triggerNewMap { get; protected set; } 
+    public Map<Id, SObject> triggerOldMap { get; protected set; }
     @TestVisible System.TriggerOperation operation = Trigger.operationType; 
     static Boolean isEnabled = true; 
 

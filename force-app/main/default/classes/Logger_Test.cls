@@ -25,7 +25,7 @@ private class Logger_Test {
         System.assertEquals(String.valueOf(Request.getCurrent().getQuiddity()), event.Source__c, 'Wrong source'); 
         System.assertNotEquals(null, event.Stack_Trace__c, 'No stack trace');
         System.assertNotEquals(null, event.Transaction_Id__c, 'No Transaction Id');
-    }
+    } 
 
     @IsTest 
     static void shouldGenerateAndPublishLogEvent() {
@@ -37,7 +37,7 @@ private class Logger_Test {
         Logger.logAndPublish(LoggingLevel.FINEST, 'Testing 123');
         Test.stopTest();
 
-        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Event not published');
+        System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Event not published');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Event still pending');
     }
 
@@ -195,7 +195,7 @@ private class Logger_Test {
         Logger.logAndPublish('Testing 123'); 
         Test.stopTest(); 
 
-        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Event not published');
+        System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Event not published');
         System.assertEquals(0, Logger.pendingEvents?.size(), 'Event still pending');
     }
 
@@ -231,7 +231,7 @@ private class Logger_Test {
         Logger.logFromLightning(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -245,7 +245,7 @@ private class Logger_Test {
         Logger.logFromLightning(input);
         Test.stopTest();
 
-        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -259,7 +259,7 @@ private class Logger_Test {
         Logger.logFromApi(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -275,7 +275,7 @@ private class Logger_Test {
         Logger.logFromApi(new List<Logger.Input>{input});
         Test.stopTest();
 
-        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -291,7 +291,7 @@ private class Logger_Test {
         Logger.logFromFlow(inputs);
         Test.stopTest();
 
-        System.assertEquals(inputs?.size(), dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(inputs?.size(), Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -307,7 +307,7 @@ private class Logger_Test {
         Logger.logFromFlow(new List<Logger.Input>{input});
         Test.stopTest();
 
-        System.assertEquals(1, dmlMock.published?.getAll()?.size(), 'Wrong # of published events');
+        System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Wrong # of published events');
     }
 
     @IsTest 
@@ -320,8 +320,9 @@ private class Logger_Test {
         Logger.logException(error); 
         Test.stopTest();
 
-        System.assertEquals(1, dmlMock?.published?.getAll()?.size(), 'Wrong # of published events'); 
-        Log_Event__e event = (Log_Event__e) dmlMock?.published?.getAll()[0];
+        List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll(); 
+        System.assertEquals(1, logEvents.size(), 'Wrong # of published events'); 
+        Log_Event__e event = logEvents[0];
         String expected = error?.getTypeName() + ': ' + error.getMessage() + '\n' + error.getStackTraceString();
         System.assertEquals(expected, event.Message__c, 'Wrong log message');
     }

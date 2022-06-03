@@ -24,30 +24,29 @@ global without sharing class Logger {
         LoggingLevel.FINEST => 7
     };
 
-    // **** PUBLIC **** //
-    @AuraEnabled
-    global static void logFromLightning(List<Input> inputs) {
-        Logger.logFromExternalSource(inputs); 
-    }
-
-    @AuraEnabled 
-    global static void logFromLightning(Input input) {
-        Logger.logFromLightning(new List<Input>{input});
-    }
-    
     @HttpPost
     global static void logFromApi(List<Input> inputs) {
         // Only one method per type can be defined with: HttpPost, 
         // so callers must supply an array of Inputs
         Logger.logFromExternalSource(inputs);
     }
-
-    @InvocableMethod(label='Post to Log')
-    global static void logFromFlow(List<Input> inputs) {
+    
+    @AuraEnabled
+    public static void logFromLightning(List<Input> inputs) {
         Logger.logFromExternalSource(inputs); 
     }
 
-    global static void log(LoggingLevel level, String message) {
+    @AuraEnabled 
+    public static void logFromLightning(Input input) {
+        Logger.logFromLightning(new List<Input>{input});
+    }
+
+    @InvocableMethod(label='Post to Log')
+    public static void logFromFlow(List<Input> inputs) {
+        Logger.logFromExternalSource(inputs); 
+    }
+
+    public static void log(LoggingLevel level, String message) {
         System.debug(level, message); 
         if (settings?.Enabled__c == true && clearsSeverityThreshold(level)) {
             Request context = Request.getCurrent(); 
@@ -62,21 +61,21 @@ global without sharing class Logger {
         }
     }
 
-    global static void log(String message) {
+    public static void log(String message) {
         // This will default the logging level to the current threshold
         Logger.log(threshold, message); 
     }
 
-    global static void logAndPublish(LoggingLevel level, String message) {
+    public static void logAndPublish(LoggingLevel level, String message) {
         Logger.log(level, message); 
         Logger.publish(); 
     }
 
-    global static void logAndPublish(String message) {
+    public static void logAndPublish(String message) {
         Logger.logAndPublish(threshold, message); 
     }
 
-    global static void publish() {
+    public static void publish() {
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
         if (currentPublishCalls < Logger.maxPublishCalls) {
             DatabaseLayer.DmlEngine.doPublish(Logger.pendingEvents); 
@@ -84,12 +83,12 @@ global without sharing class Logger {
         }
     }
 
-    global static void logException(Exception error) {
+    public static void logException(Exception error) {
         String message = error?.getTypeName() + ': ' + error?.getMessage() + '\n' + error?.getStackTraceString();
         Logger.logAndPublish(LoggingLevel.ERROR, message);
     }
 
-    global static void clear() {
+    public static void clear() {
         Logger.pendingEvents?.clear(); 
     }
 

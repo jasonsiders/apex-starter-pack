@@ -1,4 +1,4 @@
-global abstract inherited sharing class GarbageCollector implements Database.Batchable<SObject>, GarbageCollector.IGarbageCollector {
+public abstract inherited sharing class GarbageCollector implements Database.Batchable<SObject>, GarbageCollector.IGarbageCollector {
     public Id jobId { get; private set; }
     public Integer batchSize { get; private set; }
 

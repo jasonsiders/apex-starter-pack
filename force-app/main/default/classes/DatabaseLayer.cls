@@ -1,5 +1,5 @@
 public inherited sharing abstract class DatabaseLayer {
-    public static IDml DmlEngine { get; private set; }
+    public static Dml DmlEngine { get; private set; }
     public static IQueryFactory QueryEngine { get; private set; }
 
     static {
@@ -8,7 +8,7 @@ public inherited sharing abstract class DatabaseLayer {
     }
 
     @TestVisible
-    static IDml setDmlEngine(IDml dmlEngine) {
+    static Dml setDmlEngine(Dml dmlEngine) {
         DatabaseLayer.DmlEngine = dmlEngine;
         return dmlEngine; 
     }

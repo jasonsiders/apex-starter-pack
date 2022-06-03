@@ -1,10 +1,10 @@
-global class DmlResult {
+public class DmlResult {
     // Database.*Result classes do not share a common interface, and they cannot be manually constructed
     // This makes testing/mocking especially difficult
     // This class wraps all of those result types
-    global List<Error> errors { get; private set; }
-    global Boolean isSuccess { get; private set; }
-    global Id recordId { get; private set; }
+    public List<Error> errors { get; private set; }
+    public Boolean isSuccess { get; private set; }
+    public Id recordId { get; private set; }
 
     @TestVisible
     private DmlResult(List<Error> errors, Boolean isSuccess, Id recordId) {
@@ -19,30 +19,30 @@ global class DmlResult {
     }
 
     // Constructors wrap a single Result object
-    global DmlResult(Database.DeleteResult result) {
+    public DmlResult(Database.DeleteResult result) {
         this(result.getErrors(), result.isSuccess(), result.getId());
     }
 
-    global DmlResult(Database.SaveResult result) {
+    public DmlResult(Database.SaveResult result) {
         this(result.getErrors(), result.isSuccess(), result.getId());
     }
 
-    global DmlResult(Database.UndeleteResult result) {
+    public DmlResult(Database.UndeleteResult result) {
         this(result.getErrors(), result.isSuccess(), result.getId());
     }
 
-    global DmlResult(Database.UpsertResult result) {
+    public DmlResult(Database.UpsertResult result) {
         this(result.getErrors(), result.isSuccess(), result.getId());
     }
 
     // Specialized methods to process data
-    global void logError() {
+    public void logError() {
         if (this.isSuccess == false) {
             Logger.log(LoggingLevel.ERROR, JSON.serializePretty(this.errors)); 
         }
     }
 
-    global static void logErrors(List<DmlResult> results) {
+    public static void logErrors(List<DmlResult> results) {
         for (DmlResult result : results) {
             result.logError();
         }
@@ -50,7 +50,7 @@ global class DmlResult {
     }
 
     // Methods to "wrap" results in bulk
-    global static List<DmlResult> wrap(List<Database.DeleteResult> deleteResults) {
+    public static List<DmlResult> wrap(List<Database.DeleteResult> deleteResults) {
         List<DmlResult> dmlResults = new List<DmlResult>();
         for (Database.DeleteResult deleteResult : deleteResults) {
             dmlResults.add(new DmlResult(deleteResult));
@@ -58,7 +58,7 @@ global class DmlResult {
         return dmlResults;
     }
 
-    global static List<DmlResult> wrap(List<Database.SaveResult> saveResults) {
+    public static List<DmlResult> wrap(List<Database.SaveResult> saveResults) {
         List<DmlResult> dmlResults = new List<DmlResult>();
         for (Database.SaveResult saveResult : saveResults) {
             dmlResults.add(new DmlResult(saveResult));
@@ -66,7 +66,7 @@ global class DmlResult {
         return dmlResults;
     }
 
-    global static List<DmlResult> wrap(List<Database.UndeleteResult> undeleteResults) {
+    public static List<DmlResult> wrap(List<Database.UndeleteResult> undeleteResults) {
         List<DmlResult> dmlResults = new List<DmlResult>();
         for (Database.UndeleteResult undeleteResult : undeleteResults) {
             dmlResults.add(new DmlResult(undeleteResult));
@@ -74,7 +74,7 @@ global class DmlResult {
         return dmlResults;
     }
 
-    global static List<DmlResult> wrap(List<Database.UpsertResult> upsertResults) {
+    public static List<DmlResult> wrap(List<Database.UpsertResult> upsertResults) {
         List<DmlResult> dmlResults = new List<DmlResult>();
         for (Database.UpsertResult upsertResult : upsertResults) {
             dmlResults.add(new DmlResult(upsertResult));
@@ -82,7 +82,7 @@ global class DmlResult {
         return dmlResults;
     }
 
-    global static List<Error> wrap(List<Database.Error> errors) {
+    public static List<Error> wrap(List<Database.Error> errors) {
         List<Error> dmlErrors = new List<Error>();
         errors = (errors != null) ? errors : new List<Database.Error>();
         for (Database.Error error : errors) {
@@ -104,13 +104,13 @@ global class DmlResult {
         return dmlResults;
     }
 
-    global class Error {
+    public class Error {
         // Wraps the Database.Error class, which also cannot be constructed
-        global List<String> fields { get; private set; }
-        global String message { get; private set; }
-        global StatusCode statusCode { get; private set; }
+        public List<String> fields { get; private set; }
+        public String message { get; private set; }
+        public StatusCode statusCode { get; private set; }
 
-        global Error(Database.Error error) {
+        public Error(Database.Error error) {
             this(error.getFields(), error.getMessage(), error.getStatusCode()); 
         }
 

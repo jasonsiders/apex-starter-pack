@@ -1,4 +1,4 @@
-global interface IQuery {
+public interface IQuery {
     IQuery addFields(List<SObjectField> fields);
     IQuery addFields(SObjectField field);
     IQuery addFields(List<String> fields); 

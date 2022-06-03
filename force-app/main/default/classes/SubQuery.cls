@@ -1,11 +1,11 @@
-global inherited sharing virtual class SubQuery extends SoqlQuery {
+public inherited sharing virtual class SubQuery extends SoqlQuery {
     @TestVisible Schema.ChildRelationship relationship; 
     
-    global SubQuery(Schema.ChildRelationship relationship) {
+    public SubQuery(Schema.ChildRelationship relationship) {
         this.relationship = relationship; 
     }
 
-    global override String getQueryString() {
+    public override String getQueryString() {
         return '(' + super.getQueryString() + ')';
     }
 

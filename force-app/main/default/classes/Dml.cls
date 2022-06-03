@@ -1,145 +1,284 @@
-global virtual inherited sharing class Dml implements IDml {
-    global List<SObject> publishedEvents = new List<SObject>();
+public virtual inherited sharing class Dml {
+    public static History Inserted = new History(); 
+    public static History Updated = new History(); 
+    public static History Upserted = new History(); 
+    public static History Deleted = new History(); 
+    public static History Undeleted = new History(); 
+    public static History Published = new History().setAlternateIdField('ReplayId');
+
+    // Operation-based methods
+    public List<DmlResult> doDml(Operation operation, List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
+        List<DmlResult> results; 
+        switch on operation {
+            when DO_PUBLISH {
+                results = DatabaseLayer.DmlEngine.doPublish(records);
+            } when DO_INSERT {
+                results = DatabaseLayer.DmlEngine.doInsert(records, allOrNone);
+            } when DO_UPDATE {
+                results = DatabaseLayer.DmlEngine.doUpdate(records, allOrNone);
+            } when DO_UPSERT {
+                results = DatabaseLayer.DmlEngine.doUpsert(records, externalIdField, allOrNone);
+            } when DO_DELETE {
+                results = DatabaseLayer.DmlEngine.doDelete(records, allOrNone);
+            } when DO_UNDELETE {
+                results = DatabaseLayer.DmlEngine.doUndelete(records, allOrNone);
+            } when DO_HARD_DELETE {
+                results = DatabaseLayer.DmlEngine.doHardDelete(records, allOrNone);
+            }
+        }
+        return results;
+    }
+
+    public List<DmlResult> doDml(Operation operation, List<SObject> records, SObjectField externalIdField) {
+        return this.doDml(operation, records, externalIdField, true); 
+    }
+
+    public List<DmlResult> doDml(Operation operation, List<SObject> records, Boolean allOrNone) {
+        return this.doDml(operation, records, null, allOrNone); 
+    }
+
+    public List<DmlResult> doDml(Operation operation, List<SObject> records) {
+        return this.doDml(operation, records, null, true); 
+    }
+
+    public DmlResult doDml(Operation operation, SObject record, SObjectField externalIdField, Boolean allOrNone) {
+        return this.doDml(operation, new List<SObject>{record}, externalIdField, allOrNone)[0]; 
+    }
+
+    public DmlResult doDml(Operation operation, SObject record, SObjectField externalIdField) {
+        return this.doDml(operation, new List<SObject>{record}, externalIdField)[0]; 
+    }
+
+    public DmlResult doDml(Operation operation, SObject record, Boolean allOrNone) {
+        return this.doDml(operation, new List<SObject>{record}, allOrNone)[0]; 
+    }
+
+    public DmlResult doDml(Operation operation, SObject record) {
+        return this.doDml(operation, new List<SObject>{record})[0]; 
+    }
 
     // Publish Methods
-    global virtual List<DmlResult> doPublish(List<SObject> events) {
-        this.publishedEvents.addAll(events); 
+    public virtual List<DmlResult> doPublish(List<SObject> events) {
+        Dml.Published.add(events); 
         List<Database.SaveResult> results = EventBus.publish(events); 
         return DmlResult.wrap(results); 
     }
 
-    global virtual DmlResult doPublish(SObject event) {
+    public virtual DmlResult doPublish(SObject event) {
         return this.doPublish(new List<SObject>{event})[0];
     }
 
-    global virtual List<SObject> getPublishedEvents() {
-        return this.publishedEvents; 
+    public virtual List<SObject> getPublishedEvents() {
+        return Dml.Published.getAll(); 
     }
 
     // Insert Methods
-    global virtual List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
+    public virtual List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
         List<Database.SaveResult> results = Database.insert(records, allOrNone);
+        Dml.Inserted.add(records); 
         return DmlResult.wrap(results);
     }
     
-    global virtual List<DmlResult> doInsert(List<SObject> records) {
+    public virtual List<DmlResult> doInsert(List<SObject> records) {
         return this.doInsert(records, true);
     }
 
-    global virtual DmlResult doInsert(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doInsert(SObject record, Boolean allOrNone) {
         return this.doInsert(new List<SObject>{record}, allOrNone)[0];
     }
 
-    global virtual DmlResult doInsert(SObject record) {
+    public virtual DmlResult doInsert(SObject record) {
         return this.doInsert(record, true);
     }
 
     // Update Methods
-    global virtual List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
+    public virtual List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
+        Dml.Updated.add(records); 
         List<Database.SaveResult> results = Database.update(records, allOrNone);
         return DmlResult.wrap(results);
     }
     
-    global virtual List<DmlResult> doUpdate(List<SObject> records) {
+    public virtual List<DmlResult> doUpdate(List<SObject> records) {
         return this.doUpdate(records, true);
     }
 
-    global virtual DmlResult doUpdate(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doUpdate(SObject record, Boolean allOrNone) {
         return this.doUpdate(new List<SObject>{record}, allOrNone)[0];
     }
 
-    global virtual DmlResult doUpdate(SObject record) {
+    public virtual DmlResult doUpdate(SObject record) {
         return this.doUpdate(record, true);
     }
 
     // Upsert Methods
-    global virtual List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
-        List<Database.UpsertResult> results = Database.upsert(records, externalIdField, allOrNone);
+    public virtual List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
+        // Avoid this error from null externalIdField values:
+        // ! System.NullPointerException: Argument 2 cannot be null
+        List<Database.UpsertResult> results = (externalIdField != null) 
+            ? Database.upsert(records, externalIdField, allOrNone)
+            : Database.upsert(records, allOrNone); 
+        Dml.Upserted.add(records); 
         return DmlResult.wrap(results); 
     }
-    
-    global virtual List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField) {
+
+    public virtual List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField) {
         return this.doUpsert(records, externalIdField, true);
     }
-    
-    global virtual List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
-        // Can't re-use the first doUpsert method, because externalIdField can't be null
-        List<Database.UpsertResult> results = Database.upsert(records, allOrNone);
-        return DmlResult.wrap(results);
+
+    public virtual List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
+        return this.doUpsert(records, null, allOrNone); 
     }
     
-    global virtual List<DmlResult> doUpsert(List<SObject> records) {
+    public virtual List<DmlResult> doUpsert(List<SObject> records) {
         return this.doUpsert(records, true);
     }
     
-    global virtual DmlResult doUpsert(SObject record, SObjectField externalIdField, Boolean allOrNone) {
+    public virtual DmlResult doUpsert(SObject record, SObjectField externalIdField, Boolean allOrNone) {
         return this.doUpsert(new List<SObject>{record}, externalIdField, allOrNone)[0];
     }
     
-    global virtual DmlResult doUpsert(SObject record, SObjectField externalIdField) {
+    public virtual DmlResult doUpsert(SObject record, SObjectField externalIdField) {
         return this.doUpsert(record, externalIdField, true);
     }
     
-    global virtual DmlResult doUpsert(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doUpsert(SObject record, Boolean allOrNone) {
         return this.doUpsert(new List<SObject>{record}, allOrNone)[0];
     }
     
-    global virtual DmlResult doUpsert(SObject record) {
+    public virtual DmlResult doUpsert(SObject record) {
         return this.doUpsert(record, true); 
     }
 
     // Delete Methods
-    global virtual List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
+    public virtual List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
+        Dml.Deleted.add(records); 
         List<Database.DeleteResult> results = Database.delete(records, allOrNone);
         return DmlResult.wrap(results); 
     }
 
-    global virtual List<DmlResult> doDelete(List<SObject> records) {
+    public virtual List<DmlResult> doDelete(List<SObject> records) {
         return this.doDelete(records, true); 
     }
 
-    global virtual DmlResult doDelete(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doDelete(SObject record, Boolean allOrNone) {
         return this.doDelete(new List<SObject>{record}, allOrNone)[0];
     }
 
-    global virtual DmlResult doDelete(SObject record) {
+    public virtual DmlResult doDelete(SObject record) {
         return this.doDelete(record, true);
     }
 
     // Hard Delete Methods
-    global virtual List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
+    public virtual List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
+        Dml.Deleted.add(records); 
         List<Database.DeleteResult> results = Database.delete(records, allOrNone); 
         Database.emptyRecycleBin(records); 
         return DmlResult.wrap(results); 
     }
 
-    global virtual List<DmlResult> doHardDelete(List<SObject> records) {
+    public virtual List<DmlResult> doHardDelete(List<SObject> records) {
         return this.doHardDelete(records, true); 
     }
 
-    global virtual DmlResult doHardDelete(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doHardDelete(SObject record, Boolean allOrNone) {
         return this.doHardDelete(new List<SObject>{record}, allOrNone)[0];
     }
 
-    global virtual DmlResult doHardDelete(SObject record) {
+    public virtual DmlResult doHardDelete(SObject record) {
         return this.doHardDelete(record, true);
     }
 
     // Undelete Methods
-    global virtual List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
+    public virtual List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
+        Dml.Undeleted.add(records); 
         List<Database.UndeleteResult> results = Database.undelete(records, allOrNone);
         return DmlResult.wrap(results); 
     }
 
-    global virtual List<DmlResult> doUndelete(List<SObject> records) {
+    public virtual List<DmlResult> doUndelete(List<SObject> records) {
         return this.doUndelete(records, true); 
     }
 
-    global virtual DmlResult doUndelete(SObject record, Boolean allOrNone) {
+    public virtual DmlResult doUndelete(SObject record, Boolean allOrNone) {
         return this.doUndelete(new List<SObject>{record}, allOrNone)[0];
     }
 
-    global virtual DmlResult doUndelete(SObject record) {
+    public virtual DmlResult doUndelete(SObject record) {
         return this.doUndelete(record, true); 
+    }
+
+    // **** INNER **** //
+    public enum Operation {
+        DO_PUBLISH,
+        DO_INSERT,
+        DO_UPDATE,
+        DO_UPSERT,
+        DO_DELETE,
+        DO_UNDELETE,
+        DO_HARD_DELETE
+    }
+
+    public class History {
+        // A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
+        private Map<SObjectType, List<SObject>> recordsBySObjectType = new Map<SObjectType, List<SObject>>(); 
+        private Map<Id, SObject> recordsById = new Map<Id, SObject>();
+        private String idField = 'Id';
+
+        private History() {
+            // Not available for construction outside of this file
+        }
+
+        private History setAlternateIdField(String idField) {
+            this.idField = idField;
+            return this;
+        }
+
+        public Boolean containsRecord(Id recordId) {
+            return this.recordsById?.containsKey(recordId); 
+        }
+
+        public Boolean containsRecord(SObject record) {
+            Id recordId = (Id) record?.get(this.idField); 
+            return this.containsRecord(recordId);
+        }
+
+        public SObject getRecord(Id recordId) {
+            return this.recordsById?.get(recordId); 
+        }
+
+        public SObject getRecord(SObject record) {
+            Id recordId = (Id) record?.get(this.idField); 
+            return this.getRecord(recordId);
+        }   
+
+        public List<SObject> getRecords(Schema.SObjectType objectType) {
+            return this.recordsBySObjectType.get(objectType); 
+        }
+
+        public List<SObject> getAll() {
+            List<SObject> allRecords = new List<SObject>();
+            for (List<SObject> records : this.recordsBySObjectType.values()) {
+                allRecords.addAll(records); 
+            }
+            return allRecords;
+        }
+
+        public void clear() {
+            this.recordsBySObjectType = new Map<SObjectType, List<SObject>>(); 
+        }
+
+        public void add(List<SObject> records) {
+            for (SObject record : records) {
+                // Map the record by its Id (1:1)
+                Id idField = (Id) record?.get(this.idField); 
+                this.recordsById.put(idField, record); 
+                // Map the record by its SObjectType (1:many)
+                SObjectType objectType = record?.getSObjectType();
+                List<SObject> matchingRecords = this.recordsBySObjectType.get(objectType); 
+                matchingRecords = (matchingRecords != null) ? matchingRecords : new List<SObject>();
+                matchingRecords?.add(record);
+                this.recordsBySObjectType.put(objectType, matchingRecords); 
+            }
+        }
     }
 }
