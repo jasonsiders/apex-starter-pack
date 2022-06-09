@@ -19,7 +19,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 
     public Id runJob() {
         Id jobId;
-        if (this.queueableIsSafe()) {
+        if (LimitUtils.isQueueableSafe()) {
             jobId = System.enqueueJob(this); 
             this.requests.clear(); 
         } else {
@@ -35,13 +35,6 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
         for (Request request : this.requests) {
             request.process(); 
         }
-    }
-
-    @TestVisible
-    private virtual Boolean queueableIsSafe() {
-        // TODO: Consider farming this out to a `LimitsUtils` class or something
-        // TODO: Build this out
-        return true; 
     }
 
     public virtual class Request {

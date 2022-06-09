@@ -1,25 +1,14 @@
-public abstract class LimitUtils {
+public virtual class LimitUtils {
     @TestVisible static System.Quiddity context = System.Request.getCurrent().getQuiddity();
     @TestVisible static Integer numDailyAsyncMethods; 
-    @TestVisible static LimitWrapper limitWrapper = new LimitWrapper(); 
+    @TestVisible static LimitUtils instance = new LimitUtils(); 
     @TestVisible static Integer LIMIT_DAILY_ASYNC_METHODS = 250000;
 
+    protected LimitUtils() {}
+
+    // **** PUBLIC **** // 
     public static Boolean isQueueableSafe() {
-        Integer numQueueables = limitWrapper.getQueueableJobs(); 
-        // Note: In synchronous context, max 50; but in many other contexts, the limit is much lower (1)
-        // Prevent this error: ! "Too many queueable jobs added to the queue: 2"
-        List<System.Quiddity> restrictedContexts = new List<System.Quiddity>{
-            System.Quiddity.BATCH_APEX, 
-            System.Quiddity.BATCH_CHUNK_PARALLEL, 
-            System.Quiddity.BATCH_CHUNK_SERIAL, 
-            System.Quiddity.FUTURE, 
-            System.Quiddity.QUEUEABLE
-        };
-        Integer maxQueueables = restrictedContexts.contains(LimitUtils.context) ? 1 : Limits.getLimitQueueableJobs();
-        return (
-            numQueueables < maxQueueables && 
-            LimitUtils.getNumDailyAsyncMethods() < LimitUtils.LIMIT_DAILY_ASYNC_METHODS
-        );
+        return instance.checkIfQueueableIsSafe(); 
     }
 
     public static Integer getNumDailyAsyncMethods() {
@@ -49,6 +38,30 @@ public abstract class LimitUtils {
         return LimitUtils.numDailyAsyncMethods;
     }
 
+    // **** PRIVATE **** //
+    @TestVisible
+    protected virtual Integer getQueueableJobs() {
+        return Limits.getQueueableJobs(); 
+    }
+
+    protected virtual Boolean checkIfQueueableIsSafe() {
+        Integer numQueueables = this.getQueueableJobs(); 
+        // Note: In synchronous context, max 50; but in many other contexts, the limit is much lower (1)
+        // Prevent this error: ! "Too many queueable jobs added to the queue: 2"
+        List<System.Quiddity> restrictedContexts = new List<System.Quiddity>{
+            System.Quiddity.BATCH_APEX, 
+            System.Quiddity.BATCH_CHUNK_PARALLEL, 
+            System.Quiddity.BATCH_CHUNK_SERIAL, 
+            System.Quiddity.FUTURE, 
+            System.Quiddity.QUEUEABLE
+        };
+        Integer maxQueueables = restrictedContexts.contains(LimitUtils.context) ? 1 : Limits.getLimitQueueableJobs();
+        return (
+            numQueueables < maxQueueables && 
+            LimitUtils.getNumDailyAsyncMethods() < LimitUtils.LIMIT_DAILY_ASYNC_METHODS
+        );
+    }
+
     // **** INNER **** // 
     private class AggregateAsyncJobs  {
         Decimal numJobs; 
@@ -61,15 +74,6 @@ public abstract class LimitUtils {
             // All others consume a single method call towards the limit
             Decimal results = (this.jobType == 'Batch Apex') ? (this.numJobs * 2) + this.numBatches: this.numJobs;
             return Integer.valueOf(results);
-        }
-    }
-
-    @TestVisible
-    private virtual class LimitWrapper {
-        // Opens the Limits class to mocking, since it's not possible 
-        // to accurately reproduce some conditions in a test
-        public virtual Integer getQueueableJobs() {
-            return Limits.getQueueableJobs(); 
         }
     }
 }

@@ -7,13 +7,13 @@ private class AsyncDml_Test {
             testAccounts.add(new Account(Name = 'Test Account')); 
         }
 
-        Test.startTest();
+        Test.startTest(); 
         AsyncDml.getInstance().addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, testAccounts)).runJob();
         Test.stopTest(); 
 
         List<Account> inserted = (List<Account>) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).run();
         System.assertEquals(testAccounts?.size(), inserted?.size(), 'Wrong # of accounts inserted'); 
-    }
+    } 
 
     @IsTest 
     static void shouldConvertLeadAsynchronously() {
@@ -109,13 +109,14 @@ private class AsyncDml_Test {
     @IsTest 
     static void shouldInsertSynchronouslyIfLimitsReached() {
         Account account = new Account(Name = 'Test Account');
-        AsyncDml instance = new PushedToLimitsExample().addRequest(new AsyncDml.Request(
+        AsyncDml.getInstance().addRequest(new AsyncDml.Request(
             Dml.Operation.DO_INSERT,
             account
         ));
+        LimitUtils.instance = new LimitsMock(); 
 
         Test.startTest();
-        Id jobId = instance.runJob(); 
+        Id jobId = AsyncDml.getInstance().runJob(); 
         Test.stopTest();
 
         System.assertEquals(null, jobId, 'Job was processed asynchronously');
@@ -123,10 +124,8 @@ private class AsyncDml_Test {
     }
 
     // **** HELPER **** // 
-    public class PushedToLimitsExample extends AsyncDml {
-        public PushedToLimitsExample() {}
-
-        public override Boolean queueableIsSafe() {
+    public class LimitsMock extends LimitUtils {
+        public override Boolean checkIfQueueableIsSafe() {
             // Simulate an instance where a new job cannot be enqueued safely
             return false; 
         }

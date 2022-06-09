@@ -3,7 +3,7 @@ private class LimitUtils_Test {
     @IsTest 
     static void shouldDetermineIfQueueableSafe() {
         MockLimits mockLimits = new MockLimits();
-        LimitUtils.limitWrapper = mockLimits;
+        LimitUtils.instance = mockLimits;
         List<System.Quiddity> restrictedContexts = new List<System.Quiddity>{
             System.Quiddity.BATCH_APEX, 
             System.Quiddity.BATCH_CHUNK_PARALLEL, 
@@ -33,9 +33,8 @@ private class LimitUtils_Test {
 
     @IsTest 
     static void shouldWrapTheLimitsClass() {
-        LimitUtils.LimitWrapper wrapper = new LimitUtils.LimitWrapper();
-        System.assertEquals(Limits.getQueueableJobs(), wrapper.getQueueableJobs(), 'Wrong default value');
-    }
+        System.assertEquals(Limits.getQueueableJobs(), LimitUtils.instance.getQueueableJobs(), 'Wrong default value');
+    } 
 
     @IsTest 
     static void shouldReturnNumberOfAsyncMethodsToday() {
@@ -54,7 +53,7 @@ private class LimitUtils_Test {
         public void execute(System.QueueableContext context) {}
     }
 
-    public class MockLimits extends LimitUtils.LimitWrapper {
+    public class MockLimits extends LimitUtils {
         Integer numQueueableJobs = 0; 
 
         public override Integer getQueueableJobs() {
