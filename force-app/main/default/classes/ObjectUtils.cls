@@ -79,4 +79,12 @@ public class ObjectUtils {
         mappedTarget.put(relationshipName, mappedParent);
         return (SObject) JSON.deserialize(JSON.serialize(mappedTarget), SObject.class);
     }
+
+    public static String joinValues(List<Object> items, String delimiter) {
+        List<String> values = new List<String>();
+        for (Object item : items) {
+            values.add(String.valueOf(item));
+        }
+        return String.join(values, delimiter);
+    }
 }

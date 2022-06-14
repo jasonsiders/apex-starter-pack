@@ -83,6 +83,14 @@ public class Filter {
         return this.operator.meetsCriteria(recordValue, this.value); 
     }
 
+    public Boolean meetsCriteria(Object item) {
+        // Returns TRUE if the given object meets the Filter's criteria
+        String serialized = JSON.serialize(item); 
+        Map<String, Object> deserialized = (Map<String, Object>) JSON.deserializeUntyped(serialized); 
+        Object value = deserialized.get(this.fieldName); 
+        return this.operator.meetsCriteria(value, this.value); 
+    }
+
     private String formatValue() {
         // Note: System.Type is not a valid switch expression type :(
         switch on TypeUtils.getType(this.value)?.getName().toUpperCase() {

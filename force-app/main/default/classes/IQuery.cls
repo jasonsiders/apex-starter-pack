@@ -15,7 +15,7 @@ public interface IQuery {
     IQuery addFilters(Filter filter);
     IQuery resetFilters();
 
-    IQuery setFilterLogic(String logicString);
+    IQuery setFilterLogic(Type filterLogicType);
     IQuery resetFilterLogic(); 
 
     IQuery setOrderBy(QuerySort sortOrder);

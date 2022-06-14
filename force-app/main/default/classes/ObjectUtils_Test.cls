@@ -147,6 +147,14 @@ private class ObjectUtils_Test {
         System.assertEquals(testAccount?.Name, testContact?.Account?.Name, 'Wrong Account.Name');
     }
 
+    @IsTest 
+    static void shouldJoinUntypedObjects() {
+        List<Integer> values = new List<Integer>{1, 2, 3, 4};
+        String delimiter = 'eAndA'; // A music theory reference
+        String expected = '1eAndA2eAndA3eAndA4';
+        System.assertEquals(expected, ObjectUtils.joinValues(values, delimiter), 'Wrong delimited value'); 
+    }
+
     // **** HELPER **** // 
     public virtual class ExampleObject {
         Boolean boolValue;

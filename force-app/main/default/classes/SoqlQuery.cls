@@ -1,11 +1,10 @@
 public inherited sharing virtual class SoqlQuery implements IQuery {
     @TestVisible Set<String> fields = new Set<String>{'Id'};
     @TestVisible SObjectType targetObject;
-    @TestVisible List<Filter> filters = new List<Filter>();
+    @TestVisible FilterLogic filterLogic = new FilterLogic.AndLogic(); 
     @TestVisible QuerySort orderBy;
     @TestVisible List<String> queryTags = new List<String>(); 
     @TestVisible Integer queryLimit; 
-    @TestVisible String filterLogic; 
     public String queryKey { get; private set; }
     
     public SoqlQuery(SObjectType targetObject) {
@@ -98,7 +97,7 @@ public inherited sharing virtual class SoqlQuery implements IQuery {
     }
 
     public SoqlQuery addFilters(List<Filter> filters) {
-        this.filters.addAll(filters); 
+        this.filterLogic?.addFilters(filters);
         return this;
     }
 
@@ -107,19 +106,18 @@ public inherited sharing virtual class SoqlQuery implements IQuery {
     }
 
     public SoqlQuery resetFilters() {
-        this.filters.clear();
+        this.filterLogic?.setFilters(new List<Filter>());
         return this;
     }
 
-    public SoqlQuery setFilterLogic(String formattedLogicString) {
-        // Expects a String.format() template with and/or logic in between
-        // i.e., '{0} AND {1} AND ({2} OR {3})'
-        this.filterLogic = formattedLogicString;
+    public SoqlQuery setFilterLogic(Type logicType) {
+        List<Filter> filters = this.filterLogic?.getFilters(); 
+        this.filterLogic = ((FilterLogic) logicType.newInstance())?.setFilters(filters);
         return this;
     }
 
     public SoqlQuery resetFilterLogic() {
-        return this.setFilterLogic(null); 
+        return this.setFilterLogic(FilterLogic.AndLogic.class); 
     }
 
     public SoqlQuery setOrderBy(QuerySort orderBy) {
@@ -177,19 +175,9 @@ public inherited sharing virtual class SoqlQuery implements IQuery {
     }
 
     private String getWhereClause() {
-        return (this.filters?.isEmpty() == false)
-            ? ' WHERE ' + this.joinFilters()
+        return (this.filterLogic?.getFilters()?.isEmpty() == false)
+            ? ' WHERE ' + this.filterLogic?.toString() 
             : '';
-    }
-
-    private String joinFilters() {
-        List<String> filterStrings = new List<String>(); 
-        for (Filter filter : this.filters) {
-            filterStrings.add(filter.toString()); 
-        }
-        return (this.filterLogic != null) 
-            ? String.format(this.filterLogic, filterStrings)
-            : String.join(filterStrings, ' AND ');
     }
 
     private String getOrderByClause() {

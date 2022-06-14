@@ -842,4 +842,48 @@ private class Filter_Test {
         }
         System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
     }
+
+    @IsTest 
+    static void shouldEvaluateIfGenericObjectMeetsCriteria() {
+        ExampleObject obj = new ExampleObject(); 
+        Filter myFilter = new Filter('myBool', Filter.EQUALS, true); 
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myBool', Filter.EQUALS, false); 
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDate', Filter.STARTS_WITH, '2021');
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDate', Filter.STARTS_WITH, '2022');
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDt', Filter.STARTS_WITH, '2021');
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDt', Filter.STARTS_WITH, '2022');
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDec', Filter.NOT_EQUALS, 0);
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myDec', Filter.EQUALS, 0);
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myId', Filter.EQUALS, UserInfo.getUserId());
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myId', Filter.NOT_EQUALS, UserInfo.getUserId()); 
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myString', Filter.CONTAINS, 'Hello');
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('myString', Filter.EQUALS, 'Something else');
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        // if an unexpected param is supplied, its value will be read as null
+        myFilter = new Filter('unexpectedParam', Filter.EQUALS, null); 
+        System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+        myFilter = new Filter('unexpectedParam', Filter.EQUALS, true); 
+        System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+    }
+
+    private class ExampleObject {
+        Boolean myBool = true; 
+        Date myDate = Date.newInstance(2021, 01, 01);
+        DateTime myDt = DateTime.newInstanceGmt(2021, 01, 01); 
+        Decimal myDec = 1234.56;
+        Id myId = UserInfo.getUserId(); 
+        Integer myInt = 1234;
+        String myString = 'Hello World!';
+    }
 }

@@ -32,13 +32,13 @@ private class SoqlQuery_Test {
             .addFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
             .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
             .addFilters(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
-            .setFilterLogic('{0} AND ({1} OR {2})');
+            .setFilterLogic(CustomLogic.class); 
         final String expected = 
             'SELECT Id FROM Account ' + 
-            'WHERE AnnualRevenue > 1000 AND (' + 
+            'WHERE (AnnualRevenue > 1000 AND (' + 
                 'OwnerId = \'' + UserInfo.getUserId() + '\' OR ' + 
                 'CreatedDate < 2022-01-01T00:00:00Z' + 
-            ')';
+            '))';
         System.assertEquals(expected, query.getQueryString());
         checkIfQueryIsValid(query); 
     }
@@ -104,16 +104,16 @@ private class SoqlQuery_Test {
             .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .addFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
             .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
-            .setFilterLogic('{0} AND ({1} OR {2})')
+            .setFilterLogic(CustomLogic.class)
             .setOrderBy(new QuerySort(new List<String>{'CreatedDate', 'AnnualRevenue'}, QuerySort.Order.DESCENDING))
             .setLimit(200)
             .addTags('WITH SECURITY_ENFORCED');
         final String expected = 
             'SELECT Id, CreatedDate, Name, Owner.ProfileId FROM Account ' +
-            'WHERE Name LIKE \'Test Account%\' AND (' + 
+            'WHERE (Name LIKE \'Test Account%\' AND (' + 
                 'CreatedDate > 2022-01-01T00:00:00Z OR ' + 
                 'OwnerId = \'' + UserInfo.getUserId() + '\'' +
-            ') ' + 
+            ')) ' + 
             'WITH SECURITY_ENFORCED ' +  
             'ORDER BY CreatedDate, AnnualRevenue DESC ' + 
             'LIMIT 200';
@@ -123,19 +123,18 @@ private class SoqlQuery_Test {
 
     @IsTest
     static void shouldResetQuery() {
-        final String filterLogic = '{0} AND ({1} OR {2})';
         SoqlQuery query = new SoqlQuery(Account.SObjectType)
             .addFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
             .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .addFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, Date.today()))
             .addFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
-            .setFilterLogic(filterLogic)
+            .setFilterLogic(CustomLogic.class)
             .setOrderBy(new QuerySort(Account.CreatedDate, QuerySort.Order.DESCENDING))
             .setLimit(200)
             .addTags('WITH SECURITY_ENFORCED');
         System.assertEquals(3, query.fields?.size());
-        System.assertEquals(3, query.filters?.size());
-        System.assertEquals(filterLogic, query.filterLogic);
+        System.assertEquals(3, query.filterLogic?.getFilters()?.size());
+        System.assertEquals(true, query.filterLogic instanceOf CustomLogic);
         System.assertEquals('CreatedDate DESC', query.orderBy?.toString());
         System.assertEquals(200, query.queryLimit); 
         System.assertEquals(1, query.queryTags?.size()); 
@@ -144,8 +143,8 @@ private class SoqlQuery_Test {
         Test.stopTest();
         System.assertEquals(1, query.fields?.size());
         System.assertEquals(true, query.fields.contains('Id'));
-        System.assertEquals(0, query.filters?.size());
-        System.assertEquals(null, query.filterLogic);
+        System.assertEquals(0, query.filterLogic?.getFilters()?.size());
+        System.assertEquals(true, query.filterLogic instanceOf FilterLogic.AndLogic);
         System.assertEquals(null, query.orderBy); 
         System.assertEquals(null, query.queryLimit); 
         System.assertEquals(0, query.queryTags?.size()); 
@@ -234,6 +233,32 @@ private class SoqlQuery_Test {
             query.run();
         } catch (System.QueryException queryError) {
             System.assert(false, queryError);
+        }
+    }
+
+    public class CustomLogic extends FilterLogic {
+        // this is for this test only; always has 3 filters
+        Filter filter1;
+        Filter filter2; 
+        Filter filter3; 
+
+        public override Boolean meetsCriteria(Object item) {
+            this.constructFromSuper();
+            return filter1.meetsCriteria(item) && (
+                filter2.meetsCriteria(item) || 
+                filter3.meetsCriteria(item)
+            ); 
+        }
+
+        public override String toString() {
+            this.constructFromSuper();
+            return '(' + filter1 + ' AND (' + filter2 + ' OR ' + filter3 + '))';
+        }
+
+        private void constructFromSuper() {
+            this.filter1 = super.filters[0];
+            this.filter2 = super.filters[1];
+            this.filter3 = super.filters[2];
         }
     }
 }
