@@ -17,9 +17,9 @@ public abstract class OrgInfo {
     
     static Organization getCurrentOrg() {
         if (OrgInfo.currentOrg == null) {
-            IQuery query = DatabaseLayer.QueryEngine.newQuery(Organization.SObjectType)
+            Soql query = DatabaseLayer.QueryEngine.newQuery(Organization.SObjectType)
                 .setQueryKey(OrgInfo.CURRENT_ORG_QUERY)
-                .addFields(new List<SObjectField>{
+                .selectFields(new List<SObjectField>{
                     Organization.IsSandbox, 
                     Organization.OrganizationType
                 });

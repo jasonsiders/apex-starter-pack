@@ -2,8 +2,8 @@
 private class Rollup_Test {
     @IsTest 
     static void shouldRunFromParent() {
-        IQuery accountQuery = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addSubQueries(new SubQuery(
+        Soql accountQuery = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .selectSubQuery(new SubQuery(
                 Describes.getChildRelationship(Account.SObjectType, 'Opportunities')
             ));
         List<Account> accounts = (List<Account>) accountQuery.run();
@@ -19,7 +19,7 @@ private class Rollup_Test {
 
     @IsTest 
     static void shouldRunFromChild() {
-        IQuery oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).addFields(Opportunity.AccountId);
+        Soql oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
         List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run(); 
 
         Test.startTest();
@@ -33,7 +33,7 @@ private class Rollup_Test {
 
     @IsTest 
     static void shouldFilterRecords() {
-        IQuery oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).addFields(Opportunity.AccountId);
+        Soql oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
         List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run(); 
         // Update one of the Opportunities amounts to 0
         Set<Id> accountIds = new Set<Id>();
@@ -390,7 +390,7 @@ private class Rollup_Test {
     @IsTest 
     static void shouldGetMdtRollupsForUseInTrigger() {
         DatabaseLayer.setDmlEngine(new DmlMock());
-        DatabaseLayer.setQueryEngine(new QueryMock.Factory());
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
         List<Rollup__mdt> rollupMdts = new List<Rollup__mdt>{
             new Rollup__mdt(
                 Active__c = true,
@@ -429,7 +429,7 @@ private class Rollup_Test {
                 new List<Rollup_Filter__mdt>{rollupFilter}
             ));
         }
-        QueryMock.setMockResults(Rollup.MDT_QUERY_KEY, rollupRecords); 
+        SoqlMock.setMockResults(Rollup.MDT_QUERY_KEY, rollupRecords); 
 
         Test.startTest();
         List<Rollup> rollups = Rollup.getRollupsForTrigger(Opportunity.SObjectType); 

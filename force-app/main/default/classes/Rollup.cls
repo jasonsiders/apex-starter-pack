@@ -10,7 +10,7 @@ public without sharing class Rollup {
         'MAX' => MaxCalculator.class,
         'MIN' => MinCalculator.class,
         'SUM' => SumCalculator.class
-    };
+    }; 
 
     public Rollup(SObjectType targetObject) {
         this.targetObject = targetObject;
@@ -23,16 +23,16 @@ public without sharing class Rollup {
     }
 
     public List<SObject> run(Set<Id> targetRecordIds) {
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(this.targetObject)
+        Soql query = DatabaseLayer.QueryEngine.newQuery(this.targetObject)
             .setQueryKey(ROLLUP_QUERY_KEY)
-            .addFilters(new Filter(
+            .whereFilters(new Filter(
                 'Id', 
                 Filter.IN_COLLECTION, 
                 targetRecordIds
             ));
         for (Relationship relationship : this.relationships) {
             SubQuery subQuery = relationship?.getSubQuery(); 
-            query.addSubQueries(subQuery); 
+            query.selectSubQuery(subQuery); 
         }
         List<SObject> queryResults = query.run(); 
         for (SObject record : queryResults) {
@@ -79,7 +79,7 @@ public without sharing class Rollup {
 
     // **** STATIC **** //
     public static List<Rollup> getRollupsForTrigger(SObjectType triggerObjectType) {
-        IQuery query = Rollup.rollupMdtQuery().addFilters(new Filter(
+        Soql query = Rollup.rollupMdtQuery().whereFilters(new Filter(
             Rollup__mdt.Child_SObjectType__c,
             Filter.EQUALS,
             String.valueOf(triggerObjectType)
@@ -88,25 +88,25 @@ public without sharing class Rollup {
         return Rollup.generateFromMetadata(rollupRecords); 
     }
 
-    public static IQuery rollupMdtQuery() {
+    public static Soql rollupMdtQuery() {
         // A base query which can be built off of by other jobs.
         // It includes all necessary fields, and excludes inactive Filters/Rollups
         ChildRelationship rollupFilters = Describes.getChildRelationship(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
         return DatabaseLayer.QueryEngine.newQuery(Rollup__mdt.SObjectType)
-            .addAllFields()
-            .addSubQueries((SubQuery) new SubQuery(rollupFilters)
-                .addFields(new List<String>{
+            .selectAll()
+            .selectSubQuery((SubQuery) new SubQuery(rollupFilters)
+                .selectFields(new List<String>{
                     'Filter__r.' + Filter__mdt.Field_Name__c,
                     'Filter__r.' + Filter__mdt.Operator__c,
                     'Filter__r.' + Filter__mdt.SObjectField__c,
                     'Filter__r.' + Filter__mdt.SObjectType__c,
                     'Filter__r.' + Filter__mdt.Value__c
-                }).addFilters(new Filter(
+                }).whereFilters(new Filter(
                     Rollup_Filter__mdt.Active__c, 
                     Filter.EQUALS, 
                     true
                 ))
-            ).addFilters(new Filter(
+            ).whereFilters(new Filter(
                 Rollup__mdt.Active__c,
                 Filter.EQUALS,
                 true
@@ -152,7 +152,7 @@ public without sharing class Rollup {
         public SubQuery getSubQuery() {
             SubQuery subQuery = new SubQuery(this.childRelationship);
             for (Request request : this.requests) {
-                subQuery.addFields(request.getFieldNames());   
+                subQuery.selectFields(request.getFieldNames());   
             }
             return subQuery;
         }

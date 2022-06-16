@@ -27,7 +27,7 @@ public abstract class FilterLogic {
     }
 
     // **** IMPLEMENTATIONS **** // 
-    public class AndLogic extends FilterLogic {
+    public virtual class AndLogic extends FilterLogic {
         public AndLogic(List<Filter> filters) {
             this.filters = filters; 
         }
@@ -52,7 +52,7 @@ public abstract class FilterLogic {
         }
     }
 
-    public class OrLogic extends FilterLogic {
+    public virtual class OrLogic extends FilterLogic {
         public OrLogic(List<Filter> filters) {
             this.filters = filters; 
         }

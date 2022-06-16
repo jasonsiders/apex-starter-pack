@@ -162,10 +162,10 @@ private class DmlMock_Test {
             Phone = '+15555555555'
         );
         DatabaseLayer.DmlEngine.doInsert(testLead); 
-        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
-            .addFields(LeadStatus.MasterLabel)
-            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
-            .setLimit(1);
+        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .selectFields(LeadStatus.MasterLabel)
+            .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setRowLimit(1);
         String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
         Database.LeadConvert leadConvertObj = new Database.LeadConvert();
         leadConvertObj.setLeadId(testLead.Id); 
@@ -206,10 +206,10 @@ private class DmlMock_Test {
             Phone = '+15555555555'
         );
         DatabaseLayer.DmlEngine.doInsert(testLead); 
-        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
-            .addFields(LeadStatus.MasterLabel)
-            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
-            .setLimit(1);
+        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .selectFields(LeadStatus.MasterLabel)
+            .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setRowLimit(1);
         String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
         Database.LeadConvert leadConvertObj = new Database.LeadConvert();
         leadConvertObj.setLeadId(testLead.Id); 

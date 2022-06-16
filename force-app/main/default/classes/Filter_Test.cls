@@ -296,8 +296,8 @@ private class Filter_Test {
         );
         DatabaseLayer.DmlEngine.doInsert(testOpp); 
         testOpp = (Opportunity) DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType)
-            .addFields('Account.Name')
-            .addFilters(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
+            .selectFields('Account.Name')
+            .whereFilters(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
             .run()[0];
 
         Test.startTest();
@@ -875,6 +875,13 @@ private class Filter_Test {
         System.assertEquals(true, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
         myFilter = new Filter('unexpectedParam', Filter.EQUALS, true); 
         System.assertEquals(false, myFilter.meetsCriteria(obj), myFilter.toString() + ' returned unexpected value for obj: ' + JSON.serializePretty(obj)); 
+    }
+
+    @IsTest 
+    static void shouldGeneratePrimitiveFilter() {
+        Filter myFilter = new Filter.PrimitiveFilter(Filter.EQUALS, 0); 
+        System.assertEquals(true, myFilter.meetsCriteria(0), '0 != 0');
+        System.assertEquals(false, myFilter.meetsCriteria('Hello World!'), '"Hello World!" == 0');
     }
 
     private class ExampleObject {

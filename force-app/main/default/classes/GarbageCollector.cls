@@ -35,10 +35,10 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     }
 
     public virtual void finish(Database.BatchableContext context) {
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
-            .addFields(AsyncApexJob.JobItemsProcessed)
-            .addFields(AsyncApexJob.TotalJobItems)
-            .addFilters(new Filter(
+        Soql query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
+            .selectFields(AsyncApexJob.JobItemsProcessed)
+            .selectFields(AsyncApexJob.TotalJobItems)
+            .whereFilters(new Filter(
                 AsyncApexJob.Id, 
                 Filter.EQUALS, 
                 context.getJobId()
@@ -67,7 +67,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
             return new GarbageCollectorSoql(job);
         } else if (VALID_APEX_CLASSES.contains(job?.Apex_Class_Name__c)) {
             // If the name is contained in the list of implementing types, it can be safely cast
-            return (IGarbageCollector) Type.forName(job.Apex_Class_Name__c).newInstance();
+            return (IGarbageCollector) Type.forName(job?.Apex_Class_Name__c).newInstance();
         } else {
             throw new InvalidCriteriaException(job); 
         }
@@ -75,13 +75,13 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 
     private static Set<String> getExtendingTypes() {
         Set<String> extendingTypeNames = new Set<String>();
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
-            .addFields(ApexTypeImplementor.ClassName)
-            .addFilters(new Filter(
+        Soql query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
+            .selectFields(ApexTypeImplementor.ClassName)
+            .whereFilters(new Filter(
                 ApexTypeImplementor.InterfaceName, 
                 Filter.EQUALS, 
                 INTERFACE_NAME
-            )).addFilters(new Filter(
+            )).whereFilters(new Filter(
                 ApexTypeImplementor.IsConcrete, 
                 Filter.EQUALS, 
                 true
@@ -96,12 +96,16 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     public class InvalidCriteriaException extends Exception {
         final String template = 
             'Invalid Garbage Collection Job criteria. ' + 
-            'A SOQL Filter, or the name of an Apex Class ' +
+            'Either a SOQL Filter, or the name of an Apex Class ' +
             'that implements IGarbageCollectorScope must be provided.\n' + 
-            'Garbage Collection Job: {0}';
+            'Valid Apex Classes: {0}\n' + 
+            'Garbage Collection Job: {1}';
 
         private InvalidCriteriaException(Garbage_Collection_Job__mdt job) {
-            this.setMessage(String.format(this.template, new List<String>{JSON.serializePretty(job)}));
+            this.setMessage(String.format(this.template, new List<String>{
+                JSON.serializePretty(VALID_APEX_CLASSES),
+                JSON.serializePretty(job)
+            }));
             Logger.logAndPublish(LoggingLevel.ERROR, this.getMessage()); 
         }
     }

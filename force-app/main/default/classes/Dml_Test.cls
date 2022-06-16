@@ -26,7 +26,7 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoUpdate() {
-        Account account = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
+        Account account = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
         final String newName = 'Some other name';
         account.Name = newName; 
         Test.startTest();
@@ -75,13 +75,13 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoUndelete() {
-        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
         DatabaseLayer.DmlEngine.doDelete(testAccount);
         Test.startTest();
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(testAccount); 
         Test.stopTest();
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(
                 Account.Id, 
                 Filter.EQUALS, 
                 testAccount.Id
@@ -96,12 +96,12 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoDelete() {
-        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
         Test.startTest();
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doDelete(testAccount); 
         Test.stopTest(); 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(
                 Account.Id, 
                 Filter.EQUALS, 
                 testAccount.Id
@@ -116,14 +116,14 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldDoHardDelete() {
-        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setLimit(1).run()[0];
+        Account testAccount = (Account) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
         Test.startTest();
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doHardDelete(testAccount); 
         Test.stopTest(); 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)   
-            .addFields(Account.IsDeleted)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id))
-            .addTags('ALL ROWS');
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)   
+            .selectFields(Account.IsDeleted)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id))
+            .forUsage(Soql.Usage.ALL_ROWS);
         testAccount = (Account) query.run()[0];
         System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard Deleted'); 
         System.assertEquals(true, Dml.Deleted.containsRecord(testAccount), 'Account was not added to History list'); 
@@ -160,10 +160,10 @@ private class Dml_Test {
             Phone = '+15555555555'
         );
         DatabaseLayer.DmlEngine.doInsert(testLead); 
-        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
-            .addFields(LeadStatus.MasterLabel)
-            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
-            .setLimit(1);
+        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .selectFields(LeadStatus.MasterLabel)
+            .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setRowLimit(1);
         String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
         Database.LeadConvert leadConvertObj = new Database.LeadConvert();
         leadConvertObj.setLeadId(testLead.Id); 
@@ -456,8 +456,8 @@ private class Dml_Test {
         Test.stopTest();
 
         System.assertNotEquals(null, testAccount.Id, 'Account was not inserted'); 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         System.assertEquals(false, query.run().isEmpty(),'No Accounts exist');
     }
 
@@ -472,9 +472,9 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_UPDATE, testAccount);
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFields(Account.Name)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .selectFields(Account.Name)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         testAccount = (Account) query.run()[0]; 
         System.assertEquals(newAccName, testAccount?.Name, 'Account was not updated'); 
     }
@@ -487,8 +487,8 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_UPSERT, testAccount);
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         System.assertEquals(false, query.run().isEmpty(), 'Account was not upserted'); 
     }
 
@@ -501,8 +501,8 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_DELETE, testAccount);
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         System.assertEquals(true, query.run().isEmpty(), 'Record still exists');
         System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted'); 
     }
@@ -517,8 +517,8 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_UNDELETE, testAccount); 
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         System.assertEquals(false, query.run().isEmpty(), 'Account was not undeleted');
         System.assertEquals(true, Dml.Undeleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Undeleted'); 
     }
@@ -533,8 +533,8 @@ private class Dml_Test {
         Test.stopTest();
 
         System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
         System.assertEquals(true, query.run().isEmpty(), 'Account was not deleted');
         System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
     }
@@ -554,8 +554,8 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_UPSERT, testLead, Lead.Email);
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType)
-            .addFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType)
+            .whereFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
         System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
     }
 
@@ -592,8 +592,8 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doDml(Dml.Operation.DO_UPSERT, testLead, Lead.Email, false);
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType)
-            .addFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType)
+            .whereFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
         System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
     }
     

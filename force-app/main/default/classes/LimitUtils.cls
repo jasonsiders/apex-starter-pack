@@ -19,7 +19,7 @@ public virtual class LimitUtils {
             // Again, if SFDC simply added this to their Limits class, we wouldn't need to worry about this!
             LimitUtils.numDailyAsyncMethods = 0;
             List<AggregateResult> aggregateResults = [
-                // TODO: Replace this with an aggregate IQuery (not built yet)
+                // TODO: Replace this with an aggregate Soql (not built yet)
                 SELECT COUNT(Id) NumJobs, SUM(JobItemsProcessed) NumBatches, JobType
                 FROM AsyncApexJob
                 WHERE CreatedDate > :DateTime.now().addDays(-1) AND JobType IN (

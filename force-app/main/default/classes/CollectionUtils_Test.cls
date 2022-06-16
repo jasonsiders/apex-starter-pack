@@ -36,11 +36,11 @@ private class CollectionUtils_Test {
     }
 
     @IsTest 
-    static void shouldFilterList() {
+    static void shouldFilterListOfComplexTypes() {
         List<Account> testData = getTestData(); 
+        Filter myFilter = new Filter(Account.AnnualRevenue, Filter.NOT_EQUALS, 1000); 
 
         Test.startTest(); 
-        Filter myFilter = new Filter(Account.AnnualRevenue, Filter.NOT_EQUALS, 1000); 
         List<Account> filtered = (List<Account>) CollectionUtils.filterCollection(
             testData, 
             myFilter, 
@@ -51,6 +51,24 @@ private class CollectionUtils_Test {
         System.assertEquals(9, filtered?.size(), 'Wrong # of filtered accounts');
         for (Account account : filtered) {
             System.assertEquals(true, account.AnnualRevenue != 1000, 'Filter was not applied correctly: ' + myFilter.toString() + ': ' + JSON.serialize(account)); 
+        }
+    }
+
+    @IsTest 
+    static void shouldFilterListOfPrimitiveTypes() {
+        List<Integer> items = new List<Integer>{1, 2, 3, 4, 5};
+        Filter myFilter = new Filter.PrimitiveFilter(Filter.GREATER_THAN, 1); 
+
+        Test.startTest();
+        List<Integer> filtered = (List<Integer>) CollectionUtils.filterCollection(
+            items, 
+            myFilter,
+            List<Integer>.class
+        );
+
+        System.assertEquals(4, filtered?.size(), 'Wrong # of filtered items');
+        for (Integer item : filtered) {
+            System.assertEquals(true, item > 1, item + ' is not > 1');
         }
     }
 

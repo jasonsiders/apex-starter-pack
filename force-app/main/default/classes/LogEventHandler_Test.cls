@@ -14,7 +14,7 @@ private class LogEventHandler_Test extends TriggerHandler {
                 Message__c = 'Testing 123',
                 Running_User__c = UserInfo.getUserId(),
                 Severity__c = 'FINEST',
-                Transaction_Id__c = transactionId
+                Transaction_Id__c = transactionId 
             ));
         }
         TriggerHandler handler = new LogEventHandler();
@@ -103,12 +103,12 @@ private class LogEventHandler_Test extends TriggerHandler {
 
     private static List<Log_Transaction__c> getLogTransactions() {
         Schema.ChildRelationship logsRelationship = Describes.getChildRelationship(Log_Transaction__c.SObjectType, 'Logs__r');
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Log_Transaction__c.SObjectType)
-            .addFields(new List<SObjectField>{
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Log_Transaction__c.SObjectType)
+            .selectFields(new List<SObjectField>{
                 Log_Transaction__c.OwnerId, 
                 Log_Transaction__c.Transaction_Id__c
-            }).addSubQueries((SubQuery) new SubQuery(logsRelationship)
-                .addFields(new List<SObjectField>{
+            }).selectSubQuery((SubQuery) new SubQuery(logsRelationship)
+                .selectFields(new List<SObjectField>{
                     Log__c.Id, 
                     Log__c.Message__c, 
                     Log__c.Severity__c,

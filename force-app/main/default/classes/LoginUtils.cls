@@ -6,24 +6,24 @@ public abstract class LoginUtils {
     public static Map<Id, List<AuthSession>> getAllActiveSessions() {
         if (LoginUtils.activeSessions == null) {
             LoginUtils.activeSessions = new Map<Id, List<AuthSession>>(); 
-            IQuery query = DatabaseLayer.QueryEngine.newQuery(AuthSession.SObjectType)
+            Soql query = DatabaseLayer.QueryEngine.newQuery(AuthSession.SObjectType)
                 .setQueryKey(AUTH_SESSION_QUERY)
-                .addFields('LoginHistory.Application')
-                .addFields(new List<SObjectField>{
+                .selectFields('LoginHistory.Application')
+                .selectFields(new List<SObjectField>{
                     AuthSession.UsersId,
                     AuthSession.LastModifiedDate,
                     AuthSession.NumSecondsValid
-                }).addFilters(new Filter(
+                }).whereFilters(new Filter(
                     AuthSession.LastModifiedDate,
                     Filter.EQUALS,
                     'LAST_N_DAYS:1'
-                )).addFilters(new Filter(
+                )).whereFilters(new Filter(
                     AuthSession.ParentId,
                     Filter.Equals,
                     null
-                )).setOrderBy(new QuerySort(
+                )).orderBy(new SoqlSort(
                     AuthSession.CreatedDate,
-                    QuerySort.Order.ASCENDING
+                    SoqlSort.Order.ASCENDING
                 ));
             for (AuthSession session : (List<AuthSession>) query.run()) {
                 // Note: Can't easily filter active sessions in SOQL; must calculate manually

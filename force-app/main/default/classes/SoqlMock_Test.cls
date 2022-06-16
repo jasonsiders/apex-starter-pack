@@ -1,9 +1,9 @@
-@IsTest
-private class QueryMock_Test {
+@IsTest 
+private class SoqlMock_Test {
     @IsTest 
     static void shouldMockQuery() {
         // Generate a stupid amount of records, insert them via mock Dml, then retrieve them via mock query
-        QueryMock.Factory queryFactory = (QueryMock.Factory) DatabaseLayer.setQueryEngine(new QueryMock.Factory()); 
+        SoqlMock.Factory queryFactory = (SoqlMock.Factory) DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
         DatabaseLayer.setDmlEngine(new DmlMock());
         List<Account> accounts = new List<Account>(); 
         for (Integer i = 0; i < 10000; i++) {
@@ -14,12 +14,12 @@ private class QueryMock_Test {
         } 
         DatabaseLayer.DmlEngine.doInsert(accounts); 
         final String queryKey = 'MOCK_QUERY';
-        QueryMock.setMockResults(queryKey, accounts); 
+        SoqlMock.setMockResults(queryKey, accounts); 
         
         Test.startTest();
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
-            .addFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .selectFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
+            .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .setQueryKey(queryKey); 
         List<Account> results = (List<Account>) query.run(); 
         Test.stopTest();
@@ -33,22 +33,22 @@ private class QueryMock_Test {
 
     @IsTest 
     static void shouldMockQueryResults() {
-        DatabaseLayer.setQueryEngine(new QueryMock.Factory()); 
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
         String key = 'My_Cool_Query';
-        SoqlQuery query = (SoqlQuery) DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)?.setQueryKey(key); 
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)?.setQueryKey(key); 
         // In test environments, no Accounts exist
         // Without setting mock data, this will return an empty List<SObject>
         System.assertEquals(0, query?.run()?.size(), 'Wrong # of results'); 
         // Add some mock data to the query, indirectly. Now it should return those results
         List<Account> mockData = new List<Account>{new Account(Name = 'Test Account')};
-        QueryMock.setMockResults(key, mockData);
+        SoqlMock.setMockResults(key, mockData);
         System.assertEquals(mockData, query?.run(), 'Did not return mockData'); 
     }
 
     @IsTest
     static void shouldGenerateNewQuery() {
-        IQueryFactory factory = new QueryMock.Factory();
-        IQuery query = factory.newQuery(null); 
-        System.assertEquals(true, query instanceOf QueryMock, 'Wrong type of IQuery generated');
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
+        Soql query = DatabaseLayer.QueryEngine.newQuery(null); 
+        System.assertEquals(true, query instanceOf SoqlMock, 'Wrong type of Soql generated');
     }
 }

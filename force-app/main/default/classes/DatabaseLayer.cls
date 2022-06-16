@@ -4,7 +4,7 @@ public inherited sharing abstract class DatabaseLayer {
 
     static {
         DatabaseLayer.DmlEngine = new Dml();
-        DatabaseLayer.QueryEngine = new SoqlQuery.Factory();
+        DatabaseLayer.QueryEngine = new Soql.Factory();
     }
 
     @TestVisible

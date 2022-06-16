@@ -1,3 +1,3 @@
 public interface IQueryFactory {
-    IQuery newQuery(SObjectType objectType); 
+    Soql newQuery(SObjectType objectType); 
 }

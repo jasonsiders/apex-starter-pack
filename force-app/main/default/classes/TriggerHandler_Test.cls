@@ -314,8 +314,8 @@ private class TriggerHandler_Test extends TriggerHandler {
     }
 
     static List<Account> getAccounts() {
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .addFields(new List<SObjectField>{
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+            .selectFields(new List<SObjectField>{
                 Account.AccountNumber,
                 Account.Name  
             });

@@ -9,6 +9,6 @@ private class SubQuery_Test {
         Test.stopTest();
 
         System.assertEquals(contactsRelationship, subQuery.relationship, 'Wrong relationship');
-        System.assertEquals('(SELECT Id FROM Contacts)', subQuery.getQueryString(), 'Unexpected Query String');
+        System.assertEquals('(SELECT Id FROM Contacts)', subQuery.toString(), 'Unexpected Query String');
     }
 }

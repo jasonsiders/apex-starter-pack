@@ -3,7 +3,7 @@ private class DatabaseLayer_Test {
     @IsTest 
     static void shouldUseRealDatabaseOperationsByDefault() {
         System.assertEquals(Dml.class, TypeUtils.getType(DatabaseLayer.DmlEngine), 'Wrong Dml Engine');
-        System.assertEquals(true, DatabaseLayer.QueryEngine instanceOf SoqlQuery.Factory, 'Wrong Query Engine');
+        System.assertEquals(true, DatabaseLayer.QueryEngine instanceOf Soql.Factory, 'Wrong Query Engine');
     }
 
     @IsTest 
@@ -16,9 +16,9 @@ private class DatabaseLayer_Test {
 
     @IsTest 
     static void shouldAllowMockSoqlOperations() {
-        IQueryFactory mockSoql = new QueryMock.Factory(); 
+        IQueryFactory mockSoql = new SoqlMock.Factory(); 
         DatabaseLayer.setQueryEngine(mockSoql);
-        System.assertEquals(true, DatabaseLayer.QueryEngine instanceOf QueryMock.Factory, 'Not a mock instance');
+        System.assertEquals(true, DatabaseLayer.QueryEngine instanceOf SoqlMock.Factory, 'Not a mock instance');
         System.assertEquals(mockSoql, DatabaseLayer.QueryEngine, 'Wrong Query Engine');
     }
 }

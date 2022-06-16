@@ -25,10 +25,10 @@ private class AsyncDml_Test {
             Phone = '+15555555555'
         );
         DatabaseLayer.DmlEngine.doInsert(testLead); 
-        IQuery statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
-            .addFields(LeadStatus.MasterLabel)
-            .addFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
-            .setLimit(1);
+        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+            .selectFields(LeadStatus.MasterLabel)
+            .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+            .setRowLimit(1);
         String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
         Database.LeadConvert leadConvertObj = new Database.LeadConvert();
         leadConvertObj.setLeadId(testLead.Id); 
@@ -38,11 +38,8 @@ private class AsyncDml_Test {
         AsyncDml.getInstance().addRequest(new AsyncDml.Conversion(leadConvertObj)).runJob();
         Test.stopTest();
 
-        IQuery query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType).addFilters(new Filter(
-            Lead.IsConverted,
-            Filter.EQUALS, 
-            true
-        ));
+        Soql query = DatabaseLayer.QueryEngine.newQuery(Lead.SObjectType)
+            .whereFilters(new Filter(Lead.IsConverted, Filter.EQUALS, true));
         System.assertEquals(1, query.run().size(), 'Wrong # of converted leads');
     }
 
