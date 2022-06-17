@@ -18,21 +18,34 @@ public virtual class LimitUtils {
             // Note: Lazy-loading prevents unnecessary SOQL
             // Again, if SFDC simply added this to their Limits class, we wouldn't need to worry about this!
             LimitUtils.numDailyAsyncMethods = 0;
-            List<AggregateResult> aggregateResults = [
-                // TODO: Replace this with an aggregate Soql (not built yet)
-                SELECT COUNT(Id) NumJobs, SUM(JobItemsProcessed) NumBatches, JobType
-                FROM AsyncApexJob
-                WHERE CreatedDate > :DateTime.now().addDays(-1) AND JobType IN (
-                    'Batch Apex',
-                    'Future',
-                    'Queueable',
-                    'Scheduled Apex'
-                ) 
-                GROUP BY JobType
-            ];
-            String aggregateJson = JSON.serialize(aggregateResults);
-            for (AggregateAsyncJobs jobData : (List<AggregateAsyncJobs>) JSON.deserialize(aggregateJson, List<AggregateAsyncJobs>.class)) {
-                LimitUtils.numDailyAsyncMethods += jobData.getNumAsyncMethods();
+            Soql query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
+                .selectFields(AsyncApexJob.JobType)
+                .groupBy(AsyncApexJob.JobType)
+                .selectAggregation(new SoqlAggregation(
+                    SoqlAggregation.Function.COUNT, 
+                    AsyncApexJob.Id, 
+                    'NumJobs'
+                )).selectAggregation(new SoqlAggregation(
+                    SoqlAggregation.Function.SUM, 
+                    AsyncApexJob.JobItemsProcessed, 
+                    'NumBatches'
+                )).whereFilters(new Filter(
+                    AsyncApexJob.CreatedDate, 
+                    Filter.GREATER_THAN, 
+                    DateTime.now().addDays(-1)
+                )).whereFilters(new Filter(
+                    AsyncApexJob.JobType, 
+                    Filter.IN_COLLECTION, 
+                    new List<String>{
+                        'Batch Apex',
+                        'Future',
+                        'Queueable',
+                        'Scheduled Apex'
+                    }
+                ));
+            List<AggregateAsyncJobs> results = (List<AggregateAsyncJobs>) query.run(List<AggregateAsyncJobs>.class); 
+            for (AggregateAsyncJobs result : results) {
+                LimitUtils.numDailyAsyncMethods += result.getNumAsyncMethods();
             }
         }
         return LimitUtils.numDailyAsyncMethods;

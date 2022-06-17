@@ -283,6 +283,36 @@ private class Soql_Test {
     }
 
     @IsTest 
+    static void shouldReturnWrapperClass() {
+        // Insert 3 accounts for US and CA
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 3; i++) {
+            accounts.add(new Account(
+                BillingCountry = 'CA',
+                Name = 'CA Account #' + i
+            ));
+            accounts.add(new Account(
+                BillingCountry = 'US',
+                Name = 'US Account #' + i
+            ));
+        }
+        DatabaseLayer.DmlEngine.doInsert(accounts); 
+
+        Test.startTest();
+        Soql query = new Soql(Account.SObjectType) 
+            .selectFields(Account.BillingCountry)
+            .selectAggregation(new SoqlAggregation(SoqlAggregation.Function.COUNT, Account.Id, 'numAccs'))
+            .groupBy(Account.BillingCountry);
+        List<SampleWrapper> results = (List<SampleWrapper>) query.run(List<SampleWrapper>.class);
+        Test.stopTest();
+
+        System.assertEquals(2, results?.size(), 'Wrong # of results');
+        for (SampleWrapper wrapper : results) {
+            System.assertEquals(3, wrapper.numAccs, 'Wrong # of accs');
+        }
+    }
+
+    @IsTest 
     static void shouldThrowErrorIfInvalidQuery() {
         Soql query = new Soql(Account.SObjectType).selectFields('lajksdf');
         Test.startTest();
@@ -323,6 +353,11 @@ private class Soql_Test {
         } catch (System.QueryException queryError) {
             System.assert(false, queryError);
         }
+    }
+
+    public class SampleWrapper {
+        Integer numAccs;
+        String billingCountry; 
     }
 
     public class CustomLogic extends FilterLogic {

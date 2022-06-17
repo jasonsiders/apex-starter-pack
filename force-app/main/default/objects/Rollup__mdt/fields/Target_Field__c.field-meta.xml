@@ -8,7 +8,7 @@
     <metadataRelationshipControllingField>Rollup__mdt.Parent_SObjectType__c</metadataRelationshipControllingField>
     <referenceTo>FieldDefinition</referenceTo>
     <relationshipLabel>Target Fields</relationshipLabel>
-    <relationshipName>Target Fields</relationshipName>
+    <relationshipName>Target_Fields</relationshipName>
     <required>true</required>
     <type>MetadataRelationship</type>
     <unique>true</unique>

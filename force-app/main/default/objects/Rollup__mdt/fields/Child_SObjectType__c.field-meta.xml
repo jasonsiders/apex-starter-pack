@@ -7,7 +7,7 @@
     <label>Child SObjectType</label>
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>Child Rollups</relationshipLabel>
-    <relationshipName>Child Rollups</relationshipName>
+    <relationshipName>Child_Rollups</relationshipName>
     <required>true</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>

@@ -10,7 +10,7 @@ Not needed for COUNT-type rollups.</inlineHelpText>
     <metadataRelationshipControllingField>Rollup__mdt.Child_SObjectType__c</metadataRelationshipControllingField>
     <referenceTo>FieldDefinition</referenceTo>
     <relationshipLabel>Calculation Fields</relationshipLabel>
-    <relationshipName>Calculation Fields</relationshipName>
+    <relationshipName>Calculation_Fields</relationshipName>
     <required>false</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>

@@ -35,6 +35,12 @@ public inherited sharing virtual class Soql {
         return results;
     }
 
+    public virtual Object run(Type returnType) {
+        // Return the query results as an instance of the returnType
+        // Mostly useful for returning Aggregate Query results as a wrapper type
+        return JSON.deserialize(JSON.serialize(this.run()), returnType); 
+    }
+
     public virtual override String toString() {
         // Outputs a SOQL Query string, following the syntax defined here:
         // https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select.htm#:~:text=SOQL%20query%20syntax%20consists%20of,typeOfField%20whenExpression%5B...%5D
