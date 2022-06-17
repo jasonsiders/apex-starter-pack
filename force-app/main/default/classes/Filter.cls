@@ -33,10 +33,10 @@ public virtual class Filter {
         'NOT_CONTAINS' => Filter.NOT_CONTAINS
     };
 
-    public final String fieldName { get; private set; }
-    public final List<String> relationships { get; private set; }
-    public final Operator operator { get; private set; }
-    public final Object value { get; private set; }
+    @TestVisible protected final String fieldName { get; private set; }
+    @TestVisible protected final List<String> relationships { get; private set; }
+    @TestVisible protected final Operator operator { get; private set; }
+    @TestVisible protected final Object value { get; private set; }
 
     public Filter(String fieldReference, Type operatorType, Object value) {
         List<String> fieldParts = fieldReference?.split('\\.');
@@ -181,13 +181,13 @@ public virtual class Filter {
     }
 
     // **** STATIC **** //
-    public static String getFieldReferenceFromMdt(Filter__mdt filterRecord) {
+    static String getFieldReferenceFromMdt(Filter__mdt filterRecord) {
         return (filterRecord?.SObjectField__c != null) 
             ? String.valueOf(Describes.getSObjectFieldByName(filterRecord?.SObjectField__c))
             : filterRecord?.Field_Name__c;
     }
 
-    private static Type getOperationByItsAbbreviation(String abbreviation) {
+    static Type getOperationByItsAbbreviation(String abbreviation) {
         return Filter.OPERATOR_ABBREVIATIONS?.get(abbreviation);
     }
 
@@ -195,42 +195,43 @@ public virtual class Filter {
     // Note: In the future, may consider breaking out into its own file
     // But I like being able to refer to the enumerated types almost like an enum (see top of file)
     public abstract class Operator {
-        public abstract String getToken();
+        @TestVisible
+        protected abstract String getToken();
 
-        public abstract Boolean meetsCriteria(Object value, Object comparison); 
+        protected abstract Boolean meetsCriteria(Object value, Object comparison); 
 
-        public virtual String processStringValue(String value) {
+        protected virtual String processStringValue(String value) {
             return '\'' + value + '\'';
         }
     }
 
     private class EqualsOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '=';
         }
     
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             return value == comparison; 
         }
     }
 
     private class NotEqualsOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '!=';
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new EqualsOperator(); 
             return inverse?.meetsCriteria(value, comparison) == false; 
         }
     }
 
     private class InCollectionOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'IN';
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             List<Object> valueList;
             if (TypeUtils.isList(comparison)) {
                 valueList = (List<Object>) comparison;
@@ -248,11 +249,11 @@ public virtual class Filter {
     }
 
     private class NotInCollectionOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'NOT IN'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new InCollectionOperator(); 
             return (value != null && comparison != null) 
                 ? inverse?.meetsCriteria(value, comparison) == false
@@ -261,145 +262,145 @@ public virtual class Filter {
     }
 
     private class GreaterThanOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '>'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             return TypeUtils.greaterThan(value, comparison); 
         }
     }
 
     private class GreaterOrEqualOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '>='; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new LessThanOperator(); 
             return TypeUtils.greaterThan(value, comparison) || value == comparison;
         }
     }
 
     private class LessThanOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '<'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             return TypeUtils.lessThan(value, comparison); 
         }
     }
 
     private class LessOrEqualOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return '<='; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new GreaterThanOperator(); 
             return TypeUtils.lessThan(value, comparison) || value == comparison;
         }
     }
 
     private class StartsWithOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             // All types (including numbers) must be cast to string for this operation
             String valueString = String.valueOf(value); 
             String comparisonString = String.valueOf(comparison); 
             return value != null && comparison != null && valueString?.startsWithIgnoreCase(comparisonString); 
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'' + value + '%\''; 
         }
     }
 
     private class NotStartsWithOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'NOT LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new StartsWithOperator(); 
             return (value != null && comparison != null) 
                 ? inverse?.meetsCriteria(value, comparison) == false
                 : false;
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'' + value + '%\''; 
         }
     }
 
     private class EndsWithOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             // All types (including numbers) must be cast to string for this operation
             String valueString = String.valueOf(value); 
             String comparisonString = String.valueOf(comparison); 
             return value != null && comparison != null && valueString?.endsWithIgnoreCase(comparisonString);
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'%' + value + '\'';
         }
     }
 
     private class NotEndsWithOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'NOT LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new EndsWithOperator(); 
             return (value != null && comparison != null) 
                 ? inverse?.meetsCriteria(value, comparison) == false
                 : false; 
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'%' + value + '\'';
         }
     }
 
     private class ContainsOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             // All types (including numbers) must be cast to string for this operation
             String valueString = String.valueOf(value); 
             String comparisonString = String.valueOf(comparison); 
             return value != null && comparison != null && valueString?.containsIgnoreCase(comparisonString); 
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'%' + value + '%\'';
         }
     }
 
     private class NotContainsOperator extends Operator {
-        public override String getToken() {
+        protected override String getToken() {
             return 'NOT LIKE'; 
         }
 
-        public override Boolean meetsCriteria(Object value, Object comparison) {
+        protected override Boolean meetsCriteria(Object value, Object comparison) {
             Operator inverse = new ContainsOperator(); 
             return (value != null && comparison != null) 
                 ? inverse?.meetsCriteria(value, comparison) == false
                 : false;
         }
 
-        public override String processStringValue(String value) {
+        protected override String processStringValue(String value) {
             return '\'%' + value + '%\'';
         }
     }

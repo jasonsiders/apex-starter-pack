@@ -10,43 +10,43 @@ private class TriggerHandler_Test extends TriggerHandler {
         // Before Insert
         handler.beforeInsert();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // Before update
         handler.operation = System.TriggerOperation.BEFORE_UPDATE;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // Before delete
         handler.operation = System.TriggerOperation.BEFORE_DELETE;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // After insert
         handler.operation = System.TriggerOperation.AFTER_INSERT;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // After update
         handler.operation = System.TriggerOperation.AFTER_UPDATE;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // After delete
         handler.operation = System.TriggerOperation.AFTER_DELETE;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         // After undelete
         handler.operation = System.TriggerOperation.AFTER_UNDELETE;
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWith('Test Account #'));
+            System.assertEquals(true, account.Name.startsWith('Test Account #'), 'Invalid Account Name. Expected: "Test Account #%". Actual: "' + account.Name + '".');
         }
         Test.stopTest();
     }
@@ -59,21 +59,21 @@ private class TriggerHandler_Test extends TriggerHandler {
         // By default, the handler will be enabled
         handler.run(); 
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
         }
         // Reset the test, and Disable the handler
         handler.triggerNew = initAccounts(); 
         ExampleTriggerHandler.disable(); 
         handler.run(); 
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(false, account.Name.startsWithIgnoreCase('beforeInsert'));
+            System.assertEquals(false, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
         }
         // Reset the test, and re-enable the handler
         handler.triggerNew = initAccounts(); 
         ExampleTriggerHandler.enable(); 
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
         }
     }
     
@@ -88,7 +88,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -106,7 +106,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeUpdate'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeUpdate'), 'Invalid Account Name. Expected: "beforeUpdate%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -124,7 +124,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeDelete'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeDelete'), 'Invalid Account Name. Expected: "beforeDelete%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -140,7 +140,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterInsert'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterInsert'), 'Invalid Account Name. Expected: "afterInsert%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -158,7 +158,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterUpdate'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterUpdate'), 'Invalid Account Name. Expected: "afterUpdate%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -176,7 +176,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterDelete'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterDelete'), 'Invalid Account Name. Expected: "afterDelete%". Actual: "' + account.Name + '".');
         }
     }
 
@@ -194,7 +194,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.run();
         Test.stopTest(); 
         for (Account account : accounts) {
-            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterUndelete'));
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('afterUndelete'), 'Invalid Account Name. Expected: "afterUndelete%". Actual: "' + account.Name + '".');
         }
     }
     
@@ -206,12 +206,12 @@ private class TriggerHandler_Test extends TriggerHandler {
         Account otherAccount = accounts[1];
         TriggerHandler handler = new ExampleTriggerHandler(); 
         // Note: By default, triggerOldMap is empty, and won't contain the record in question
-        System.assertEquals(true, handler.isNew(testAccount));
+        System.assertEquals(true, handler.isNew(testAccount), 'Account is not new');
         // If triggerOldMap is not empty, it will return true if the record Id is contained
         handler.triggerOldMap.put(otherAccount.Id, otherAccount);
-        System.assertEquals(true, handler.isNew(testAccount));
+        System.assertEquals(true, handler.isNew(testAccount), 'Account is not new');
         handler.triggerOldMap.put(testAccount.Id, testAccount);
-        System.assertEquals(false, handler.isNew(testAccount));
+        System.assertEquals(false, handler.isNew(testAccount), 'Account is new');
     }
 
     @IsTest 
@@ -220,16 +220,16 @@ private class TriggerHandler_Test extends TriggerHandler {
         Account testAccount = accounts[0];
         TriggerHandler handler = new ExampleTriggerHandler(); 
         // Note: If the handler doesn't contain the account, this method will return true
-        System.assertEquals(true, handler.isChanged(testAccount, Account.Name));
+        System.assertEquals(true, handler.isChanged(testAccount, Account.Name), 'Account is not changed');
         // If the handler contains the account, but it is unchanged, it will return false
         handler.triggerNew = accounts.deepClone(true);
         handler.triggerNewMap = new Map<Id, Account>(accounts.deepClone(true));
         handler.triggerOld = accounts.deepClone(true);
         handler.triggerOldMap = new Map<Id, Account>(accounts.deepClone(true)); 
-        System.assertEquals(false, handler.isChanged(testAccount, Account.Name)); 
+        System.assertEquals(false, handler.isChanged(testAccount, Account.Name), 'Account is changed'); 
         // If the handler contains the account, and the specified field is changed, it will return true
         testAccount.Name = 'Some other account name';
-        System.assertEquals(true, handler.isChanged(testAccount, Account.Name));
+        System.assertEquals(true, handler.isChanged(testAccount, Account.Name), 'Account is not changed');
     }
 
     @IsTest 
@@ -243,15 +243,15 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.triggerOld = accounts.deepClone(); 
         handler.triggerOldMap = new Map<Id, Account>(accounts.deepClone(true)); 
         // If not changed, will return false
-        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, originalAccountName));
+        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, originalAccountName), 'Account.Name was changed from value');
         // If changed from the value to another value, will return true
         testAccount.Name = 'Some other name';
-        System.assertEquals(true, handler.isChangedFrom(testAccount, Account.Name, originalAccountName));
+        System.assertEquals(true, handler.isChangedFrom(testAccount, Account.Name, originalAccountName), 'Account.Name was not changed from value');
         // If changed, but the old value doesn't match, will return false
-        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, 'A third value'));
+        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, 'A third value'), 'Account.Name was changed from value');
         // If not changed && the old value doesn't match, will still return false
         testAccount.Name = originalAccountName;
-        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, 'Some other name'));
+        System.assertEquals(false, handler.isChangedFrom(testAccount, Account.Name, 'Some other name'), 'Account.Name was changed from value');
     }
 
     @IsTest
@@ -265,15 +265,15 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.triggerOld = accounts.deepClone(); 
         handler.triggerOldMap = new Map<Id, Account>(accounts.deepClone(true)); 
         // If not changed, will return false
-        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, originalAccountName));
+        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, originalAccountName), 'Account.Name was changed to value');
         // If changed from one value to the expected value, will return true
         testAccount.Name = 'Test';
-        System.assertEquals(true, handler.isChangedTo(testAccount, Account.Name, 'Test')); 
+        System.assertEquals(true, handler.isChangedTo(testAccount, Account.Name, 'Test'), 'Account.Name was not changed to value'); 
         // If changed, but the new value doesn't match, will return false
-        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, 'Another Test'));
+        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, 'Another Test'), 'Account.Name was changed to value');
         // If not changed, and the new value doesn't match, will still return false
         testAccount.Name = originalAccountName; 
-        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, 'Test'));
+        System.assertEquals(false, handler.isChangedTo(testAccount, Account.Name, 'Test'), 'Account.Name was changed to value');
     }
 
     @IsTest 
@@ -288,13 +288,13 @@ private class TriggerHandler_Test extends TriggerHandler {
         handler.triggerOld = accounts.deepClone(); 
         handler.triggerOldMap = new Map<Id, Account>(accounts.deepClone(true)); 
         // If not changed, will return false
-        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, newAccountName));
+        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, newAccountName), 'Account.Name was changed from/to value');
         // If changed, but the fromValue or toValue doesn't match, will return false
         testAccount.Name = newAccountName; 
-        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, 'Some Other Value', newAccountName));
-        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, 'Some other value'));
+        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, 'Some Other Value', newAccountName), 'Account.Name was changed from/to value');
+        System.assertEquals(false, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, 'Some other value'), 'Account.Name was changed from/to value');
         // If changed from the fromValue to the toValue, will return true
-        System.assertEquals(true, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, newAccountName)); 
+        System.assertEquals(true, handler.isChangedFromTo(testAccount, Account.Name, originalAccountName, newAccountName), 'Account.Name was not changed from/to value'); 
     }
     
     // **** HELPER **** // 

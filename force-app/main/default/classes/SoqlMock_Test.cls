@@ -25,8 +25,8 @@ private class SoqlMock_Test {
         Test.stopTest();
         System.assertEquals(results?.size(), accounts?.size(), 'Wrong # of results'); 
         for (Account account : results) {
-            System.assertNotEquals(null, account.Id); 
-            System.assertNotEquals(null, account.AnnualRevenue); 
+            System.assertNotEquals(null, account.Id, 'Account does not have an Id'); 
+            System.assertNotEquals(null, account.AnnualRevenue, 'Annual Revenue not populated'); 
             System.assert(account?.Name?.startsWithIgnoreCase('Test Account'), 'Expected to start with "Test Account", Actual: "' + account?.Name + '"');
         }
     }

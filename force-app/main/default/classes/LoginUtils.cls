@@ -1,7 +1,7 @@
 public abstract class LoginUtils {
     // UserId => List<AuthSession>
     static Map<Id, List<AuthSession>> activeSessions = LoginUtils.getAllActiveSessions();
-    @TestVisible static String AUTH_SESSION_QUERY = 'AUTH_SESSION_QUERY';
+    @TestVisible static final String AUTH_SESSION_QUERY = 'AUTH_SESSION_QUERY';
 
     public static Map<Id, List<AuthSession>> getAllActiveSessions() {
         if (LoginUtils.activeSessions == null) {

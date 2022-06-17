@@ -50,7 +50,8 @@ public class Describes {
     public static Schema.SObjectField getSObjectFieldByName(String dotNotationField) {
         // Assumes that input is in this format: "Account.OwnerId"
         // Originally designed for use with CMDT's 'FieldDefinition' data type, which stores data in this format
-        String objectName, fieldName; 
+        String objectName;
+        String fieldName; 
         List<String> fieldParts = dotNotationField?.split('\\.');
         if (fieldParts != null && fieldParts?.size() == 2) {
             objectName = fieldParts[0];

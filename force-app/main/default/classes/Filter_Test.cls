@@ -3,25 +3,25 @@ private class Filter_Test {
     @IsTest 
     static void shouldAllowStandardQuery() {
         Filter testFilter = new Filter(Opportunity.StageName, Filter.EQUALS, 'New');
-        System.assertEquals('StageName = \'New\'', testFilter.toString()); 
+        System.assertEquals('StageName = \'New\'', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldAllowParentQuery() {
         Filter testFilter = new Filter('Opportunity.Account.Type', Filter.EQUALS, 'Prospect');
-        System.assertEquals('Opportunity.Account.Type = \'Prospect\'', testFilter.toString());
+        System.assertEquals('Opportunity.Account.Type = \'Prospect\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForEquals() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.EQUALS, 1000);
-        System.assertEquals('Amount = 1000', testFilter.toString()); 
+        System.assertEquals('Amount = 1000', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForNotEquals() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.NOT_EQUALS, 1000); 
-        System.assertEquals('Amount != 1000', testFilter.toString());
+        System.assertEquals('Amount != 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -30,7 +30,7 @@ private class Filter_Test {
         Id caseId = TestUtils.generateFakeId(Case.SObjectType);
         Set<Id> recordIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, recordIds);
-        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -39,127 +39,127 @@ private class Filter_Test {
         Id caseId = TestUtils.generateFakeId(Case.SObjectType);
         Set<Id> recordIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.NOT_IN_COLLECTION, recordIds);
-        System.assertEquals('My_Custom_Field__c NOT IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c NOT IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForGreaterThan() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000);
-        System.assertEquals('Amount > 1000', testFilter.toString());
+        System.assertEquals('Amount > 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void houldHandleGreaterOrEqualThan() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.GREATER_OR_EQUAL, 1000);
-        System.assertEquals('Amount >= 1000', testFilter.toString());
+        System.assertEquals('Amount >= 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest
     static void shouldProduceQuerySegmentForLessThan() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.LESS_THAN, 1000);
-        System.assertEquals('Amount < 1000', testFilter.toString());
+        System.assertEquals('Amount < 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForLessOrEqual() {
         Filter testFilter = new Filter(Opportunity.Amount, Filter.LESS_OR_EQUAL, 1000);
-        System.assertEquals('Amount <= 1000', testFilter.toString());
+        System.assertEquals('Amount <= 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForStartsWith() {
         Filter testFilter = new Filter(Account.Website, Filter.STARTS_WITH, 'https://www.');
-        System.assertEquals('Website LIKE \'https://www.%\'', testFilter.toString()); 
+        System.assertEquals('Website LIKE \'https://www.%\'', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForEndsWith() {
         Filter testFilter = new Filter(Account.Website, Filter.ENDS_WITH, '.com');
-        System.assertEquals('Website LIKE \'%.com\'', testFilter.toString());
+        System.assertEquals('Website LIKE \'%.com\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForContains() {
         Filter testFilter = new Filter(Account.Website, Filter.CONTAINS, 'in-n-out');
-        System.assertEquals('Website LIKE \'%in-n-out%\'', testFilter.toString());
+        System.assertEquals('Website LIKE \'%in-n-out%\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForNotStartsWith() {
         Filter testFilter = new Filter(Account.Website, Filter.NOT_STARTS_WITH, 'https://www.');
-        System.assertEquals('Website NOT LIKE \'https://www.%\'', testFilter.toString());
+        System.assertEquals('Website NOT LIKE \'https://www.%\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForNotEndsWith() {
         Filter testFilter = new Filter(Account.Website, Filter.NOT_ENDS_WITH, '.com');
-        System.assertEquals('Website NOT LIKE \'%.com\'', testFilter.toString());
+        System.assertEquals('Website NOT LIKE \'%.com\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest
     static void shouldProduceQuerySegmentForNotContains() {
         Filter testFilter = new Filter(Account.Website, Filter.NOT_CONTAINS, 'in-n-out');
-        System.assertEquals('Website NOT LIKE \'%in-n-out%\'', testFilter.toString()); 
+        System.assertEquals('Website NOT LIKE \'%in-n-out%\'', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForNull() {
         Filter testFilter = new Filter(Account.Name, Filter.EQUALS, null); 
-        System.assertEquals('Name = null', testFilter.toString()); 
+        System.assertEquals('Name = null', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForBoolean() {
         Filter testFilter = new Filter(Account.IsDeleted, Filter.EQUALS, true); 
-        System.assertEquals('IsDeleted = true', testFilter.toString()); 
+        System.assertEquals('IsDeleted = true', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForListBoolean() {
         List<Boolean> myBools = new List<Boolean>{false, true};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myBools); 
-        System.assertEquals('My_Custom_Field__c IN (false, true)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (false, true)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetBoolean() {
         Set<Boolean> myBools = new Set<Boolean>{false, true};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myBools); 
-        System.assertEquals('My_Custom_Field__c IN (false, true)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (false, true)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForDate() {
         Date testDate = Date.newInstance(2022, 01, 01); 
         Filter testFilter = new Filter(Opportunity.CloseDate, Filter.EQUALS, testDate);
-        System.assertEquals('CloseDate = 2022-01-01', testFilter.toString()); 
+        System.assertEquals('CloseDate = 2022-01-01', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForRelativeDate() {
         Filter testFilter = new Filter(Opportunity.CreatedDate, Filter.EQUALS, 'LAST_N_DAYS:10');
-        System.assertEquals('CreatedDate = LAST_N_DAYS:10', testFilter.toString()); 
+        System.assertEquals('CreatedDate = LAST_N_DAYS:10', testFilter.toString(), 'Unexpected output'); 
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForListDate() {
         List<Date> myDates = new List<Date>{Date.newInstance(2022, 01, 01), Date.newInstance(2022, 02, 02)};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myDates);
-        System.assertEquals('My_Custom_Field__c IN (2022-01-01, 2022-02-02)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (2022-01-01, 2022-02-02)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetDate() {
         Set<Date> myDates = new Set<Date>{Date.newInstance(2022, 01, 01), Date.newInstance(2022, 02, 02)};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myDates);
-        System.assertEquals('My_Custom_Field__c IN (2022-01-01, 2022-02-02)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (2022-01-01, 2022-02-02)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForDateTime() {
         DateTime testDateTime = DateTime.newInstanceGmt(2022, 01, 01);
         Filter testFilter = new Filter(Opportunity.CreatedDate, Filter.GREATER_THAN, testDateTime); 
-        System.assertEquals('CreatedDate > 2022-01-01T00:00:00Z', testFilter.toString());
+        System.assertEquals('CreatedDate > 2022-01-01T00:00:00Z', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -169,7 +169,7 @@ private class Filter_Test {
             DateTime.newInstanceGmt(2022, 02, 02)
         };
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myDts);
-        System.assertEquals('My_Custom_Field__c IN (2022-01-01T00:00:00Z, 2022-02-02T00:00:00Z)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (2022-01-01T00:00:00Z, 2022-02-02T00:00:00Z)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -179,28 +179,28 @@ private class Filter_Test {
             DateTime.newInstanceGmt(2022, 02, 02)
         };
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myDts);
-        System.assertEquals('My_Custom_Field__c IN (2022-01-01T00:00:00Z, 2022-02-02T00:00:00Z)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (2022-01-01T00:00:00Z, 2022-02-02T00:00:00Z)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForNumber() {
         // SOQL treats numbers all the same (whether Double/Integer/Decimal/etc)
         Filter testFilter = new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000);
-        System.assertEquals('Amount > 1000', testFilter.toString());
+        System.assertEquals('Amount > 1000', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForListNumber() {
         List<Decimal> numbers = new List<Decimal>{1.0, 2.0, 3.0};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, numbers);
-        System.assertEquals('My_Custom_Field__c IN (1.0, 2.0, 3.0)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (1.0, 2.0, 3.0)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetDecimal() {
         Set<Decimal> numbers = new Set<Decimal>{1.0, 2.0, 3.0};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, numbers);
-        System.assertEquals('My_Custom_Field__c IN (1.0, 2.0, 3.0)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (1.0, 2.0, 3.0)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -209,7 +209,7 @@ private class Filter_Test {
         Id caseId = TestUtils.generateFakeId(Case.SObjectType);
         List<Id> myIds = new List<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myIds); 
-        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -218,48 +218,48 @@ private class Filter_Test {
         Id caseId = TestUtils.generateFakeId(Case.SObjectType);
         Set<Id> myIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myIds); 
-        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForListInteger() {
         List<Integer> myInts = new List<Integer>{1, 2, 3};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myInts);
-        System.assertEquals('My_Custom_Field__c IN (1, 2, 3)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (1, 2, 3)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetInteger() {
         Set<Integer> myInts = new Set<Integer>{1, 2, 3};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myInts);
-        System.assertEquals('My_Custom_Field__c IN (1, 2, 3)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (1, 2, 3)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForString() {
         Filter testFilter = new Filter(Account.Website, Filter.EQUALS, 'https://www.in-n-out.com');
-        System.assertEquals('Website = \'https://www.in-n-out.com\'', testFilter.toString());
+        System.assertEquals('Website = \'https://www.in-n-out.com\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForListString() {
         List<String> statuses = new List<String>{'New', 'Closed Won'};
         Filter testFilter = new Filter(Opportunity.StageName, Filter.IN_COLLECTION, statuses); 
-        System.assertEquals('StageName IN (\'New\', \'Closed Won\')', testFilter.toString());
+        System.assertEquals('StageName IN (\'New\', \'Closed Won\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetString() {
         Set<String> statuses = new Set<String>{'New', 'Closed Won'};
         Filter testFilter = new Filter(Opportunity.StageName, Filter.IN_COLLECTION, statuses); 
-        System.assertEquals('StageName IN (\'New\', \'Closed Won\')', testFilter.toString());
+        System.assertEquals('StageName IN (\'New\', \'Closed Won\')', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
     static void shouldProduceQuerySegmentForTime() {
         Time myTime = DateTime.newInstance(2022, 01, 01, 12, 00, 00).time();
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.EQUALS, myTime);
-        System.assertEquals('My_Custom_Field__c = 12:00:00.000Z', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c = 12:00:00.000Z', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -269,7 +269,7 @@ private class Filter_Test {
             DateTime.newInstance(2022, 01, 01, 13, 00, 00).time()
         }; 
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myTimes);
-        System.assertEquals('My_Custom_Field__c IN (12:00:00.000Z, 13:00:00.000Z)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (12:00:00.000Z, 13:00:00.000Z)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -279,7 +279,7 @@ private class Filter_Test {
             DateTime.newInstance(2022, 01, 01, 13, 00, 00).time()
         }; 
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myTimes);
-        System.assertEquals('My_Custom_Field__c IN (12:00:00.000Z, 13:00:00.000Z)', testFilter.toString());
+        System.assertEquals('My_Custom_Field__c IN (12:00:00.000Z, 13:00:00.000Z)', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 

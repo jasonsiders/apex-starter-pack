@@ -94,7 +94,7 @@ private class DmlMock_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doUndelete(account); 
         Test.stopTest();
 
-        System.assertEquals(true, Dml.Undeleted.containsRecord(account.Id)); 
+        System.assertEquals(true, Dml.Undeleted.containsRecord(account.Id), 'Account was not undeleted'); 
         System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
         System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -111,7 +111,7 @@ private class DmlMock_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doDelete(account); 
         Test.stopTest(); 
 
-        System.assertEquals(true, Dml.Deleted.containsRecord(account.Id)); 
+        System.assertEquals(true, Dml.Deleted.containsRecord(account.Id), 'Account was not deleted'); 
         System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
         System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -128,7 +128,7 @@ private class DmlMock_Test {
         DmlResult dmlResult = DatabaseLayer.DmlEngine.doHardDelete(account); 
         Test.stopTest(); 
 
-        System.assertEquals(true, Dml.Deleted.containsRecord(account.Id)); 
+        System.assertEquals(true, Dml.Deleted.containsRecord(account.Id), 'Account was not deleted'); 
         System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
         System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
         System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');

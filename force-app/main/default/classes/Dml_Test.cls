@@ -145,7 +145,7 @@ private class Dml_Test {
         Test.stopTest();
         Test.getEventBus().deliver();
         // Unlike "normal" DML, platform events are not given an ID after insert/publish
-        System.assertEquals(null, event.ReplayId);
+        System.assertEquals(null, event.ReplayId, 'Event was not inserted');
         System.assertEquals(true, Dml.Published.containsRecord(event), 'Event was not added to History list'); 
         System.assertEquals(true, result.isSuccess, 'Event did not publish. Errors: ' + result.errors);
     }
@@ -605,11 +605,11 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doInsert(account); 
         Test.stopTest();
 
-        System.assertEquals(true, Dml.Inserted?.containsRecord(account)); 
-        System.assertEquals(false, Dml.Updated?.containsRecord(account)); 
-        System.assertEquals(false, Dml.Upserted?.containsRecord(account)); 
-        System.assertEquals(false, Dml.Deleted?.containsRecord(account)); 
-        System.assertEquals(false, Dml.Undeleted?.containsRecord(account)); 
+        System.assertEquals(true, Dml.Inserted?.containsRecord(account), 'Account was not inserted'); 
+        System.assertEquals(false, Dml.Updated?.containsRecord(account), 'Account was updated'); 
+        System.assertEquals(false, Dml.Upserted?.containsRecord(account), 'Account was upserted'); 
+        System.assertEquals(false, Dml.Deleted?.containsRecord(account), 'Account was deleted'); 
+        System.assertEquals(false, Dml.Undeleted?.containsRecord(account), 'Account was undeleted'); 
     }
 
     @IsTest 
@@ -620,11 +620,11 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doInsert(account); 
         Test.stopTest();
 
-        System.assertEquals(account, Dml.Inserted?.getRecord(account)); 
-        System.assertEquals(null, Dml.Updated?.getRecord(account)); 
-        System.assertEquals(null, Dml.Upserted?.getRecord(account)); 
-        System.assertEquals(null, Dml.Deleted?.getRecord(account)); 
-        System.assertEquals(null, Dml.Undeleted?.getRecord(account));
+        System.assertEquals(account, Dml.Inserted?.getRecord(account), 'Account was not Inserted'); 
+        System.assertEquals(null, Dml.Updated?.getRecord(account), 'Account was Updated');
+        System.assertEquals(null, Dml.Upserted?.getRecord(account), 'Account was Upserted'); 
+        System.assertEquals(null, Dml.Deleted?.getRecord(account), 'Account was Deleted'); 
+        System.assertEquals(null, Dml.Undeleted?.getRecord(account), 'Account was Undeleted');
     }
 
     @IsTest 
@@ -638,12 +638,12 @@ private class Dml_Test {
         DatabaseLayer.DmlEngine.doInsert(accounts); 
         Test.stopTest();
 
-        System.assertEquals(accounts, Dml.Inserted.getRecords(Account.SObjectType));
-        System.assertEquals(null, Dml.Updated.getRecords(Account.SObjectType));
-        System.assertEquals(null, Dml.Upserted.getRecords(Account.SObjectType));
-        System.assertEquals(null, Dml.Deleted.getRecords(Account.SObjectType));
-        System.assertEquals(null, Dml.Undeleted.getRecords(Account.SObjectType));
-        System.assertEquals(null, Dml.Published?.getRecords(Account.SObjectType)); 
+        System.assertEquals(accounts, Dml.Inserted.getRecords(Account.SObjectType), 'Accounts were not Inserted');
+        System.assertEquals(null, Dml.Updated.getRecords(Account.SObjectType), 'Accounts were Updated');
+        System.assertEquals(null, Dml.Upserted.getRecords(Account.SObjectType), 'Accounts were Upserted');
+        System.assertEquals(null, Dml.Deleted.getRecords(Account.SObjectType), 'Accounts were Deleted');
+        System.assertEquals(null, Dml.Undeleted.getRecords(Account.SObjectType), 'Accounts were Undeleted');
+        System.assertEquals(null, Dml.Published?.getRecords(Account.SObjectType), 'Accounts were Published'); 
     }
 
     @IsTest 

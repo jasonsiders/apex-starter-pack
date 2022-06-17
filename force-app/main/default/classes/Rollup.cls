@@ -1,10 +1,10 @@
 public without sharing class Rollup {
-    public SObjectType targetObject { get; private set; }
-    public List<Relationship> relationships { get; private set;  }
+    @TestVisible SObjectType targetObject { get; private set; }
+    @TestVisible List<Relationship> relationships { get; private set;  }
     @TestVisible static final String ROLLUP_QUERY_KEY = 'Rollup_Records';
     @TestVisible static final String MDT_QUERY_KEY = 'Rollup_MDTs';
 
-    public static final Map<String, Type> calculatorsByToken = new Map<String, Type>{
+    static final Map<String, Type> CALCULATOR_BY_TOKEN = new Map<String, Type>{
         'AVG' => AvgCalculator.class,
         'COUNT' => CountCalculator.class,
         'MAX' => MaxCalculator.class,
@@ -263,7 +263,7 @@ public without sharing class Rollup {
             SObjectField calcField = Describes.getSObjectFieldByName(rollupRecord?.Calculation_Field__c);
             Type calcType = (rollupRecord?.Calculator_Class_Name__c != null) 
                 ? Type.forName(rollupRecord?.Calculator_Class_Name__c)
-                : Rollup.calculatorsByToken.get(rollupRecord?.Calculation_Type__c);
+                : Rollup.CALCULATOR_BY_TOKEN.get(rollupRecord?.Calculation_Type__c);
             return ((Calculator) calcType?.newInstance())?.setCalcField(calcField);
         }
     }

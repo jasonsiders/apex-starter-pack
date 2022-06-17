@@ -26,14 +26,15 @@ private class Describes_Test {
     static void shouldReturnNullDescribeIfFieldIsNull() {
         SObjectField field;
         SObjectType objectType; 
-        System.assertEquals(null, Describes.getFieldDescribe(field));
-        System.assertEquals(null, Describes.getFieldDescribe(objectType, 'OwnerId'));
+        System.assertEquals(null, Describes.getFieldDescribe(field), 'Unexpected desecribe results');
+        System.assertEquals(null, Describes.getFieldDescribe(objectType, 'OwnerId'), 'Unexpected describe reuslts');
     }
 
     @IsTest
     static void shouldReturnAnSObjectField() {
         System.assertEquals(Account.OwnerId, Describes.getSObjectFieldByName('Account', 'OwnerId'), 'Field does not match'); 
-        final String nullObjectName, nullObjectField;
+        final String nullObjectName;
+        final String nullObjectField;
         System.assertEquals(null, Describes.getSObjectFieldByName(nullObjectName, nullObjectField), 'Null input did not return a null output');
     }
 
@@ -76,8 +77,8 @@ private class Describes_Test {
     static void shouldReturnNullDescribeIfObjectIsNull() {
         SObjectType objectType;
         String objectName;
-        System.assertEquals(null, Describes.getSObjectDescribe(objectType));
-        System.assertEquals(null, Describes.getSObjectDescribe(objectName));
+        System.assertEquals(null, Describes.getSObjectDescribe(objectType), 'Unexpected describe results');
+        System.assertEquals(null, Describes.getSObjectDescribe(objectName), 'Unexpected describe results');
     }
 
     @IsTest

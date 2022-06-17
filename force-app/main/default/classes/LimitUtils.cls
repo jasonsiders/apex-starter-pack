@@ -2,7 +2,7 @@ public virtual class LimitUtils {
     @TestVisible static System.Quiddity context = System.Request.getCurrent().getQuiddity();
     @TestVisible static Integer numDailyAsyncMethods; 
     @TestVisible static LimitUtils instance = new LimitUtils(); 
-    @TestVisible static Integer LIMIT_DAILY_ASYNC_METHODS = 250000;
+    @TestVisible static Integer limitDailyAsyncMethods = 250000;
 
     protected LimitUtils() {}
 
@@ -71,7 +71,7 @@ public virtual class LimitUtils {
         Integer maxQueueables = restrictedContexts.contains(LimitUtils.context) ? 1 : Limits.getLimitQueueableJobs();
         return (
             numQueueables < maxQueueables && 
-            LimitUtils.getNumDailyAsyncMethods() < LimitUtils.LIMIT_DAILY_ASYNC_METHODS
+            LimitUtils.getNumDailyAsyncMethods() < LimitUtils.limitDailyAsyncMethods
         );
     }
 

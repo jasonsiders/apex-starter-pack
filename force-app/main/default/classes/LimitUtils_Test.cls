@@ -27,7 +27,7 @@ private class LimitUtils_Test {
         System.assertEquals(false, LimitUtils.isQueueableSafe(), 'Queueable is safe in ' + LimitUtils.context + ' with ' + mockLimits.numQueueableJobs + ' queueable calls made');
         // Else, if num daily async methods is met/exceeded, this will fail
         mockLimits.numQueueableJobs = 0;
-        LimitUtils.LIMIT_DAILY_ASYNC_METHODS = 0;
+        LimitUtils.limitDailyAsyncMethods = 0;
         System.assertEquals(false, LimitUtils.isQueueableSafe(), 'Queueable is safe, but the limit of daily async methods was exceeded');
     }
 

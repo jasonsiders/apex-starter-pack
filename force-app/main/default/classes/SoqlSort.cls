@@ -3,7 +3,7 @@ public class SoqlSort {
     Order order;
     NullOrder nullOrder; 
 
-    static final Map<Order, String> abbreviatedOrders = new Map<Order, String>{
+    static final Map<Order, String> ORDER_BY_KEYS = new Map<Order, String>{
         Order.ASCENDING => 'ASC',
         Order.DESCENDING => 'DESC'
     };
@@ -48,7 +48,7 @@ public class SoqlSort {
 
     public override String toString() {
         String nullOrder = (this.nullOrder != null) ? 'NULLS ' + String.valueOf(this.nullOrder) : ''; 
-        return (String.join(fieldNames, ', ') + ' ' + abbreviatedOrders.get(this.order) + ' ' + nullOrder).trim();
+        return (String.join(fieldNames, ', ') + ' ' + ORDER_BY_KEYS.get(this.order) + ' ' + nullOrder).trim();
     }
     
     // **** INNER **** // 
