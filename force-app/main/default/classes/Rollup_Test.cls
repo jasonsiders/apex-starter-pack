@@ -3,9 +3,7 @@ private class Rollup_Test {
     @IsTest 
     static void shouldRunFromParent() {
         Soql accountQuery = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
-            .selectSubQuery(new SubQuery(
-                Describes.getChildRelationship(Account.SObjectType, 'Opportunities')
-            ));
+            .selectSubQuery(new SubQuery(Account.SObjectType, 'Opportunities'));
         List<Account> accounts = (List<Account>) accountQuery.run();
 
         Test.startTest(); 

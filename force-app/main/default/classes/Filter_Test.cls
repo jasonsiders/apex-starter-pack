@@ -884,6 +884,21 @@ private class Filter_Test {
         System.assertEquals(false, myFilter.meetsCriteria('Hello World!'), '"Hello World!" == 0');
     }
 
+    @IsTest 
+    static void shouldGenerateInnerQueryFilter() {
+        // If a query is passed as the value, wrap it in parentheses to avoid syntax errors
+        Soql innerQuery = DatabaseLayer.QueryEngine.newQuery(User.SObjectType)
+            .deselectId()
+            .selectFields(User.ProfileId)
+            .whereFilters(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
+        
+        Test.startTest();
+        Filter myFilter = new Filter(Profile.Id, Filter.IN_COLLECTION, innerQuery); 
+        Test.stopTest();
+
+        System.assertEquals('Id IN (SELECT ProfileId FROM User WHERE Id = \'' + UserInfo.getUserId() + '\')', myFilter.toString(), 'Unexpected output');
+    }
+
     private class ExampleObject {
         Boolean myBool = true; 
         Date myDate = Date.newInstance(2021, 01, 01);

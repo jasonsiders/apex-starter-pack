@@ -118,6 +118,9 @@ public virtual class Filter {
                 return this.processStringList((List<String>) new List<Id>((Set<Id>) this.value));
             } when 'SET<STRING>' {
                 return this.processStringList(new List<String>((Set<String>) this.value));
+            } when 'SOQL' {
+                // Inner queries must be wrapped in parentheses to avoid syntax errors in SOQL
+                return String.format('({0})', new List<String>{this.value?.toString()});
             } when else {
                 // Can't convert from Set<ANY> to List<Object>, so this is the best we can do
                 return (TypeUtils.isSet(this.value))

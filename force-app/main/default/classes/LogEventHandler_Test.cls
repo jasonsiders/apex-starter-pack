@@ -102,20 +102,20 @@ private class LogEventHandler_Test extends TriggerHandler {
     }
 
     private static List<Log_Transaction__c> getLogTransactions() {
-        Schema.ChildRelationship logsRelationship = Describes.getChildRelationship(Log_Transaction__c.SObjectType, 'Logs__r');
+        SubQuery childLogs = (SubQuery) new SubQuery(Log_Transaction__c.SObjectType, 'Logs__r')
+            .selectFields(new List<SObjectField>{
+                Log__c.Id, 
+                Log__c.Message__c, 
+                Log__c.Severity__c,
+                Log__c.Source__c, 
+                Log__c.Stack_Trace__c
+            });
         Soql query = DatabaseLayer.QueryEngine.newQuery(Log_Transaction__c.SObjectType)
+            .selectSubQuery(childLogs)
             .selectFields(new List<SObjectField>{
                 Log_Transaction__c.OwnerId, 
                 Log_Transaction__c.Transaction_Id__c
-            }).selectSubQuery((SubQuery) new SubQuery(logsRelationship)
-                .selectFields(new List<SObjectField>{
-                    Log__c.Id, 
-                    Log__c.Message__c, 
-                    Log__c.Severity__c,
-                    Log__c.Source__c, 
-                    Log__c.Stack_Trace__c
-                }
-            ));
+            });
         return query.run();
     }
 }

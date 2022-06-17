@@ -1,8 +1,4 @@
 public class ObjectUtils {
-    // Surprisingly, there's not an easy way to get this dynamically
-    // Requires an API call; TODO evaluate if we can use platform cache or something to solve
-    static final String SFDC_API_VERSION = '54.0'; 
-
     public static Object setParams(Object target, Map<String, Object> newValues) {
         Map<String, Object> parameters = ObjectUtils.toMap(target);
         parameters.putAll(newValues);
@@ -69,7 +65,7 @@ public class ObjectUtils {
         mappedParent.put('attributes', new Map<String, Object>{
             'type' => parentSObjectName,
             'url' => String.format('/services/data/{0}/sobjects/{1}/{2}', new List<String>{
-                SFDC_API_VERSION,
+                OrgUtils.getCurrentApiVersion()?.toPlainString(),
                 parentSObjectName,
                 parent?.Id
             })

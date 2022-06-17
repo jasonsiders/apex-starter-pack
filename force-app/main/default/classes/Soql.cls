@@ -87,8 +87,14 @@ public inherited sharing virtual class Soql {
 
     public Soql selectAggregation(SoqlAggregation aggregation) {
         // Note: 'Id' should never be included in the SELECT clause for Aggregate queries
-        this.selectClauses.remove('Id');
-        return this.selectFields(aggregation?.toString());
+        return this.deselectId()?.selectFields(aggregation?.toString());
+    }
+
+    public Soql deselectId() {
+        // By default, Id will always be included in queries
+        // Occasionally, (i.e., aggregate & inner queries), this isn't desirable
+        this.selectClauses?.remove('Id');
+        return this; 
     }
 
     public Soql usingScope(Scope scope) {

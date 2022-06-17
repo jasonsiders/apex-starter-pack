@@ -26,10 +26,16 @@ private class Soql_Test {
 
     @IsTest 
     static void shouldGenerateQueryWithSubqueries() {
-        Schema.ChildRelationship contactsRelationship = Describes.getChildRelationship(Account.SObjectType, 'Contacts');
-        SubQuery contactsSubQuery = new SubQuery(contactsRelationship); 
+        SubQuery contactsSubQuery = new SubQuery(Account.SObjectType, 'Contacts'); 
         Soql query = new Soql(Account.SObjectType).selectSubQuery(contactsSubQuery);
         Soql_Test.checkQueryString('SELECT Id, (SELECT Id FROM Contacts) FROM Account', query);
+        Soql_Test.runTestQuery(query); 
+    }
+
+    @IsTest 
+    static void shouldDeselectIdField() {
+        Soql query = new Soql(Account.SObjectType).selectFields(Account.OwnerId).deselectId(); 
+        Soql_Test.checkQueryString('SELECT OwnerId FROM Account', query); 
         Soql_Test.runTestQuery(query); 
     }
 
@@ -164,6 +170,22 @@ private class Soql_Test {
         Soql query = new Soql(Opportunity.SObjectType)
             .whereFilters(new Filter('Account.AnnualRevenue', Filter.GREATER_THAN, 1000));
         Soql_Test.checkQueryString('SELECT Id FROM Opportunity WHERE Account.AnnualRevenue > 1000', query);
+        Soql_Test.runTestQuery(query);
+    }
+
+    @IsTest 
+    static void shouldGenerateQueryWithInnerQueries() {
+        // The Filter class consumes SOQL objects as IN_COLLECTION / NOT_IN_COLLECTION values
+        Soql innerQuery = new Soql(User.SObjectType)
+            .deselectId()
+            .selectFields(User.ProfileId)
+            .whereFilters(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
+        Soql query = new Soql(Profile.SObjectType).whereFilters(new Filter(
+            Profile.Id,
+            Filter.IN_COLLECTION, 
+            innerQuery
+        ));
+        Soql_Test.checkQueryString('SELECT Id FROM Profile WHERE Id IN (SELECT ProfileId FROM User WHERE Id = \'' + UserInfo.getUserId() + '\')', query); 
         Soql_Test.runTestQuery(query);
     }
     

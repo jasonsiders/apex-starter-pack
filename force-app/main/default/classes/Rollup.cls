@@ -91,10 +91,9 @@ public without sharing class Rollup {
     public static Soql rollupMdtQuery() {
         // A base query which can be built off of by other jobs.
         // It includes all necessary fields, and excludes inactive Filters/Rollups
-        ChildRelationship rollupFilters = Describes.getChildRelationship(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
         return DatabaseLayer.QueryEngine.newQuery(Rollup__mdt.SObjectType)
             .selectAll()
-            .selectSubQuery((SubQuery) new SubQuery(rollupFilters)
+            .selectSubQuery((SubQuery) new SubQuery(Rollup__mdt.SObjectType, 'Rollup_Filters__r')
                 .selectFields(new List<String>{
                     'Filter__r.' + Filter__mdt.Field_Name__c,
                     'Filter__r.' + Filter__mdt.Operator__c,
