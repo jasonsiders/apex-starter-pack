@@ -76,6 +76,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     private static Set<String> getExtendingTypes() {
         Set<String> extendingTypeNames = new Set<String>();
         Soql query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
+            .setQueryKey('IGarbageCollector_Query')
             .selectFields(ApexTypeImplementor.ClassName)
             .whereFilters(new Filter(
                 ApexTypeImplementor.InterfaceName, 

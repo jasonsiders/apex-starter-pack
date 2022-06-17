@@ -35,7 +35,16 @@ private class GarbageCollector_Test {
         // `System.UnexpectedException - Error Processing Messages (System Code)`
         // For test purposes, we just need to see that the correct type is generated from the MDT,
         // And that the right records are returned via its start() method
-        Garbage_Collection_Job__mdt jobMdt = testApexJob; 
+        Garbage_Collection_Job__mdt jobMdt = testApexJob;
+        // Note: Known issues for ApexTypeImplementor sometimes lead to incorrect query results when running all tests
+        // To avoid this, stub out the query for the known type
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
+        ApexTypeImplementor mockImplementor = (ApexTypeImplementor) ObjectUtils.setReadOnlyField(
+            new ApexTypeImplementor(), 
+            ApexTypeImplementor.ClassName, 
+            String.valueOf(GarbageCollector_Test.TestExtension.class)
+        );
+        SoqlMock.setMockResults('IGarbageCollector_Query', new List<ApexTypeImplementor>{mockImplementor});
         
         Test.startTest(); 
         GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt);
@@ -43,6 +52,8 @@ private class GarbageCollector_Test {
 
         System.assertEquals(true, (batchJob instanceOf GarbageCollector_Test.TestExtension), 'Wrong extending type');
         GarbageCollector_Test.TestExtension scopedJob = (GarbageCollector_Test.TestExtension) batchJob; 
+        // Use real SOQL to run the job
+        DatabaseLayer.setQueryEngine(new Soql.Factory());
         System.assertEquals(200, scopedJob.start(null)?.size(), 'Wrong # of records returned');
     }
 
