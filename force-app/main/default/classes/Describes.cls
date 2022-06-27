@@ -47,19 +47,6 @@ public class Describes {
         return Describes.getSObjectFieldByName(objectType, fieldName); 
     }
 
-    public static Schema.SObjectField getSObjectFieldByName(String dotNotationField) {
-        // Assumes that input is in this format: "Account.OwnerId"
-        // Originally designed for use with CMDT's 'FieldDefinition' data type, which stores data in this format
-        String objectName;
-        String fieldName; 
-        List<String> fieldParts = dotNotationField?.split('\\.');
-        if (fieldParts != null && fieldParts?.size() == 2) {
-            objectName = fieldParts[0];
-            fieldName = fieldParts[1];
-        }
-        return Describes.getSObjectFieldByName(objectName, fieldName); 
-    }
-
     public static Schema.ChildRelationship getChildRelationship(SObjectType objectType, String relationshipName) {
         DescribeSObjectResult objectDescribe = Describes.getSObjectDescribe(objectType); 
         if (objectDescribe != null && Describes.childRelationships.containsKey(objectType) == false) {

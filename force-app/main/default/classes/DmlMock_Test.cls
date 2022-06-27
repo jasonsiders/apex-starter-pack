@@ -284,4 +284,34 @@ private class DmlMock_Test {
             System.assertEquals(0, dmlResult?.errors?.size(), 'Wrong # of errors');
         }
     }
+
+    @IsTest 
+    static void shouldClearAllHistoryObjects() {
+        DatabaseLayer.setDmlEngine(new DmlMock()); 
+        Lead testLead = new Lead(Company = 'Test Lead'); 
+        // Add 1 record to each history object
+        Map<Dml.Operation, Dml.History> operations = new Map<Dml.Operation, Dml.History>{
+            Dml.Operation.DO_INSERT => Dml.Inserted,
+            Dml.Operation.DO_UPDATE => Dml.Updated,
+            Dml.Operation.DO_UPSERT => Dml.Upserted,
+            Dml.Operation.DO_DELETE => Dml.Deleted,
+            Dml.Operation.DO_UNDELETE => Dml.Undeleted
+        };
+
+        for (Dml.Operation operation : operations.keySet()) {
+            DatabaseLayer.DmlEngine.doDml(operation, testLead); 
+            Dml.History history = operations.get(operation); 
+            System.assertEquals(1, history.getAll()?.size(), 'Wrong # of records for ' + operation); 
+        }
+        
+        Test.startTest();
+        // Remove all previously added history objects
+        DmlMock.resetHistory(); 
+        Test.stopTest(); 
+
+        for (Dml.Operation operation : operations.keySet()) {
+            Dml.History history = operations.get(operation); 
+            System.assertEquals(0, history.getAll()?.size(), 'Wrong # of records for ' + operation); 
+        }
+    }
 }

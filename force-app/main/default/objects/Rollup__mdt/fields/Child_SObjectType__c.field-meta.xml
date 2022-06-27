@@ -5,10 +5,8 @@
     <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText>The source SObject used in calculations</inlineHelpText>
     <label>Child SObjectType</label>
-    <referenceTo>EntityDefinition</referenceTo>
-    <relationshipLabel>Child Rollups</relationshipLabel>
-    <relationshipName>Child_Rollups</relationshipName>
+    <type>Text</type>
+    <length>255</length>
     <required>true</required>
-    <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>

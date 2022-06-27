@@ -1,5 +1,21 @@
 @IsTest
 public class DmlMock extends Dml {
+    public static void resetHistory() {
+        // Sometimes in tests, it's useful to reset the Dml tracking,
+        // especially to determine what changes were made during the test action itself, vs. setup
+        for (Dml.History history : new List<Dml.History>{
+            Dml.Inserted,
+            Dml.Updated,
+            Dml.Upserted,
+            Dml.Deleted,
+            Dml.Undeleted,
+            Dml.Published,
+            Dml.Converted
+        }) {
+            history.clear(); 
+        }
+    }
+
     // Publish Methods
     public override List<DmlResult> doPublish(List<SObject> platformEvents) {
         Dml.Published.add(platformEvents); 

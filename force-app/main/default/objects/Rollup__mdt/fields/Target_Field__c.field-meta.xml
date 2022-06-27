@@ -5,11 +5,8 @@
     <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText>The field on the Parent SObject where rollup results will be posted</inlineHelpText>
     <label>Target Field</label>
-    <metadataRelationshipControllingField>Rollup__mdt.Parent_SObjectType__c</metadataRelationshipControllingField>
-    <referenceTo>FieldDefinition</referenceTo>
-    <relationshipLabel>Target Fields</relationshipLabel>
-    <relationshipName>Target_Fields</relationshipName>
     <required>true</required>
-    <type>MetadataRelationship</type>
+    <type>Text</type>
+    <length>255</length>
     <unique>true</unique>
 </CustomField>

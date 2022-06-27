@@ -57,11 +57,11 @@ public virtual class Filter {
 
     public Filter(Filter__mdt filterRecord) {
         this(
-            Filter.getFieldReferenceFromMdt(filterRecord),
+            filterRecord?.SObjectField__c, 
             Filter.getOperationByItsAbbreviation(filterRecord?.Operator__c),
             TypeUtils.parseStringValue(filterRecord?.Value__c)
         );
-    }
+    } 
 
     public override String toString() {
         return this.getFieldName() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
@@ -181,12 +181,6 @@ public virtual class Filter {
     }
 
     // **** STATIC **** //
-    static String getFieldReferenceFromMdt(Filter__mdt filterRecord) {
-        return (filterRecord?.SObjectField__c != null) 
-            ? String.valueOf(Describes.getSObjectFieldByName(filterRecord?.SObjectField__c))
-            : filterRecord?.Field_Name__c;
-    }
-
     static Type getOperationByItsAbbreviation(String abbreviation) {
         return Filter.OPERATOR_ABBREVIATIONS?.get(abbreviation);
     }

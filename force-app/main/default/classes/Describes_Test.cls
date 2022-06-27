@@ -38,19 +38,6 @@ private class Describes_Test {
         System.assertEquals(null, Describes.getSObjectFieldByName(nullObjectName, nullObjectField), 'Null input did not return a null output');
     }
 
-    @IsTest 
-    static void shouldReturnSObjectFieldFromDotNotation() {
-        // Must be in this format: {SObjectType.Name}.{Field.Name}
-        System.assertEquals(Account.OwnerId, Describes.getSObjectFieldByName('Account.OwnerId'), 'Wrong field');
-        // Won't support multiple relationships
-        System.assertEquals(null, Describes.getSObjectFieldByName('Account.Owner.ProfileId'), 'Field w/multiple relationships did not return null');
-        // Won't support 0 relationships
-        System.assertEquals(null, Describes.getSObjectFieldByName('OwnerId'), 'Field w/0 relationships did not return null');
-        // Won't support blank/null
-        System.assertEquals(null, Describes.getSObjectFieldByName(''), 'Blank field did not return null'); 
-        System.assertEquals(null, Describes.getSObjectFieldByName(null), 'Null field did not return null');
-    }
-
     @IsTest
     static void shouldReturnAnSObjectDescribeFromAnSObjectType() {
         Schema.DescribeSObjectResult expected = SObjectType.Account; 

@@ -16,7 +16,7 @@ private class FilterLogic_Test {
         // Should output as a block of AND statements
         String expected = testFilters[0] + ' AND ' + testFilters[1] + ' AND ' + testFilters[2];
         System.assertEquals(expected, logic.toString(), 'Wrong logic output');
-    } 
+    }  
 
     @IsTest 
     static void shouldDetermineAnyMeetCriteria() {

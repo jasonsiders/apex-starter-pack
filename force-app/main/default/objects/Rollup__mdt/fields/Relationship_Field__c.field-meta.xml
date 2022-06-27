@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>SObjectField__c</fullName>
+    <fullName>Relationship_Field__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
-    <label>SObjectField</label>
+    <inlineHelpText>The API Name of the lookup field which points to the Parent SObjectType. 
+This field&apos;s &quot;Child Relationship Name&quot; should match the Rollup&apos;s &quot;Child Relationship Name&quot;</inlineHelpText>
+    <label>Relationship Field</label>
     <length>255</length>
     <required>true</required>
     <type>Text</type>

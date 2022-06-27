@@ -20,7 +20,7 @@ public abstract class FilterLogic {
     public virtual FilterLogic setFilters(List<Filter> filters) {
         this.filters = filters;
         return this; 
-    }  
+    }   
 
     public virtual FilterLogic setFilters(Filter filter) {
         return this.setFilters(new List<Filter>{filter});

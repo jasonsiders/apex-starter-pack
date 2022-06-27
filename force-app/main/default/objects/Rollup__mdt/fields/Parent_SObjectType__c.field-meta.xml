@@ -2,13 +2,11 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Parent_SObjectType__c</fullName>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText>The target SObjectType, where rollup results will be posted.</inlineHelpText>
     <label>Parent SObjectType</label>
-    <referenceTo>EntityDefinition</referenceTo>
-    <relationshipLabel>Parent Rollups</relationshipLabel>
-    <relationshipName>Parent_Rollups</relationshipName>
+    <type>Text</type>
+    <length>255</length>
     <required>true</required>
-    <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>

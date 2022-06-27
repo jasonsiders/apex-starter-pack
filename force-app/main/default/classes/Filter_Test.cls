@@ -719,9 +719,8 @@ private class Filter_Test {
     static void shouldConstructFromMdt() {
         // SObjectField provided
         Filter__mdt filterMdt = new Filter__mdt(
-            Field_Name__c = null,
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.IsClosed',
+            SObjectField__c = 'IsClosed',
             SObjectType__c = 'Opportunity',
             Value__c = null
         ); 
@@ -730,19 +729,18 @@ private class Filter_Test {
         System.assertEquals(0, filter?.relationships?.size(), 'Wrong # of relationships'); 
         System.assertEquals('=', filter?.operator?.getToken(), 'Wrong operator'); 
         System.assertEquals(null, filter?.value, 'Wrong value'); 
-        // Field Name provided - allows for multi-level filtering
-        filterMdt.Field_Name__c = 'Opportunity.Owner.Profile.Name';
-        filterMdt.SObjectField__c = null;
+        // Should allow for multi-level filtering
+        filterMdt.SObjectField__c = 'Owner.Profile.Name';
         filter = new Filter(filterMdt);
         System.assertEquals('Name', filter?.fieldName, 'Wrong field name');
-        System.assertEquals(new List<String>{'Opportunity', 'Owner', 'Profile'}, filter?.relationships, 'Wrong relationships'); 
+        System.assertEquals(new List<String>{'Owner', 'Profile'}, filter?.relationships, 'Wrong relationships'); 
     }
 
     @IsTest 
     static void shouldConstructFilterWithBooleanValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.IsClosed',
+            SObjectField__c = 'IsClosed',
             SObjectType__c = 'Opportunity',
             Value__c = 'true'
         );
@@ -754,7 +752,7 @@ private class Filter_Test {
     static void shouldConstructFilterWithDateValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.CloseDate',
+            SObjectField__c = 'CloseDate',
             SObjectType__c = 'Opportunity',
             Value__c = '"2022-01-01"'
         );
@@ -766,7 +764,7 @@ private class Filter_Test {
     static void shouldConstructFilterWithDateTimeValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.CreatedDate',
+            SObjectField__c = 'CreatedDate',
             SObjectType__c = 'Opportunity',
             Value__c = '"2022-01-01T00:00:00.000Z"'
         );
@@ -778,7 +776,7 @@ private class Filter_Test {
     static void shouldConstructFilterWithDecimalValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.Amount',
+            SObjectField__c = 'Amount',
             SObjectType__c = 'Opportunity',
             Value__c = '99.99'
         );
@@ -790,19 +788,19 @@ private class Filter_Test {
     static void shouldConstructFilterWithIntegerValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.Amount',
+            SObjectField__c = 'Amount',
             SObjectType__c = 'Opportunity',
             Value__c = '100'
         );
         Filter filter = new Filter(filterMdt); 
         System.assertEquals(100, filter?.value, 'Wrong value'); 
-    }
+    } 
 
     @IsTest 
     static void shouldConstructFilterWithNullValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.Description',
+            SObjectField__c = 'Description',
             SObjectType__c = 'Opportunity',
             Value__c = null
         );
@@ -814,7 +812,7 @@ private class Filter_Test {
     static void shouldConstructFilterWithStringValueFromMdt() {
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
-            SObjectField__c = 'Opportunity.OwnerId',
+            SObjectField__c = 'OwnerId',
             SObjectType__c = 'Opportunity',
             Value__c = '"' + UserInfo.getUserId() + '"'
         );

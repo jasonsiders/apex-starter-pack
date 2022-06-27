@@ -4,10 +4,8 @@
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
     <label>SObjectType</label>
-    <referenceTo>EntityDefinition</referenceTo>
-    <relationshipLabel>Filters</relationshipLabel>
-    <relationshipName>Filters</relationshipName>
+    <type>Text</type>
+    <length>255</length>
     <required>true</required>
-    <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>

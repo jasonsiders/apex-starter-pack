@@ -7,11 +7,8 @@
 ex., SUM Opportunity.Amount
 Not needed for COUNT-type rollups.</inlineHelpText>
     <label>Calculation Field</label>
-    <metadataRelationshipControllingField>Rollup__mdt.Child_SObjectType__c</metadataRelationshipControllingField>
-    <referenceTo>FieldDefinition</referenceTo>
-    <relationshipLabel>Calculation Fields</relationshipLabel>
-    <relationshipName>Calculation_Fields</relationshipName>
+    <type>Text</type>
+    <length>255</length>
     <required>false</required>
-    <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>
