@@ -68,12 +68,12 @@ public inherited sharing abstract class InvocableRollup {
         // https://github.com/jasonsiders/apex-starter-pack/issues/90
         for (Rollup__mdt rollup : rollups) {
             // Check Parent Object values
-            SObjectType parentObject = Describes.getSObjectTypeByName(rollup.Parent_SObjectType__c); 
-            SObjectField targetField = Describes.getSObjectFieldByName(parentObject, rollup.Target_Field__c);
-            ChildRelationship childRel = Describes.getChildRelationship(parentObject, rollup.Child_Relationship_Name__c); 
+            SObjectType parentObject = SchemaUtils.getSObjectType(rollup.Parent_SObjectType__c); 
+            SObjectField targetField = SchemaUtils.getSObjectField(parentObject, rollup.Target_Field__c);
+            ChildRelationship childRel = SchemaUtils.getChildRelationship(parentObject, rollup.Child_Relationship_Name__c); 
             // Check Child Object values
-            SObjectType childObject = Describes.getSObjectTypeByName(rollup.Child_SObjectType__c); 
-            SObjectField relField = Describes.getSObjectFieldByName(childObject, rollup.Relationship_Field__c); 
+            SObjectType childObject = SchemaUtils.getSObjectType(rollup.Child_SObjectType__c); 
+            SObjectField relField = SchemaUtils.getSObjectField(childObject, rollup.Relationship_Field__c); 
             for (Object item : new List<Object>{
                 parentObject, 
                 childObject, 
@@ -86,7 +86,7 @@ public inherited sharing abstract class InvocableRollup {
                 }
             }
             // Note: Calculation_Field__c is not required if the Calculation Type is COUNT
-            SObjectField calcField = Describes.getSObjectFieldByName(childObject, rollup.Calculation_Field__c); 
+            SObjectField calcField = SchemaUtils.getSObjectField(childObject, rollup.Calculation_Field__c); 
             if (calcField == null && rollup.Calculation_Type__c != 'COUNT') {
                 throw new InvalidInputException(rollup);
             }
@@ -138,7 +138,7 @@ public inherited sharing abstract class InvocableRollup {
 
         private void mapByRelationshipField(List<Rollup__mdt> rollups) {
             for (Rollup__mdt rollup : rollups) {
-                SObjectField relationshipField = Describes.getSObjectFieldByName(
+                SObjectField relationshipField = SchemaUtils.getSObjectField(
                     rollup.Child_SObjectType__c,
                     rollup.Relationship_Field__c
                 ); 

@@ -1,9 +1,10 @@
 @IsTest 
 public class TestUtils {
+    // Note: @IsTest classes cannot be abstract, like the other *Utils classes
     static Integer numIdsGenerated = 0; 
 
     public static Id generateFakeId(SObjectType objectType) {
-        String prefix = Describes.getSObjectDescribe(objectType)?.getKeyPrefix();
+        String prefix = SchemaUtils.describeSObject(objectType)?.getKeyPrefix();
         String suffix = String.valueOf(numIdsGenerated++);
         return prefix + '0'.repeat(15-suffix?.length()) + suffix; 
     }

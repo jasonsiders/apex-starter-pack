@@ -63,11 +63,11 @@ public without sharing class Rollup {
         }
 
         public Relationship(SObjectType objectType, String relationshipName) {
-            this(Describes.getChildRelationship(objectType, relationshipName));
+            this(SchemaUtils.getChildRelationship(objectType, relationshipName));
         }
 
         public Relationship(String objectName, String relationshipName) {
-            this(Describes.getSObjectTypeByName(objectName), relationshipName);
+            this(SchemaUtils.getSObjectType(objectName), relationshipName);
         }
         
         public Relationship addRequest(Request request) {
@@ -173,7 +173,7 @@ public without sharing class Rollup {
 
         public virtual Object calculate(List<SObject> records) {
             records = (records != null) ? records : new List<SObject>();
-            Schema.SoapType dataType = Describes.getFieldDescribe(this.calcField)?.getSoapType(); 
+            Schema.SoapType dataType = SchemaUtils.describeField(this.calcField)?.getSoapType(); 
             switch on dataType {
                 when BOOLEAN {
                     return this.calculateBoolean(records); 

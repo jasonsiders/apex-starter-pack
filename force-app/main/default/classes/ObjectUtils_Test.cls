@@ -119,7 +119,7 @@ private class ObjectUtils_Test {
         }
         Databaselayer.Dml.doInsert(contacts); 
         Schema.ChildRelationship contactRelationship = 
-            Describes.getChildRelationship(Account.SObjectType, 'Contacts');
+            SchemaUtils.getChildRelationship(Account.SObjectType, 'Contacts');
 
         Test.startTest();
         testAccount = (Account) ObjectUtils.setReadOnlyField(testAccount, contactRelationship, contacts); 

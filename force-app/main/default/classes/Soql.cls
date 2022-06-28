@@ -77,7 +77,7 @@ public inherited sharing virtual class Soql {
     }
 
     public Soql selectAll() {
-        List<SObjectField> allFields = Describes.getSObjectDescribe(this.fromSObject)?.fields?.getMap()?.values();
+        List<SObjectField> allFields = SchemaUtils.describeSObject(this.fromSObject)?.fields?.getMap()?.values();
         return this.selectFields(allFields); 
     }
 
@@ -260,7 +260,7 @@ public inherited sharing virtual class Soql {
         FOR_UPDATE
     }
 
-    public class Factory implements IQueryFactory {
+    public class Factory implements DatabaseLayer.QueryFactory {
         public Soql newQuery(SObjectType fromSObject) {
             return new Soql(fromSObject); 
         }

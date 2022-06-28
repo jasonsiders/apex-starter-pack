@@ -10,7 +10,7 @@ private class Soql_Test {
     @IsTest 
     static void shouldGenerateQueryWihAllFields() {
         Soql query = new Soql(Account.SObjectType).selectAll();
-        for (SObjectField field : Describes.getSObjectDescribe(Account.SObjectType)?.fields?.getMap()?.values()) {
+        for (SObjectField field : SchemaUtils.describeSObject(Account.SObjectType)?.fields?.getMap()?.values()) {
             String fieldName = String.valueOf(field); 
             System.assert(query.selectClauses?.contains(fieldName), 'Missing field (' + fieldName + '): ' + query?.toString()); 
         }
@@ -349,7 +349,7 @@ private class Soql_Test {
 
     @IsTest 
     static void shouldGenerateNewQuery() {
-        IQueryFactory factory = new Soql.Factory();
+        DatabaseLayer.QueryFactory factory = new Soql.Factory();
         Object queryObj = factory.newQuery(null); 
         System.assertEquals(true, queryObj instanceOf Soql, 'Not an instance of Soql.class');
         System.assertEquals(false, queryObj instanceOf SoqlMock, 'Factory created an instance of SoqlMock.class');

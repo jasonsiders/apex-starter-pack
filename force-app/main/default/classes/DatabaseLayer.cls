@@ -1,6 +1,6 @@
 public inherited sharing abstract class DatabaseLayer {
     public static Dml Dml { get; private set; }
-    public static IQueryFactory Soql { get; private set; }
+    public static QueryFactory Soql { get; private set; }
 
     static {
         Databaselayer.Dml = new Dml();
@@ -14,8 +14,12 @@ public inherited sharing abstract class DatabaseLayer {
     }
 
     @TestVisible
-    static IQueryFactory setQueryEngine(IQueryFactory queryEngine) {
+    static QueryFactory setQueryEngine(QueryFactory queryEngine) {
         Databaselayer.Soql = queryEngine; 
         return queryEngine;
+    }
+
+    public interface QueryFactory {
+        Soql newQuery(SObjectType objectType); 
     }
 }

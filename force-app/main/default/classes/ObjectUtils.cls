@@ -1,4 +1,4 @@
-public class ObjectUtils {
+public abstract class ObjectUtils {
     public static Object setParams(Object target, Map<String, Object> newValues) {
         Map<String, Object> parameters = ObjectUtils.toMap(target);
         parameters.putAll(newValues);
@@ -71,7 +71,7 @@ public class ObjectUtils {
             })
         });
         // The relationship object's key is the same as the Id field, minus "Id"/"__c" (depending if Standard/Custom)
-        String relationshipName = Describes.getFieldDescribe(field)?.getRelationshipName();
+        String relationshipName = SchemaUtils.describeField(field)?.getRelationshipName();
         mappedTarget.put(relationshipName, mappedParent);
         return (SObject) JSON.deserialize(JSON.serialize(mappedTarget), SObject.class);
     }

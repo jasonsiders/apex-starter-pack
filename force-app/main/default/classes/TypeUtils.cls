@@ -1,4 +1,4 @@
-public class TypeUtils {
+public abstract class TypeUtils {
     static final String TYPE_ERROR_PREFIX = 'Invalid conversion from runtime type ';
     static final String TYPE_ERROR_SUFFIX = ' to ' + UnknownType.class.getName();
     static final String LIST_PREFIX = 'List<';

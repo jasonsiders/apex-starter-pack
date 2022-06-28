@@ -15,7 +15,7 @@ public class RollupMetadataHelper {
     
     public RollupMetadataHelper(List<Rollup__mdt> rollupMdts) {
         for (Rollup__mdt rollupMdt : rollupMdts) {
-            SObjectType objectType = Describes.getSObjectTypeByName(rollupMdt.Parent_SObjectType__c); 
+            SObjectType objectType = SchemaUtils.getSObjectType(rollupMdt.Parent_SObjectType__c); 
             Rollup rollup = this.rollups.containsKey(objectType) 
                 ? this.rollups.get(objectType) 
                 : new Rollup(objectType);
@@ -30,11 +30,11 @@ public class RollupMetadataHelper {
 
     // **** PRIVATE **** //
     private void addRequest(Rollup rollup, Rollup__mdt rollupMdt) {
-        rollup?.addRelationship(new Rollup.Relationship(Describes.getChildRelationship(
+        rollup?.addRelationship(new Rollup.Relationship(SchemaUtils.getChildRelationship(
             rollupMdt?.Parent_SObjectType__c, 
             rollupMdt?.Child_Relationship_Name__c
         )).addRequest(new Rollup.Request(
-            Describes.getSObjectFieldByName(
+            SchemaUtils.getSObjectField(
                 rollupMdt?.Parent_SObjectType__c,
                 rollupMdt?.Target_Field__c
             ),
@@ -44,7 +44,7 @@ public class RollupMetadataHelper {
     }
 
     private Rollup.Calculator getCalculator(Rollup__mdt rollupMdt) {
-        Schema.SObjectField calcField = Describes.getSObjectFieldByName(
+        Schema.SObjectField calcField = SchemaUtils.getSObjectField(
             rollupMdt?.Child_SObjectType__c, 
             rollupMdt?.Calculation_Field__c
         ); 
@@ -71,7 +71,7 @@ public class RollupMetadataHelper {
         Filter activeFilter = new Filter('Active__c', Filter.EQUALS, true);
         SubQuery filtersQuery = (SubQuery) new SubQuery(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
         filtersQuery.selectFields(Rollup_Filter__mdt.Active__c); 
-        final String parentRelationship = Describes.getFieldDescribe(Rollup_Filter__mdt.Filter__c)?.getRelationshipName();
+        final String parentRelationship = SchemaUtils.describeField(Rollup_Filter__mdt.Filter__c)?.getRelationshipName();
         for (SObjectField parentField : new List<SObjectField>{
             Filter__mdt.Operator__c, 
             Filter__mdt.SObjectField__c, 
