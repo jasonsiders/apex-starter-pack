@@ -45,4 +45,26 @@ public abstract class CollectionUtils {
     public static Object mapByCommonKey(List<SObject> records, SObjectField keyField, Type outputType) {
         return CollectionUtils.mapByCommonKey(records, String.valueOf(keyField), outputType); 
     }
+
+    public static Object getIndexOf(List<Object> items, Integer index) {
+        // Safely returns an item at a given index. If the index does not exist, will return null
+        // Note: Indexes starts at 0, but <List>.size() starts at 1
+        Integer size = (items != null) ? items?.size() : 0; 
+        Integer minSize = (index + 1); 
+        return (size >= minSize) ? items[index] : null; 
+    }
+
+    public static Object extractValues(List<Object> items, String key, Type returnType) {
+        List<Object> values = new List<Object>();
+        for (Object item : items) {
+            Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(item)); 
+            Object value = jsonMap.get(key); 
+            values.add(value);
+        }
+        return JSON.deserialize(JSON.serialize(values), returnType); 
+    }
+
+    public static Object extractValues(List<Object> items, SObjectField field, Type returnType) {
+        return CollectionUtils.extractValues(items, String.valueOf(field), returnType); 
+    }
 }

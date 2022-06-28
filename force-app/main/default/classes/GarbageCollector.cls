@@ -44,7 +44,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
                 context.getJobId()
             ));
         List<AsyncApexJob> jobDetails = (List<AsyncApexJob>) query.run(); 
-        AsyncApexJob currentJob = (jobDetails?.isEmpty() == false) ? jobDetails[0] : null; 
+        AsyncApexJob currentJob = (AsyncApexJob) CollectionUtils.getIndexOf(jobDetails, 0); 
         Integer numCompletedBatches = currentJob?.JobItemsProcessed; 
         Integer numTotalBatches = currentJob?.TotalJobItems; 
         final String template = 'GarbageCollector job {0} completed. {1}/{2} successful batches';

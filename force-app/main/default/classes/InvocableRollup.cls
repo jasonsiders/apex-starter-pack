@@ -14,7 +14,7 @@ public inherited sharing abstract class InvocableRollup {
     public static void invoke(List<Input> inputs) {
         // Note: Because of the way Flow boxcars input values,
         // we should treat certain values as consistent across the entire List<Input>
-        Input firstInput = (inputs?.isEmpty() == false) ? inputs[0] : null;
+        Input firstInput = (Input) CollectionUtils.getIndexOf(inputs, 0);
         RollupContext context = (RollupContext) EnumUtils.valueOf(firstInput?.rollupContext, RollupContext.class);
         Timing timing = firstInput?.getTiming(); 
         SObjectType objectType = firstInput?.getSObjectType(); 
@@ -131,7 +131,7 @@ public inherited sharing abstract class InvocableRollup {
                 this.validateMetadata(matching); 
                 RollupMetadataHelper helper = new RollupMetadataHelper(matching);
                 // Note: This should always a size 1 in this case
-                Rollup rollup = helper.getRollups()?.isEmpty() == false ? helper.getRollups()[0] : null;
+                Rollup rollup = (Rollup) CollectionUtils.getIndexOf(helper.getRollups(), 0);
                 this.rollupMap.put(field, rollup);
             }
         }
@@ -229,8 +229,7 @@ public inherited sharing abstract class InvocableRollup {
         private List<Rollup__mdt> allRollups; 
 
         public SObjectType getSObjectType() {
-            List<SObject> records = this.getRecords(); 
-            SObject record = (records?.isEmpty() == false) ? records[0] : null;
+            SObject record = (SObject) CollectionUtils.getIndexOf(this.getRecords(), 0);
             return record?.getSObjectType();
         }
 

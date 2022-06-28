@@ -72,6 +72,41 @@ private class CollectionUtils_Test {
         }
     }
 
+    @IsTest 
+    static void shouldReturnIndexOfList() {
+        List<String> items = new List<String>{
+            'foo',
+            'bar',
+            'hello world!'
+        };
+        // Get items with legal indeces
+        for (Integer i = 0; i < items?.size(); i++) {
+            String item = items[i];
+            System.assertEquals(item, CollectionUtils.getIndexOf(items, i), 'Incorrect result');
+        }
+        // Get items with an illegal index
+        System.assertEquals(null, CollectionUtils.getIndexOf(items, 3), 'items[3] is out of bounds, but returned a result anyways');
+    }
+
+    @IsTest 
+    static void shouldExtractValues() {
+        List<Account> accounts = new List<Account>(); 
+        for (Integer i = 0; i < 10; i++) {
+            accounts.add(new Account(
+                Name = 'Account #' + i
+            ));
+        }
+
+        Test.startTest();
+        List<String> accountNames = (List<String>) CollectionUtils.extractValues(accounts, Account.Name, List<String>.class);
+        System.assertEquals(accounts.size(), accountNames?.size(), 'Wrong # of Account Names'); 
+        for (Integer i = 0; i < 10; i++) {
+            Account account = accounts[i];
+            String name = accountNames[i];
+            System.assertEquals(name, account.Name, 'Wrong name');
+        }
+    }
+
     // **** HELPER **** //
     static List<Account> getTestData() {
         List<Account> accounts = new List<Account>();

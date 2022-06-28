@@ -79,6 +79,28 @@ private class Rollup_Test {
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for null calcField');
     }
 
+    @IsTest 
+    static void shouldPreventDuplicateRelationships() {
+        Rollup rollup = new Rollup(Account.SObjectType); 
+        // Create two relationship objects for the same ChildRelationship
+        Rollup.Relationship rel1 = new Rollup.Relationship(Account.SObjectType, 'Opportunities').addRequest(new Rollup.Request(
+            Account.NumberOfEmployees,
+            new MockCalculator()
+        ));
+        Rollup.Relationship rel2 = new Rollup.Relationship(Account.SObjectType, 'Opportunities').addRequest(new Rollup.Request(
+            Account.AnnualRevenue,
+            new MockCalculator()
+        ));
+
+        Test.startTest();  
+        rollup.addRelationship(rel1).addRelationship(rel2);
+        Test.stopTest();
+
+        System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationsihps');
+        Rollup.Relationship relationship = rollup.relationships.values()[0];
+        System.assertEquals(2, relationship.requests?.size(), 'Wrong # of requests');
+    }
+
     // **** HELPER **** // 
     @TestSetup 
     static void setup() {

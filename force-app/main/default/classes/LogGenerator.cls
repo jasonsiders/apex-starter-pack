@@ -67,8 +67,8 @@ public without sharing class LogGenerator {
         }
 
         private Id getRunningUserId() {
-            return (this.logEvents?.isEmpty() == false) 
-                ? this.logEvents[0]?.Running_User__c : UserInfo.getUserId();
+            Log_Event__e firstEvent = (Log_Event__e) CollectionUtils.getIndexOf(this.logEvents, 0); 
+            return (firstEvent != null) ? firstEvent.Running_User__c : UserInfo.getUserId();
         }
 
         private List<Log__c> generateLogRecords() {

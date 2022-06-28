@@ -44,12 +44,14 @@ public without sharing class Rollup {
     }
 
     public List<SObject> runFromChild(List<SObject> sourceRecords, SObjectField targetIdField) {
+        // Note: Not using CollectionUtils.extractValues() here to void JSON errors when using mock DML
+        // Ex: ! System.JSONException: malformed id 001000000000000000
         Set<Id> targetIds = new Set<Id>();
         for (SObject record : sourceRecords) {
-            Id targetId = (Id) record?.get(targetIdField); 
+            Id targetId = (Id) record.get(targetIdField); 
             targetIds.add(targetId); 
         }
-        return this.run(targetIds);
+        return this.run(new Set<Id>(targetIds));
     }
     
     // **** INNER **** // 

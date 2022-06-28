@@ -35,12 +35,12 @@ public abstract class OrgUtils {
     public static Decimal getCurrentApiVersion() {
         // There's no straightforward way to getting the latest API version
         // However, this is exposed via the 'attributes' object in SOQL
-        if (currentApiVersion == null) {
+        if (OrgUtils.currentApiVersion == null) {
             Soql query = Databaselayer.Soql.newQuery(Profile.SObjectType).setRowLimit(1);
-            List<QueryJson> results = ((List<QueryJson>) query.run(List<QueryJson>.class));
-            currentApiVersion = (results?.isEmpty() == false) ? results[0]?.getApiVersion() : DEFAULT_API_VERSION; 
+            QueryJson results = (QueryJson) CollectionUtils.getIndexOf((List<QueryJson>) query.run(List<QueryJson>.class), 0);
+            OrgUtils.currentApiVersion = (results != null) ? results?.getApiVersion() : OrgUtils.DEFAULT_API_VERSION; 
         }
-        return currentApiVersion;  
+        return OrgUtils.currentApiVersion;  
     }
 
     // **** INNNER **** //
