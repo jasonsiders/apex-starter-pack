@@ -81,7 +81,7 @@ public class RollupMetadataHelper {
             String reference = parentRelationship + '.' + parentField; 
             filtersQuery.selectFields(reference);
         }
-        return DatabaseLayer.QueryEngine.newQuery(Rollup__mdt.SObjectType)
+        return Databaselayer.Soql.newQuery(Rollup__mdt.SObjectType)
             .selectAll()
             .selectSubQuery(filtersQuery).whereFilters(activeFilter)
             .whereFilters(activeFilter)

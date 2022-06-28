@@ -100,7 +100,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
         }
 
         protected virtual List<DmlResult> doDml() {
-            return DatabaseLayer.DmlEngine.doDml(
+            return Databaselayer.Dml.doDml(
                 this.operation, 
                 this.records, 
                 this.externalIdField, 
@@ -123,7 +123,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 
         public override List<DmlResult> doDml() {
             List<Database.LeadConvert> leadConverts = SerializableLeadConvert.unwrap(this.wrappers); 
-            return DatabaseLayer.DmlEngine.doConvert(leadConverts); 
+            return Databaselayer.Dml.doConvert(leadConverts); 
         }
     }
 }

@@ -12,19 +12,19 @@ public virtual inherited sharing class Dml {
         List<DmlResult> results; 
         switch on operation {
             when DO_PUBLISH {
-                results = DatabaseLayer.DmlEngine.doPublish(records);
+                results = Databaselayer.Dml.doPublish(records);
             } when DO_INSERT {
-                results = DatabaseLayer.DmlEngine.doInsert(records, allOrNone);
+                results = Databaselayer.Dml.doInsert(records, allOrNone);
             } when DO_UPDATE {
-                results = DatabaseLayer.DmlEngine.doUpdate(records, allOrNone);
+                results = Databaselayer.Dml.doUpdate(records, allOrNone);
             } when DO_UPSERT {
-                results = DatabaseLayer.DmlEngine.doUpsert(records, externalIdField, allOrNone);
+                results = Databaselayer.Dml.doUpsert(records, externalIdField, allOrNone);
             } when DO_DELETE {
-                results = DatabaseLayer.DmlEngine.doDelete(records, allOrNone);
+                results = Databaselayer.Dml.doDelete(records, allOrNone);
             } when DO_UNDELETE {
-                results = DatabaseLayer.DmlEngine.doUndelete(records, allOrNone);
+                results = Databaselayer.Dml.doUndelete(records, allOrNone);
             } when DO_HARD_DELETE {
-                results = DatabaseLayer.DmlEngine.doHardDelete(records, allOrNone);
+                results = Databaselayer.Dml.doHardDelete(records, allOrNone);
             }
         }
         return results;

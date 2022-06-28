@@ -22,7 +22,7 @@ private class LoginUtils_Test {
         System.assertEquals(true, LoginUtils.userIsLoggedIn(me), 'Current user is not logged in');
         // A fake user should never be logged in
         User mockUser = new User();
-        DatabaseLayer.DmlEngine.doInsert(mockUser); 
+        Databaselayer.Dml.doInsert(mockUser); 
         System.assertEquals(false, LoginUtils.userIsLoggedIn(mockUser), 'A fake user was flagged as logged in');
     }
 }

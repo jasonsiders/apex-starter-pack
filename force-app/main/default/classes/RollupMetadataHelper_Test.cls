@@ -153,21 +153,21 @@ private class RollupMetadataHelper_Test {
             Parent_SObjectType__c = 'Account',
             Target_Field__c = 'AnnualRevenue'
         ); 
-        DatabaseLayer.DmlEngine.doInsert(rollupMdt);
+        Databaselayer.Dml.doInsert(rollupMdt);
         Filter__mdt filterMdt = new Filter__mdt(
             Operator__c = 'EQUALS',
             SObjectField__c = 'StageName',
             SObjectType__c = 'Opportunity',
             Value__c = '"Closed Won"'
         ); 
-        DatabaseLayer.DmlEngine.doInsert(filterMdt);
+        Databaselayer.Dml.doInsert(filterMdt);
         Rollup_Filter__mdt rollupFilterMdt = new Rollup_Filter__mdt(Active__c = true);
         rollupFilterMdt = (Rollup_Filter__mdt) ObjectUtils.setLookupField(
             rollupFilterMdt, 
             Rollup_Filter__mdt.Filter__c, 
             filterMdt
         ); 
-        DatabaseLayer.DmlEngine.doInsert(rollupFilterMdt);
+        Databaselayer.Dml.doInsert(rollupFilterMdt);
         rollupMdt = (Rollup__mdt) ObjectUtils.setReadOnlyField(
             rollupMdt, 
             'Rollup_Filters__r', 
@@ -204,7 +204,7 @@ private class RollupMetadataHelper_Test {
             Parent_SObjectType__c = 'Account',
             Target_Field__c = 'AnnualRevenue'
         ); 
-        DatabaseLayer.DmlEngine.doInsert(rollupMdt);
+        Databaselayer.Dml.doInsert(rollupMdt);
         List<Filter__mdt> filterMdts = new List<Filter__mdt>{
             new Filter__mdt(
                 Operator__c = 'EQUALS',
@@ -225,7 +225,7 @@ private class RollupMetadataHelper_Test {
                 Value__c = '"2022-01-01"'
             )
         };
-        DatabaseLayer.DmlEngine.doInsert(filterMdts);
+        Databaselayer.Dml.doInsert(filterMdts);
         List<Rollup_Filter__mdt> rollupFilterMdts = new List<Rollup_Filter__mdt>();
         for (Integer i = 0; i < filterMdts?.size(); i++) {
             Filter__mdt filterMdt = filterMdts[i];
@@ -236,7 +236,7 @@ private class RollupMetadataHelper_Test {
             rollupFilter = (Rollup_Filter__mdt) ObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Filter__c, filterMdt);
             rollupFilterMdts.add(rollupFilter);
         }
-        DatabaseLayer.DmlEngine.doInsert(rollupFilterMdts);
+        Databaselayer.Dml.doInsert(rollupFilterMdts);
         rollupmdt = (Rollup__mdt) ObjectUtils.setReadOnlyField(
             rollupMdt, 
             'Rollup_Filters__r', 
@@ -306,14 +306,14 @@ private class RollupMetadataHelper_Test {
                 Target_Field__c = 'NumberOfEmployees'
             )
         };
-        DatabaseLayer.DmlEngine.doInsert(rollupMdts);
+        Databaselayer.Dml.doInsert(rollupMdts);
         Filter__mdt oppIsClosedFilter = new Filter__mdt(
             Operator__c = 'EQUALS',
             SObjectField__c = 'IsClosed',
             SObjectType__c = 'Opportunity',
             Value__c = 'true'
         );
-        DatabaseLayer.DmlEngine.doInsert(oppIsClosedFilter);
+        Databaselayer.Dml.doInsert(oppIsClosedFilter);
         List<Rollup__mdt> rollupRecords = new List<Rollup__mdt>(); 
         for (Rollup__mdt rollupMdt : rollupMdts) {
             Rollup_Filter__mdt rollupFilter = new Rollup_Filter__mdt(Active__c = true);
@@ -379,7 +379,7 @@ private class RollupMetadataHelper_Test {
     @TestSetup 
     static void setup() {
         Account account = new Account(Name = 'Test Account');
-        DatabaseLayer.DmlEngine.doInsert(account); 
+        Databaselayer.Dml.doInsert(account); 
         List<Opportunity> opportunities = new List<Opportunity>(); 
         for (Integer i = 0; i < 3; i++) {
             opportunities.add(new Opportunity(
@@ -390,6 +390,6 @@ private class RollupMetadataHelper_Test {
                 StageName = 'New'
             ));
         }
-        DatabaseLayer.DmlEngine.doInsert(opportunities); 
+        Databaselayer.Dml.doInsert(opportunities); 
     }
 }

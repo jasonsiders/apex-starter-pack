@@ -287,7 +287,7 @@ private class Soql_Test {
         for (Integer i = 0; i < 3; i++) {
             accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
         }
-        DatabaseLayer.DmlEngine.doInsert(accounts);
+        Databaselayer.Dml.doInsert(accounts);
         Soql query = new Soql(Account.SObjectType)
             .selectFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
             .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
@@ -318,7 +318,7 @@ private class Soql_Test {
                 Name = 'US Account #' + i
             ));
         }
-        DatabaseLayer.DmlEngine.doInsert(accounts); 
+        Databaselayer.Dml.doInsert(accounts); 
 
         Test.startTest();
         Soql query = new Soql(Account.SObjectType) 

@@ -12,12 +12,12 @@ private class SoqlMock_Test {
                 AnnualRevenue = (i * i)
             )); 
         } 
-        DatabaseLayer.DmlEngine.doInsert(accounts); 
+        Databaselayer.Dml.doInsert(accounts); 
         final String queryKey = 'MOCK_QUERY';
         SoqlMock.setMockResults(queryKey, accounts); 
         
         Test.startTest();
-        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+        Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
             .selectFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
             .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .setQueryKey(queryKey); 
@@ -35,7 +35,7 @@ private class SoqlMock_Test {
     static void shouldMockQueryResults() {
         DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
         String key = 'My_Cool_Query';
-        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)?.setQueryKey(key); 
+        Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)?.setQueryKey(key); 
         // In test environments, no Accounts exist
         // Without setting mock data, this will return an empty List<SObject>
         System.assertEquals(0, query?.run()?.size(), 'Wrong # of results'); 
@@ -48,7 +48,7 @@ private class SoqlMock_Test {
     @IsTest
     static void shouldGenerateNewQuery() {
         DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
-        Soql query = DatabaseLayer.QueryEngine.newQuery(null); 
+        Soql query = Databaselayer.Soql.newQuery(null); 
         System.assertEquals(true, query instanceOf SoqlMock, 'Wrong type of Soql generated');
     }
 }

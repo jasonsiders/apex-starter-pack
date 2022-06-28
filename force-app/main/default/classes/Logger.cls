@@ -78,7 +78,7 @@ global without sharing class Logger {
     public static void publish() {
         Integer currentPublishCalls = Limits.getPublishImmediateDml();
         if (currentPublishCalls < Logger.MAX_PUBLISH_CALLS) {
-            DatabaseLayer.DmlEngine.doPublish(Logger.pendingEvents); 
+            Databaselayer.Dml.doPublish(Logger.pendingEvents); 
             Logger.pendingEvents.clear(); 
         }
     }

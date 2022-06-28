@@ -23,7 +23,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     // **** BATCHABLE **** //
     public virtual void execute(Database.BatchableContext context, List<SObject> scope) {
         try {
-            List<DmlResult> results = DatabaseLayer.DmlEngine.doDelete(scope, false); 
+            List<DmlResult> results = Databaselayer.Dml.doDelete(scope, false); 
             DmlResult.logErrors(results);
         } catch (Exception caughtError) {
             final String message = 
@@ -35,7 +35,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     }
 
     public virtual void finish(Database.BatchableContext context) {
-        Soql query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
+        Soql query = Databaselayer.Soql.newQuery(AsyncApexJob.SObjectType)
             .selectFields(AsyncApexJob.JobItemsProcessed)
             .selectFields(AsyncApexJob.TotalJobItems)
             .whereFilters(new Filter(
@@ -75,7 +75,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 
     private static Set<String> getExtendingTypes() {
         Set<String> extendingTypeNames = new Set<String>();
-        Soql query = DatabaseLayer.QueryEngine.newQuery(ApexTypeImplementor.SObjectType) 
+        Soql query = Databaselayer.Soql.newQuery(ApexTypeImplementor.SObjectType) 
             .setQueryKey('IGarbageCollector_Query')
             .selectFields(ApexTypeImplementor.ClassName)
             .whereFilters(new Filter(

@@ -1,21 +1,21 @@
 public inherited sharing abstract class DatabaseLayer {
-    public static Dml DmlEngine { get; private set; }
-    public static IQueryFactory QueryEngine { get; private set; }
+    public static Dml Dml { get; private set; }
+    public static IQueryFactory Soql { get; private set; }
 
     static {
-        DatabaseLayer.DmlEngine = new Dml();
-        DatabaseLayer.QueryEngine = new Soql.Factory();
+        Databaselayer.Dml = new Dml();
+        Databaselayer.Soql = new Soql.Factory();
     }
 
     @TestVisible
     static Dml setDmlEngine(Dml dmlEngine) {
-        DatabaseLayer.DmlEngine = dmlEngine;
+        Databaselayer.Dml = dmlEngine;
         return dmlEngine; 
     }
 
     @TestVisible
     static IQueryFactory setQueryEngine(IQueryFactory queryEngine) {
-        DatabaseLayer.QueryEngine = queryEngine; 
+        Databaselayer.Soql = queryEngine; 
         return queryEngine;
     }
 }

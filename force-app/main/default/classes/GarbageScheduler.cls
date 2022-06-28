@@ -41,7 +41,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     }
 
     private List<Garbage_Collection_Job__mdt> getActiveJobs() {
-        Soql query = DatabaseLayer.QueryEngine
+        Soql query = Databaselayer.Soql
             .newQuery(Garbage_Collection_Job__mdt.SObjectType)
             .selectFields(new List<SObjectField>{
                 Garbage_Collection_Job__mdt.Apex_Class_Name__c,
@@ -60,7 +60,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
     }
 
     private Integer getFlexQueueSize() {
-        Soql query = DatabaseLayer.QueryEngine
+        Soql query = Databaselayer.Soql
             .newQuery(AsyncApexJob.SObjectType)
             .whereFilters(new Filter(
                 AsyncApexJob.Status,

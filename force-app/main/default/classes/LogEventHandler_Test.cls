@@ -85,7 +85,7 @@ private class LogEventHandler_Test extends TriggerHandler {
         }
 
         Test.startTest();
-        DatabaseLayer.DmlEngine.doPublish(logEvents); 
+        Databaselayer.Dml.doPublish(logEvents); 
         Test.stopTest();
 
         List<Log_Transaction__c> logTransactions = getLogTransactions();
@@ -110,7 +110,7 @@ private class LogEventHandler_Test extends TriggerHandler {
                 Log__c.Source__c, 
                 Log__c.Stack_Trace__c
             });
-        Soql query = DatabaseLayer.QueryEngine.newQuery(Log_Transaction__c.SObjectType)
+        Soql query = Databaselayer.Soql.newQuery(Log_Transaction__c.SObjectType)
             .selectSubQuery(childLogs)
             .selectFields(new List<SObjectField>{
                 Log_Transaction__c.OwnerId, 

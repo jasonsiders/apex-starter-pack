@@ -10,10 +10,10 @@ public without sharing class LogGenerator {
         Map<String, LogGroup> logGroups = this.groupLogsByTransactionId(); 
         // Generate & upsert a Log_Transaction__c record for each unique TransactionId
         List<Log_Transaction__c> logTransactions = this.generateLogTransactions(logGroups.values()); 
-        DatabaseLayer.DmlEngine.doUpsert(logTransactions, Log_Transaction__c.Transaction_Id__c); 
+        Databaselayer.Dml.doUpsert(logTransactions, Log_Transaction__c.Transaction_Id__c); 
         // Generate & Insert a Log__c record for each Log Event
         List<Log__c> logRecords = this.generateLogs(logGroups.values());
-        DatabaseLayer.DmlEngine.doInsert(logRecords); 
+        Databaselayer.Dml.doInsert(logRecords); 
     }
 
     private Map<String, LogGroup> groupLogsByTransactionId() {

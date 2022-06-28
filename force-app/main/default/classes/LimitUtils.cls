@@ -18,7 +18,7 @@ public virtual class LimitUtils {
             // Note: Lazy-loading prevents unnecessary SOQL
             // Again, if SFDC simply added this to their Limits class, we wouldn't need to worry about this!
             LimitUtils.numDailyAsyncMethods = 0;
-            Soql query = DatabaseLayer.QueryEngine.newQuery(AsyncApexJob.SObjectType)
+            Soql query = Databaselayer.Soql.newQuery(AsyncApexJob.SObjectType)
                 .selectFields(AsyncApexJob.JobType)
                 .groupBy(AsyncApexJob.JobType)
                 .selectAggregation(new SoqlAggregation(

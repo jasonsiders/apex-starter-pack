@@ -18,7 +18,7 @@ public without sharing class Rollup {
     }
 
     public List<SObject> run(Set<Id> targetRecordIds) {
-        Soql query = DatabaseLayer.QueryEngine.newQuery(this.targetObject)
+        Soql query = Databaselayer.Soql.newQuery(this.targetObject)
             .setQueryKey(ROLLUP_QUERY)
             .whereFilters(new Filter(
                 'Id', 

@@ -9,8 +9,8 @@ private class ConversionResult_Test {
             LastName = 'Doe',
             Phone = '+15555555555'
         );
-        DatabaseLayer.DmlEngine.doInsert(testLead); 
-        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+        Databaselayer.Dml.doInsert(testLead); 
+        Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
             .selectFields(LeadStatus.MasterLabel)
             .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
             .setRowLimit(1);
@@ -43,8 +43,8 @@ private class ConversionResult_Test {
             LastName = 'Doe',
             Phone = '+15555555555'
         );
-        DatabaseLayer.DmlEngine.doInsert(testLead); 
-        Soql statusQuery = DatabaseLayer.QueryEngine.newQuery(LeadStatus.SObjectType)
+        Databaselayer.Dml.doInsert(testLead); 
+        Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
             .selectFields(LeadStatus.MasterLabel)
             .whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
             .setRowLimit(1);

@@ -133,8 +133,8 @@ private class GarbageCollector_Test {
             Level__c = 'FINEST'
         );
         Contact contact = new Contact(LastName = 'Test');
-        DatabaseLayer.DmlEngine.doInsert(contact);
-        DatabaseLayer.DmlEngine.doInsert(new Case(ContactId = contact.Id));
+        Databaselayer.Dml.doInsert(contact);
+        Databaselayer.Dml.doInsert(new Case(ContactId = contact.Id));
         GarbageCollector instance = new TestExtension(); 
         Database.BatchableContext mockContext = null; 
         List<SObject> scope = new List<SObject>{contact};
@@ -144,7 +144,7 @@ private class GarbageCollector_Test {
         Test.stopTest();
 
         List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
-        System.assertEquals(scope?.size(), logEvents?.size(), 'Wrong # of log events: ' + DatabaseLayer.DmlEngine);
+        System.assertEquals(scope?.size(), logEvents?.size(), 'Wrong # of log events: ' + Databaselayer.Dml);
     }
 
     @IsTest 
@@ -186,11 +186,11 @@ private class GarbageCollector_Test {
             )); 
         }
         records.sort();
-        DatabaseLayer.DmlEngine.doInsert(records); 
+        Databaselayer.Dml.doInsert(records); 
     }
 
     static List<SObject> queryRecords(SObjectType objectType) {
-        return DatabaseLayer.QueryEngine.newQuery(objectType).run();
+        return Databaselayer.Soql.newQuery(objectType).run();
     }   
 
     public class TestExtension extends GarbageCollector {

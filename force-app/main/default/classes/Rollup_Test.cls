@@ -2,7 +2,7 @@
 private class Rollup_Test {
     @IsTest 
     static void shouldRunFromParent() {
-        Soql accountQuery = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+        Soql accountQuery = Databaselayer.Soql.newQuery(Account.SObjectType)
             .selectSubQuery(new SubQuery(Account.SObjectType, 'Opportunities'));
         List<Account> accounts = (List<Account>) accountQuery.run(); 
 
@@ -17,7 +17,7 @@ private class Rollup_Test {
 
     @IsTest 
     static void shouldRunFromChild() {
-        Soql oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
+        Soql oppQuery = Databaselayer.Soql.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
         List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run(); 
 
         Test.startTest();
@@ -31,14 +31,14 @@ private class Rollup_Test {
 
     @IsTest 
     static void shouldFilterRecords() {
-        Soql oppQuery = DatabaseLayer.QueryEngine.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
+        Soql oppQuery = Databaselayer.Soql.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
         List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run(); 
         // Update one of the Opportunities amounts to 0
         Set<Id> accountIds = new Set<Id>();
         Opportunity invalidOpp = opportunities[0];
         accountIds.add(invalidOpp.AccountId); 
         invalidOpp.Amount = 0; 
-        DatabaseLayer.DmlEngine.doUpdate(invalidOpp); 
+        Databaselayer.Dml.doUpdate(invalidOpp); 
 
         Test.startTest(); 
         Rollup rollup = new Rollup(Account.SObjectType).addRelationship(
@@ -83,7 +83,7 @@ private class Rollup_Test {
     @TestSetup 
     static void setup() {
         Account account = new Account(Name = 'Test Account');
-        DatabaseLayer.DmlEngine.doInsert(account); 
+        Databaselayer.Dml.doInsert(account); 
         List<Opportunity> opportunities = new List<Opportunity>(); 
         for (Integer i = 0; i < 3; i++) {
             opportunities.add(new Opportunity(
@@ -94,7 +94,7 @@ private class Rollup_Test {
                 StageName = 'New'
             ));
         }
-        DatabaseLayer.DmlEngine.doInsert(opportunities); 
+        Databaselayer.Dml.doInsert(opportunities); 
     }
 
     private static Rollup getSumCalculator() {

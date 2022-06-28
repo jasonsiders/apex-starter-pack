@@ -44,7 +44,7 @@ public inherited sharing abstract class InvocableRollup {
                 AsyncDml.Request updates = new AsyncDml.Request(Dml.Operation.DO_UPDATE, records); 
                 AsyncDml.getInstance().addRequest(updates).runJob(); 
             } when else {
-                DatabaseLayer.DmlEngine.doUpdate(records); 
+                Databaselayer.Dml.doUpdate(records); 
             }
         }
     }

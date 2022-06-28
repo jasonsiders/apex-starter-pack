@@ -6,7 +6,7 @@ public abstract class LoginUtils {
     public static Map<Id, List<AuthSession>> getAllActiveSessions() {
         if (LoginUtils.activeSessions == null) {
             LoginUtils.activeSessions = new Map<Id, List<AuthSession>>(); 
-            Soql query = DatabaseLayer.QueryEngine.newQuery(AuthSession.SObjectType)
+            Soql query = Databaselayer.Soql.newQuery(AuthSession.SObjectType)
                 .setQueryKey(AUTH_SESSION_QUERY)
                 .selectFields('LoginHistory.Application')
                 .selectFields(new List<SObjectField>{

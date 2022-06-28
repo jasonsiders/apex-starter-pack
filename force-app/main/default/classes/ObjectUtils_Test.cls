@@ -108,7 +108,7 @@ private class ObjectUtils_Test {
         // Child Object relationships (like Account.Contacts) are read-only fields too!
         DatabaseLayer.setDmlEngine(new DmlMock());
         Account testAccount = new Account(Name = 'Test Account');
-        DatabaseLayer.DmlEngine.doInsert(testAccount);
+        Databaselayer.Dml.doInsert(testAccount);
         List<Contact> contacts = new List<Contact>();
         for (Integer i = 0; i < 3; i++) {
             contacts.add(new Contact(
@@ -117,7 +117,7 @@ private class ObjectUtils_Test {
                 LastName = 'Contact #' + (i + 1)
             ));
         }
-        DatabaseLayer.DmlEngine.doInsert(contacts); 
+        Databaselayer.Dml.doInsert(contacts); 
         Schema.ChildRelationship contactRelationship = 
             Describes.getChildRelationship(Account.SObjectType, 'Contacts');
 
@@ -133,7 +133,7 @@ private class ObjectUtils_Test {
     static void shouldSetLookupFieldWithParentValues() {
         DatabaseLayer.setDmlEngine(new DmlMock());
         Account testAccount = new Account(Name = 'Test Account');
-        DatabaseLayer.DmlEngine.doInsert(testAccount);
+        Databaselayer.Dml.doInsert(testAccount);
 
         Test.startTest();
         Contact testContact = new Contact(

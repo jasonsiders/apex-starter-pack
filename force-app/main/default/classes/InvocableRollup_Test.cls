@@ -224,7 +224,7 @@ private class InvocableRollup_Test {
         setMocks(); 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        DatabaseLayer.DmlEngine.doInsert(account); 
+        Databaselayer.Dml.doInsert(account); 
         DmlMock.resetHistory(); 
         SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
 
@@ -333,7 +333,7 @@ private class InvocableRollup_Test {
     static Account getTestAccount(Integer numOpps) {
         Account account = new Account(Name = 'Test Account');
         Campaign campaign = new Campaign(Name = 'Test Campaign');
-        DatabaseLayer.DmlEngine.doInsert(new List<SObject>{account, campaign}); 
+        Databaselayer.Dml.doInsert(new List<SObject>{account, campaign}); 
         List<Opportunity> opportunities = new List<Opportunity>(); 
         for (Integer i = 0; i < numOpps; i++) {
             opportunities.add(new Opportunity(
@@ -345,7 +345,7 @@ private class InvocableRollup_Test {
         }
         // One of the opportunities will NOT be closed won
         opportunities[0].StageName = 'New';
-        DatabaseLayer.DmlEngine.doInsert(opportunities); 
+        Databaselayer.Dml.doInsert(opportunities); 
         return (Account) ObjectUtils.setReadOnlyField(account, 'Opportunities', opportunities); 
     }
 }

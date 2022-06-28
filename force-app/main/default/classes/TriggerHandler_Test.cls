@@ -300,7 +300,7 @@ private class TriggerHandler_Test extends TriggerHandler {
     // **** HELPER **** // 
     @testSetup 
     static void setup() {
-        DatabaseLayer.DmlEngine.doInsert(initAccounts());
+        Databaselayer.Dml.doInsert(initAccounts());
     }
 
     static final Integer TEST_SIZE = 200;
@@ -314,7 +314,7 @@ private class TriggerHandler_Test extends TriggerHandler {
     }
 
     static List<Account> getAccounts() {
-        Soql query = DatabaseLayer.QueryEngine.newQuery(Account.SObjectType)
+        Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
             .selectFields(new List<SObjectField>{
                 Account.AccountNumber,
                 Account.Name  
