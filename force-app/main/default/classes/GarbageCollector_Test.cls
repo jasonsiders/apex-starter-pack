@@ -10,7 +10,7 @@ private class GarbageCollector_Test {
     static Garbage_Collection_Job__mdt testApexJob = new Garbage_Collection_Job__mdt(
         Active__c = true, 
         Apex_Class_Name__c = 'GarbageCollector_Test.TestExtension',
-        Batch_Size__c = 200, 
+        Batch_Size__c = 200,
         SObjectType__c = 'Account'
     );
 

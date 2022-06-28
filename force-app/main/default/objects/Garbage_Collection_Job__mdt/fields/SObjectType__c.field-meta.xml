@@ -4,10 +4,8 @@
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <label>SObjectType</label>
-    <referenceTo>EntityDefinition</referenceTo>
-    <relationshipLabel>Garbage_Collection_Jobs</relationshipLabel>
-    <relationshipName>Garbage_Collection_Jobs</relationshipName>
+    <length>255</length>
     <required>true</required>
-    <type>MetadataRelationship</type>
+    <type>Text</type>
     <unique>false</unique>
 </CustomField>

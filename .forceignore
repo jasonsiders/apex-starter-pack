@@ -13,3 +13,7 @@ package.xml
 
 force-app/main/default/profiles*
 force-app/main/default/customMetadata*
+# Flows & Custom fields used to test Rollups shouldn't be included
+force-app/main/default/flows*
+force-app/main/default/objects/Account*
+force-app/main/default/objects/Contact*
