@@ -30,10 +30,12 @@ public class RollupMetadataHelper {
 
     // **** PRIVATE **** //
     private void addRequest(Rollup rollup, Rollup__mdt rollupMdt) {
-        rollup?.addRelationship(new Rollup.Relationship(SchemaUtils.getChildRelationship(
-            rollupMdt?.Parent_SObjectType__c, 
-            rollupMdt?.Child_Relationship_Name__c
-        )).addRequest(new Rollup.Request(
+        SObjectField relationshipField = SchemaUtils.getSObjectField(
+            rollupMdt?.Child_SObjectType__c, 
+            rollupMdt?.Relationship_Field__c
+        );
+        ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
+        rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(new Rollup.Request(
             SchemaUtils.getSObjectField(
                 rollupMdt?.Parent_SObjectType__c,
                 rollupMdt?.Target_Field__c
@@ -69,7 +71,7 @@ public class RollupMetadataHelper {
         // Returns a base query which can be extended by callers.
         // It includes all necessary fields, and excludes inactive Filters/Rollups
         Filter activeFilter = new Filter('Active__c', Filter.EQUALS, true);
-        SubQuery filtersQuery = (SubQuery) new SubQuery(Rollup__mdt.SObjectType, 'Rollup_Filters__r');
+        SubQuery filtersQuery = (SubQuery) new SubQuery(Rollup_Filter__mdt.Rollup__c);
         filtersQuery.selectFields(Rollup_Filter__mdt.Active__c); 
         final String parentRelationship = SchemaUtils.describeField(Rollup_Filter__mdt.Filter__c)?.getRelationshipName();
         for (SObjectField parentField : new List<SObjectField>{

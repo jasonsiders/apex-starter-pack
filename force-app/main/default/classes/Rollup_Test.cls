@@ -3,7 +3,7 @@ private class Rollup_Test {
     @IsTest 
     static void shouldRunFromParent() {
         Soql accountQuery = Databaselayer.Soql.newQuery(Account.SObjectType)
-            .selectSubQuery(new SubQuery(Account.SObjectType, 'Opportunities'));
+            .selectSubQuery(new SubQuery(Opportunity.AccountId));
         List<Account> accounts = (List<Account>) accountQuery.run(); 
 
         Test.startTest(); 
@@ -42,10 +42,7 @@ private class Rollup_Test {
 
         Test.startTest(); 
         Rollup rollup = new Rollup(Account.SObjectType).addRelationship(
-            new Rollup.Relationship(
-                'Account',
-                'Opportunities'
-            ).addRequest(new Rollup.Request(
+            new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
                 Account.AnnualRevenue,
                 new SumCalculator()?.setCalcField(Opportunity.Amount)
             ).addFilters(new Filter(
@@ -83,11 +80,11 @@ private class Rollup_Test {
     static void shouldPreventDuplicateRelationships() {
         Rollup rollup = new Rollup(Account.SObjectType); 
         // Create two relationship objects for the same ChildRelationship
-        Rollup.Relationship rel1 = new Rollup.Relationship(Account.SObjectType, 'Opportunities').addRequest(new Rollup.Request(
+        Rollup.Relationship rel1 = new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
             Account.NumberOfEmployees,
             new MockCalculator()
         ));
-        Rollup.Relationship rel2 = new Rollup.Relationship(Account.SObjectType, 'Opportunities').addRequest(new Rollup.Request(
+        Rollup.Relationship rel2 = new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
             Account.AnnualRevenue,
             new MockCalculator()
         ));
@@ -121,10 +118,7 @@ private class Rollup_Test {
 
     private static Rollup getSumCalculator() {
         return new Rollup(Account.SObjectType).addRelationship(
-            new Rollup.Relationship(
-                'Account',
-                'Opportunities'
-            ).addRequest(new Rollup.Request(
+            new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
                 Account.AnnualRevenue,
                 new SumCalculator()?.setCalcField(Opportunity.Amount)
             ))

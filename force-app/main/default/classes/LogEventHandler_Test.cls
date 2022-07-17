@@ -102,7 +102,7 @@ private class LogEventHandler_Test extends TriggerHandler {
     }
 
     private static List<Log_Transaction__c> getLogTransactions() {
-        SubQuery childLogs = (SubQuery) new SubQuery(Log_Transaction__c.SObjectType, 'Logs__r')
+        SubQuery childLogs = (SubQuery) new SubQuery(Log__c.Log_Transaction__c)
             .selectFields(new List<SObjectField>{
                 Log__c.Id, 
                 Log__c.Message__c, 

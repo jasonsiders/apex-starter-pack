@@ -56,10 +56,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Child_Relationship_Name__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
                 <field>Relationship_Field__c</field>
             </layoutItems>
         </layoutColumns>

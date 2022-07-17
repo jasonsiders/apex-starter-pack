@@ -5,9 +5,9 @@ private class RollupMetadataHelper_Test {
         Rollup__mdt rollupMdt = new Rollup__mdt(
             Calculation_Field__c = null, 
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'AnnualRevenue'
         );  
 
@@ -20,7 +20,6 @@ private class RollupMetadataHelper_Test {
         System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollup.relationships?.values()[0];
-        System.assertEquals(rollupMdt.Child_Relationship_Name__c, relationship?.childRelationship?.getRelationshipName(), 'Wrong child relationship');
         System.assertEquals(1, relationship?.requests?.size(), 'Wrong # of requests');
         Rollup.Request request = relationship?.requests?.values()[0];
         System.assertEquals(Account.AnnualRevenue, request?.targetField, 'Wrong targetField');
@@ -35,27 +34,27 @@ private class RollupMetadataHelper_Test {
                 Active__c = true,
                 Calculation_Field__c = null, 
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'AnnualRevenue'
             ),
             new Rollup__mdt(
                 Active__c = true,
                 Calculation_Field__c = null, 
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'NumberOfEmployees'
             ),
             new Rollup__mdt(
                 Active__c = true,
                 Calculation_Field__c = null, 
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'DunsNumber'
             )
         };
@@ -80,18 +79,18 @@ private class RollupMetadataHelper_Test {
                 Active__c = true,
                 Calculation_Field__c = null, 
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'AnnualRevenue'
             ),
             new Rollup__mdt(
                 Active__c = true,
                 Calculation_Field__c = 'CreatedDate', 
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Cases',
                 Child_SObjectType__c = 'Case', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'AnnualRevenue'
             )
         };
@@ -116,18 +115,18 @@ private class RollupMetadataHelper_Test {
             Active__c = true,
             Calculation_Field__c = null,
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'AnnualRevenue'
         ));
         rollupMdts.add(new Rollup__mdt(
             Active__c = true,
             Calculation_Field__c = null,
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Tasks',
             Child_SObjectType__c = 'Task',
             Parent_SObjectType__c = 'Lead',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'NumberOfEmployees'
         ));
 
@@ -148,9 +147,9 @@ private class RollupMetadataHelper_Test {
         Rollup__mdt rollupMdt = new Rollup__mdt(
             Calculation_Field__c = null, 
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'AnnualRevenue'
         ); 
         Databaselayer.Dml.doInsert(rollupMdt);
@@ -183,7 +182,6 @@ private class RollupMetadataHelper_Test {
         System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollup.relationships?.values()[0];
-        System.assertEquals(rollupMdt.Child_Relationship_Name__c, relationship?.childRelationship?.getRelationshipName(), 'Wrong child relationship');
         System.assertEquals(1, relationship?.requests?.values()?.size(), 'Wrong # of requests');
         Rollup.Request request = relationship?.requests?.values()[0];
         System.assertEquals(Account.AnnualRevenue, request?.targetField, 'Wrong targetField');
@@ -199,9 +197,9 @@ private class RollupMetadataHelper_Test {
         Rollup__mdt rollupMdt = new Rollup__mdt(
             Calculation_Field__c = null, 
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'AnnualRevenue'
         ); 
         Databaselayer.Dml.doInsert(rollupMdt);
@@ -261,9 +259,9 @@ private class RollupMetadataHelper_Test {
             Calculation_Field__c = 'Amount',
             Calculator_Class_Name__c = calculatorClassName,
             Calculation_Type__c = null,
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
+            Relationship_Field__c = 'AccountId',
             Target_Field__c = 'AnnualRevenue'
         ); 
 
@@ -292,17 +290,17 @@ private class RollupMetadataHelper_Test {
                 Active__c = true,
                 Calculation_Field__c = 'Amount',
                 Calculation_Type__c = 'SUM',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'AnnualRevenue'
             ),
             new Rollup__mdt(
                 Active__c = true,
                 Calculation_Type__c = 'COUNT',
-                Child_Relationship_Name__c = 'Opportunities',
                 Child_SObjectType__c = 'Opportunity', 
                 Parent_SObjectType__c = 'Account',
+                Relationship_Field__c = 'AccountId',
                 Target_Field__c = 'NumberOfEmployees'
             )
         };

@@ -5,8 +5,8 @@ public inherited sharing virtual class SubQuery extends Soql {
         this.relationship = relationship; 
     }
 
-    public SubQuery(SObjectType objectType, String relationshipName) {
-        this(SchemaUtils.getChildRelationship(objectType, relationshipName)); 
+    public SubQuery(SObjectField lookupField) {
+        this(SchemaUtils.getChildRelationship(lookupField)); 
     }
 
     public override String toString() {

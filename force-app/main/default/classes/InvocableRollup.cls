@@ -69,11 +69,11 @@ public inherited sharing abstract class InvocableRollup {
         for (Rollup__mdt rollup : rollups) {
             // Check Parent Object values
             SObjectType parentObject = SchemaUtils.getSObjectType(rollup.Parent_SObjectType__c); 
-            SObjectField targetField = SchemaUtils.getSObjectField(parentObject, rollup.Target_Field__c);
-            ChildRelationship childRel = SchemaUtils.getChildRelationship(parentObject, rollup.Child_Relationship_Name__c); 
-            // Check Child Object values
             SObjectType childObject = SchemaUtils.getSObjectType(rollup.Child_SObjectType__c); 
+            SObjectField targetField = SchemaUtils.getSObjectField(parentObject, rollup.Target_Field__c);
             SObjectField relField = SchemaUtils.getSObjectField(childObject, rollup.Relationship_Field__c); 
+            ChildRelationship childRel = SchemaUtils.getChildRelationship(relField); 
+            // Check Child Object values
             for (Object item : new List<Object>{
                 parentObject, 
                 childObject, 

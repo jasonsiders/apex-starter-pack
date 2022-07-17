@@ -64,12 +64,8 @@ public without sharing class Rollup {
             this.requests = new Map<SObjectField, Request>();
         }
 
-        public Relationship(SObjectType objectType, String relationshipName) {
-            this(SchemaUtils.getChildRelationship(objectType, relationshipName));
-        }
-
-        public Relationship(String objectName, String relationshipName) {
-            this(SchemaUtils.getSObjectType(objectName), relationshipName);
+        public Relationship(SObjectField lookupField) {
+            this(SchemaUtils.getChildRelationship(lookupField));
         }
         
         public Relationship addRequest(Request request) {
@@ -92,10 +88,14 @@ public without sharing class Rollup {
         }
 
         private void calculate(SObject targetRecord) {
-            List<SObject> childRecords = targetRecord?.getSObjects(this.childRelationship?.getRelationshipName());
-            for (Request request : this.requests?.values()) {
-                request.calculate(targetRecord, childRecords);
-            }
+            String relationshipName = this.childRelationship?.getRelationshipName(); 
+            // ! Supplying a null value to SObject.getSObjects() will cause a System.NullPointerException
+            if (relationshipName != null) {
+                List<SObject> childRecords = targetRecord?.getSObjects(relationshipName);
+                for (Request request : this.requests?.values()) {
+                    request.calculate(targetRecord, childRecords);
+                }
+            }  
         } 
     }
 

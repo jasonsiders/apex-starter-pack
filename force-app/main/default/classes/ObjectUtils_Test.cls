@@ -118,8 +118,7 @@ private class ObjectUtils_Test {
             ));
         }
         Databaselayer.Dml.doInsert(contacts); 
-        Schema.ChildRelationship contactRelationship = 
-            SchemaUtils.getChildRelationship(Account.SObjectType, 'Contacts');
+        Schema.ChildRelationship contactRelationship = SchemaUtils.getChildRelationship(Contact.AccountId);
 
         Test.startTest();
         testAccount = (Account) ObjectUtils.setReadOnlyField(testAccount, contactRelationship, contacts); 

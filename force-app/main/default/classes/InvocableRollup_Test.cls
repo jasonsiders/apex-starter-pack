@@ -232,7 +232,6 @@ private class InvocableRollup_Test {
             Active__c = true,
             Calculation_Field__c = 'Amount',
             Calculation_Type__c = 'SUM',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
             Relationship_Field__c = 'AccountId',
@@ -241,7 +240,6 @@ private class InvocableRollup_Test {
         List<Rollup__mdt> rollups = new List<Rollup__mdt>();
         for (SObjectField metadataField : new List<SObjectField>{
             Rollup__mdt.Calculation_Field__c,
-            Rollup__mdt.Child_Relationship_Name__c,
             Rollup__mdt.Child_SObjectType__c,
             Rollup__mdt.Parent_SObjectType__c,
             Rollup__mdt.Relationship_Field__c,
@@ -270,7 +268,7 @@ private class InvocableRollup_Test {
             } catch (InvocableRollup.InvalidInputException thrownError) {
                 caughtError = thrownError; 
             }
-            System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
+            System.assertNotEquals(null, caughtError, 'An error was not thrown/caught. Rollup: ' + JSON.serializePretty(rollup));
         }
         Test.stopTest();
     }
@@ -287,7 +285,6 @@ private class InvocableRollup_Test {
             Active__c = true,
             Calculation_Field__c = null, 
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Account',
             Relationship_Field__c = 'AccountId',
@@ -321,7 +318,6 @@ private class InvocableRollup_Test {
             Active__c = true,
             Calculation_Field__c = null, 
             Calculation_Type__c = 'COUNT',
-            Child_Relationship_Name__c = 'Opportunities',
             Child_SObjectType__c = 'Opportunity', 
             Parent_SObjectType__c = 'Campaign',
             Relationship_Field__c = 'CampaignId',

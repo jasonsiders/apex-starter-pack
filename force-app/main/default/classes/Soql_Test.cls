@@ -26,7 +26,7 @@ private class Soql_Test {
 
     @IsTest 
     static void shouldGenerateQueryWithSubqueries() {
-        SubQuery contactsSubQuery = new SubQuery(Account.SObjectType, 'Contacts'); 
+        SubQuery contactsSubQuery = new SubQuery(Contact.AccountId);
         Soql query = new Soql(Account.SObjectType).selectSubQuery(contactsSubQuery);
         Soql_Test.checkQueryString('SELECT Id, (SELECT Id FROM Contacts) FROM Account', query);
         Soql_Test.runTestQuery(query); 
