@@ -89,6 +89,17 @@ private class CollectionUtils_Test {
     }
 
     @IsTest 
+    static void shouldReturnIndexSizeOfList() {
+        List<String> items = new List<String>{'a', 'b', 'c'};
+        System.assertEquals(2, CollectionUtils.getMaxIndex(items), 'Did not return the max index');
+        System.assertEquals('c', items[CollectionUtils.getMaxIndex(items)], 'Max index did not return the correct value');
+        items.clear();
+        System.assertEquals(null, CollectionUtils.getMaxIndex(items), 'Empty list should have returned null');
+        items = null; 
+        System.assertEquals(null, CollectionUtils.getMaxIndex(items), 'Null list should have returned null');
+    }
+
+    @IsTest 
     static void shouldExtractValues() {
         List<Account> accounts = new List<Account>(); 
         for (Integer i = 0; i < 10; i++) {

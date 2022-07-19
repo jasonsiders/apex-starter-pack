@@ -38,8 +38,8 @@ public virtual class Filter {
     @TestVisible protected final Operator operator { get; private set; }
     @TestVisible protected final Object value { get; private set; }
 
-    public Filter(String fieldReference, Type operatorType, Object value) {
-        List<String> fieldParts = fieldReference?.split('\\.');
+    public Filter(String fieldName, Type operatorType, Object value) {
+        List<String> fieldParts = fieldName?.split('\\.');
         if (fieldParts != null) {
             Integer fieldNameIndex = fieldParts?.size() - 1;
             this.fieldName = fieldParts[fieldNameIndex];
@@ -49,6 +49,10 @@ public virtual class Filter {
         this.operator = (Operator) operatorType?.newInstance();
         this.value = value; 
         this.validate(); 
+    }
+
+    public Filter(FieldReference fieldReference, Type operatorType, Object value) {
+        this(fieldReference?.toString(), operatorType, value); 
     }
 
     public Filter(SObjectField field, Type operatorType, Object value) {

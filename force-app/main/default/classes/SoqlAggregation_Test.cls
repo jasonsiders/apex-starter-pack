@@ -13,6 +13,17 @@ private class SoqlAggregation_Test {
     }
 
     @IsTest 
+    static void shouldOutputAggregationWithParentField() {
+        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+            Case.ContactId,
+            Contact.AccountId,
+            Account.AnnualRevenue
+        });
+        SoqlAggregation aggregation = new SoqlAggregation(SoqlAggregation.Function.SUM, fieldRef);
+        System.assertEquals('SUM(Contact.Account.AnnualRevenue)', aggregation.toString(), 'Unexpected output');
+    }
+
+    @IsTest 
     static void shouldGenerateAggregateFilter() {
         SoqlAggregation aggregation = new SoqlAggregation(SoqlAggregation.Function.COUNT, Lead.Name); 
         Filter testFilter = new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100);

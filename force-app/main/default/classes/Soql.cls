@@ -1,7 +1,7 @@
 public inherited sharing virtual class Soql {
     @TestVisible protected String queryKey { get; private set; }
     @TestVisible protected Set<String> selectClauses = new Set<String>{'Id'};
-    protected SObjectType fromSObject;
+    protected SObjectReference fromSObject;
     protected Scope scope; 
     protected SoqlWithClause withExpression;
     protected FilterLogic whereFilters = new FilterLogic.AndLogic(); 
@@ -12,8 +12,9 @@ public inherited sharing virtual class Soql {
     protected Integer rowOffset;
     protected Usage usage;
     
-    public Soql(SObjectType fromSObject) {
-        this.fromSObject = fromSObject;
+    @TestVisible
+    protected Soql(SObjectType fromSObject) {
+        this.fromSObject = new SObjectReference(fromSObject); 
     }
 
     protected Soql() {
@@ -53,31 +54,39 @@ public inherited sharing virtual class Soql {
     }
 
     // **** Building a Query **** //
-    public Soql selectFields(List<String> fields) {
-        this.selectClauses.addAll(fields); 
-        return this; 
+    public Soql selectFields(List<FieldReference> fieldReferences) {
+        for (FieldReference fieldReference : fieldReferences) {
+            this.selectClauses.add(fieldReference?.toString());
+        }
+        return this;
     }
 
-    public Soql selectFields(String field) {
-        return this.selectFields(new List<String>{field});
+    public Soql selectFields(FieldReference fieldReference) {
+        return this.selectFields(new List<FieldReference>{fieldReference});
     }
 
     public Soql selectFields(List<SObjectField> fields) {
-        List<String> fieldStrings = new List<String>();
         for (SObjectField field : fields) {
-            if (field != null) {
-                fieldStrings.add(String.valueOf(field));
-            }
+            this.selectClauses.add(String.valueOf(field));
         }
-        return this.selectFields(fieldStrings); 
+        return this;
     }
 
     public Soql selectFields(SObjectField field) {
         return this.selectFields(new List<SObjectField>{field});
     }
 
+    public Soql selectFields(List<String> fieldNames) {
+        this.selectClauses.addAll(fieldNames);
+        return this;
+    }
+
+    public Soql selectFields(String fieldName) {
+        return this.selectFields(new List<String>{fieldName});
+    }
+
     public Soql selectAll() {
-        List<SObjectField> allFields = SchemaUtils.describeSObject(this.fromSObject)?.fields?.getMap()?.values();
+        List<SObjectField> allFields = SchemaUtils.describeSObject(this.fromSObject?.toSchemaType())?.fields?.getMap()?.values();
         return this.selectFields(allFields); 
     }
 
@@ -122,24 +131,35 @@ public inherited sharing virtual class Soql {
         return this;
     }
 
-    public Soql groupBy(List<String> groupByFieldNames) {
-        this.groupByClauses?.addAll(groupByFieldNames);
-        return this;
+    public Soql groupBy(List<FieldReference> fieldReferences) {
+        for (FieldReference fieldReference : fieldReferences) {
+            this.groupByClauses?.add(fieldReference?.toString());
+        }
+        return this; 
     }
 
-    public Soql groupBy(String groupByFieldName) {
-        return this.groupBy(new List<String>{groupByFieldName});
+    public Soql groupBy(FieldReference fieldReference) {
+        return this.groupBy(new List<FieldReference>{fieldReference});
     }
 
-    public Soql groupBy(List<SObjectField> groupByFields) {
-        for (SObjectField groupByField : groupByFields) {
-            this.groupBy(String.valueOf(groupByField));
+    public Soql groupBy(List<SObjectField> fields) {
+        for (SObjectField field : fields) {
+            this.groupBy(String.valueOf(field));
         }
         return this;
     }
 
-    public Soql groupBy(SObjectField groupByField) {
-        return this.groupBy(new List<SObjectField>{groupByField});
+    public Soql groupBy(SObjectField field) {
+        return this.groupBy(new List<SObjectField>{field});
+    }
+
+    public Soql groupBy(List<String> fieldNames) {
+        this.groupByClauses?.addAll(fieldNames);
+        return this;
+    }
+
+    public Soql groupBy(String fieldName) {
+        return this.groupBy(new List<String>{fieldName});
     }
 
     public Soql havingFilters(List<SoqlAggregation.AggregateFilter> filters) {

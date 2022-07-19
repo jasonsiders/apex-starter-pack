@@ -8,8 +8,13 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldAllowParentQuery() {
-        Filter testFilter = new Filter('Opportunity.Account.Type', Filter.EQUALS, 'Prospect');
-        System.assertEquals('Opportunity.Account.Type = \'Prospect\'', testFilter.toString(), 'Unexpected output');
+        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+            Case.ContactId,
+            Contact.AccountId,
+            Account.Type
+        });
+        Filter testFilter = new Filter(fieldRef, Filter.EQUALS, 'Prospect');
+        System.assertEquals('Contact.Account.Type = \'Prospect\'', testFilter.toString(), 'Unexpected output');
     }
 
     @IsTest 
@@ -296,12 +301,16 @@ private class Filter_Test {
         );
         Databaselayer.Dml.doInsert(testOpp); 
         testOpp = (Opportunity) Databaselayer.Soql.newQuery(Opportunity.SObjectType)
-            .selectFields('Account.Name')
+            .selectFields(new FieldReference(new List<SObjectField>{Opportunity.AccountId, Account.Name}))
             .whereFilters(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
             .run()[0];
 
         Test.startTest();
-        Filter testFilter = new Filter('Account.Name', Filter.EQUALS, accountName);
+        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+            Opportunity.AccountId,
+            Account.Name
+        });
+        Filter testFilter = new Filter(fieldRef, Filter.EQUALS, accountName);
         System.assertEquals(true, testFilter?.meetsCriteria(testOpp), testOpp.Account.Name + ' == ' + accountName);
         Test.stopTest();
     }

@@ -9,33 +9,14 @@ private class SchemaUtils_Test {
         }
         Decimal total = Limits.getCpuTime() - start;
         System.debug(LoggingLevel.FINEST, 'Completed 200 getFieldDescribe(Account.OwnerId) calls in ' + total + 'ms'); 
-    }
-
-    @IsTest
-    static void shouldReturnAFieldDescribeFromAString() {
-        Schema.DescribeFieldResult expected = Account.OwnerId.getDescribe(); 
-        Decimal start = Limits.getCpuTime(); 
-        for (Integer i = 0; i < 200; i++) {
-            System.assertEquals(expected, SchemaUtils.describeField(Account.SObjectType, 'OwnerId'), 'Describe does not match');
-        }
-        Decimal total = Limits.getCpuTime() - start;
-        System.debug(LoggingLevel.FINEST, 'Completed 200 getFieldDescribe(Account.SObjectType, OwnerId) calls in ' + total + 'ms'); 
-    }
-
-    @IsTest 
-    static void shouldReturnNullDescribeIfFieldIsNull() {
-        SObjectField field;
-        SObjectType objectType; 
-        System.assertEquals(null, SchemaUtils.describeField(field), 'Unexpected desecribe results');
-        System.assertEquals(null, SchemaUtils.describeField(objectType, 'OwnerId'), 'Unexpected describe reuslts');
+        // Should return null if field is null
+        System.assertEquals(null, SchemaUtils.describeField(null), 'Unexpected desecribe results');
     }
 
     @IsTest
     static void shouldReturnAnSObjectField() {
-        System.assertEquals(Account.OwnerId, SchemaUtils.getSObjectField('Account', 'OwnerId'), 'Field does not match'); 
-        final String nullObjectName;
-        final String nullObjectField;
-        System.assertEquals(null, SchemaUtils.getSObjectField(nullObjectName, nullObjectField), 'Null input did not return a null output');
+        System.assertEquals(Account.OwnerId, SchemaUtils.getSObjectField(Account.SObjectType, 'OwnerId'), 'Field does not match'); 
+        System.assertEquals(null, SchemaUtils.getSObjectField(null, null), 'Null input did not return a null output');
     }
 
     @IsTest
@@ -47,25 +28,8 @@ private class SchemaUtils_Test {
         }
         Decimal total = Limits.getCpuTime() - start;
         System.debug(LoggingLevel.FINEST, 'Completed 200 getSObjectDescribe(Account.SObjectType) calls in ' + total + 'ms'); 
-    }
-
-    @IsTest
-    static void shouldReturnAnSObjectDescribeFromAString() {
-        Schema.DescribeSObjectResult expected = SObjectType.Account; 
-        Decimal start = Limits.getCpuTime(); 
-        for (Integer i = 0; i < 200; i++) {
-            System.assertEquals(expected, SchemaUtils.describeSObject('Account'), 'Describe does not match');
-        }
-        Decimal total = Limits.getCpuTime() - start;
-        System.debug(LoggingLevel.FINEST, 'Completed 200 getSObjectDescribe(Account.SObjectType) calls in ' + total + 'ms'); 
-    }
-
-    @IsTest 
-    static void shouldReturnNullDescribeIfObjectIsNull() {
-        SObjectType objectType;
-        String objectName;
-        System.assertEquals(null, SchemaUtils.describeSObject(objectType), 'Unexpected describe results');
-        System.assertEquals(null, SchemaUtils.describeSObject(objectName), 'Unexpected describe results');
+        // Null objectType should return null
+        System.assertEquals(null, SchemaUtils.describeSObject(null), 'Unexpected describe results');
     }
 
     @IsTest

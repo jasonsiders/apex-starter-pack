@@ -15,11 +15,6 @@ public abstract class SchemaUtils {
         }
         return SchemaUtils.SObjectDescribes.get(objectType);
     }
-
-    public static DescribeSObjectResult describeSObject(String objectName) {
-        SObjectType objectType = SchemaUtils.getSObjectType(objectName); 
-        return SchemaUtils.describeSObject(objectType); 
-    }
     
     public static SObjectType getSObjectType(String objectName) {
         try {
@@ -55,18 +50,8 @@ public abstract class SchemaUtils {
         return SchemaUtils.FieldDescribes.get(field); 
     }
 
-    public static DescribeFieldResult describeField(SObjectType objectType, String fieldName) {
-        SObjectField field = SchemaUtils.getSObjectField(objectType, fieldName);
-        return SchemaUtils.describeField(field);
-    }
-
     public static SObjectField getSObjectField(SObjectType objectType, String fieldName) {
         return SchemaUtils.describeSObject(objectType)?.fields?.getMap().get(fieldName); 
-    }
-
-    public static SObjectField getSObjectField(String objectName, String fieldName) {
-        SObjectType objectType = SchemaUtils.getSObjectType(objectName); 
-        return SchemaUtils.getSObjectField(objectType, fieldName); 
     }
 
     public static SObjectField getSObjectFieldByLocalName(SObjectType objectType, String localName) {
@@ -87,8 +72,8 @@ public abstract class SchemaUtils {
         // ex., "Contact.Account.Owner.Profile.Name"
         List<String> references = new List<String>();
         if (fields?.isEmpty() == false) {
-            Integer lastIndex = fields.size() - 1;
-            SObjectField lastField = fields[lastIndex];
+            Integer maxIndex = CollectionUtils.getMaxIndex(fields);
+            SObjectField lastField = fields[maxIndex];
             for (SObjectField field : fields) {
                 String reference = (field != lastField) 
                     ? SchemaUtils.describeField(field)?.getRelationshipName() 

@@ -138,10 +138,8 @@ public inherited sharing abstract class InvocableRollup {
 
         private void mapByRelationshipField(List<Rollup__mdt> rollups) {
             for (Rollup__mdt rollup : rollups) {
-                SObjectField relationshipField = SchemaUtils.getSObjectField(
-                    rollup.Child_SObjectType__c,
-                    rollup.Relationship_Field__c
-                ); 
+                SObjectType childSObjectType = SchemaUtils.getSObjectType(rollup.Child_SObjectType__c); 
+                SObjectField relationshipField = SchemaUtils.getSObjectField(childSObjectType, rollup.Relationship_Field__c); 
                 List<Rollup__mdt> matching = rollupMdts?.containsKey(relationshipField) 
                     ? this.rollupMdts.get(relationshipField)
                     : new List<Rollup__mdt>();

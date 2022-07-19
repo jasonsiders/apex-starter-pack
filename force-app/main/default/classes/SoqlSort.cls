@@ -8,25 +8,27 @@ public class SoqlSort {
         Order.DESCENDING => 'DESC'
     };
 
-    public SoqlSort(List<String> fieldNames, Order order, nullOrder nullOrder) {
-        this.fieldNames = fieldNames;
+    public SoqlSort(List<FieldReference> fieldReferences, Order order, NullOrder nullOrder) {
+        for (FieldReference fieldReference : fieldReferences) {
+            this.fieldNames.add(fieldReference?.toString());
+        }
         this.order = order; 
         this.nullOrder = nullOrder;
     }
 
-    public SoqlSort(List<String> fieldNames, Order order) {
-        this(fieldNames, order, null); 
+    public SoqlSort(List<FieldReference> fieldReferences, Order order) {
+        this(fieldReferences, order, null); 
     }
 
-    public SoqlSort(String fieldName, Order order, nullOrder nullOrder) {
-        this(new List<String>{fieldName}, order, nullOrder); 
+    public SoqlSort(FieldReference fieldReference, Order order, NullOrder nullOrder) {
+        this(new List<FieldReference>{fieldReference}, order, nullOrder);
     }
 
-    public SoqlSort(String fieldName, Order order) {
-        this(fieldName, order, null); 
+    public SoqlSort(FieldReference fieldReference, Order order) {
+        this(fieldReference, order, null); 
     }
 
-    public SoqlSort(List<SObjectField> fields, Order order, nullOrder nullOrder) {
+    public SoqlSort(List<SObjectField> fields, Order order, NullOrder nullOrder) {
         for (SObjectField field : fields) {
             this.fieldNames.add(String.valueOf(field)); 
         }
@@ -38,12 +40,30 @@ public class SoqlSort {
         this(fields, order, null); 
     }
 
-    public SoqlSort(SObjectField field, Order order, nullOrder nullOrder) {
+    public SoqlSort(SObjectField field, Order order, NullOrder nullOrder) {
         this(new List<SObjectField>{field}, order, nullOrder); 
     }
 
     public SoqlSort(SObjectField field, Order order) {
         this(field, order, null); 
+    }
+
+    public SoqlSort(List<String> fieldNames, Order order, NullOrder nullOrder) {
+        this.fieldNames = fieldNames;
+        this.order = order; 
+        this.nullOrder = nullOrder;
+    }
+
+    public SoqlSort(List<String> fieldNames, Order order) {
+        this(fieldNames, order, null); 
+    }
+
+    public SoqlSort(String fieldName, Order order, NullOrder nullOrder) {
+        this(new List<String>{fieldName}, order, nullOrder); 
+    }
+
+    public SoqlSort(String fieldName, Order order) {
+        this(fieldName, order, null); 
     }
 
     public override String toString() {

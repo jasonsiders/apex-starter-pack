@@ -54,6 +54,13 @@ public abstract class CollectionUtils {
         return (size >= minSize) ? items[index] : null; 
     }
 
+    public static Integer getMaxIndex(List<Object> items) {
+        // Returns the "last" index of a collection
+        // ex., if size == 1, will return 0; if size == 2, will return 1
+        // If null or empty, will return null
+        return items?.isEmpty() == false ? items.size() - 1 : null;
+    }
+
     public static Object extractValues(List<Object> items, String key, Type returnType) {
         List<Object> values = new List<Object>();
         for (Object item : items) {

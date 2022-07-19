@@ -30,26 +30,20 @@ public class RollupMetadataHelper {
 
     // **** PRIVATE **** //
     private void addRequest(Rollup rollup, Rollup__mdt rollupMdt) {
-        SObjectField relationshipField = SchemaUtils.getSObjectField(
-            rollupMdt?.Child_SObjectType__c, 
-            rollupMdt?.Relationship_Field__c
-        );
+        SObjectType childSObjectType = SchemaUtils.getSObjectType(rollupMdt?.Child_SObjectType__c); 
+        SObjectType parentSObjectType = SchemaUtils.getSObjectType(rollupMdt?.Parent_SObjectType__c); 
+        SObjectField relationshipField = SchemaUtils.getSObjectField(childSObjectType, rollupMdt?.Relationship_Field__c);
         ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
         rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(new Rollup.Request(
-            SchemaUtils.getSObjectField(
-                rollupMdt?.Parent_SObjectType__c,
-                rollupMdt?.Target_Field__c
-            ),
+            SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c),
             this.getCalculator(rollupMdt),
             this.getFilters(rollupMdt?.Rollup_Filters__r)
         )));
     }
 
     private Rollup.Calculator getCalculator(Rollup__mdt rollupMdt) {
-        Schema.SObjectField calcField = SchemaUtils.getSObjectField(
-            rollupMdt?.Child_SObjectType__c, 
-            rollupMdt?.Calculation_Field__c
-        ); 
+        SObjectType childSObjectType = SchemaUtils.getSObjectType(rollupMdt?.Child_SObjectType__c);
+        Schema.SObjectField calcField = SchemaUtils.getSObjectField(childSObjectType, rollupMdt?.Calculation_Field__c);
         Type calcType = (String.isNotBlank(rollupMdt?.Calculator_Class_Name__c))
             ? Type.forName(rollupMdt?.Calculator_Class_Name__c)
             : RollupMetadataHelper.CALCULATOR_BY_TOKEN.get(rollupMdt?.Calculation_Type__c);
@@ -73,14 +67,13 @@ public class RollupMetadataHelper {
         Filter activeFilter = new Filter('Active__c', Filter.EQUALS, true);
         SubQuery filtersQuery = (SubQuery) new SubQuery(Rollup_Filter__mdt.Rollup__c);
         filtersQuery.selectFields(Rollup_Filter__mdt.Active__c); 
-        final String parentRelationship = SchemaUtils.describeField(Rollup_Filter__mdt.Filter__c)?.getRelationshipName();
         for (SObjectField parentField : new List<SObjectField>{
             Filter__mdt.Operator__c, 
             Filter__mdt.SObjectField__c, 
             Filter__mdt.SObjectType__c,
             Filter__mdt.Value__c
         }) {
-            String reference = parentRelationship + '.' + parentField; 
+            FieldReference reference = new FieldReference(new List<SObjectField>{Rollup_Filter__mdt.Filter__c, parentField});
             filtersQuery.selectFields(reference);
         }
         return Databaselayer.Soql.newQuery(Rollup__mdt.SObjectType)
