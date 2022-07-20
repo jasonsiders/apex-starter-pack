@@ -31,8 +31,8 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldProduceQuerySegmentForInCollection() {
-        Id accountId = TestUtils.generateFakeId(Account.SObjectType);
-        Id caseId = TestUtils.generateFakeId(Case.SObjectType);
+        Id accountId = DmlMock.generateFakeId(Account.SObjectType);
+        Id caseId = DmlMock.generateFakeId(Case.SObjectType);
         Set<Id> recordIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, recordIds);
         System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
@@ -40,8 +40,8 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldProduceQuerySegmentForNotInCollection() {
-        Id accountId = TestUtils.generateFakeId(Account.SObjectType);
-        Id caseId = TestUtils.generateFakeId(Case.SObjectType);
+        Id accountId = DmlMock.generateFakeId(Account.SObjectType);
+        Id caseId = DmlMock.generateFakeId(Case.SObjectType);
         Set<Id> recordIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.NOT_IN_COLLECTION, recordIds);
         System.assertEquals('My_Custom_Field__c NOT IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
@@ -210,8 +210,8 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldProduceQuerySegmentForListId() {
-        Id accountId = TestUtils.generateFakeId(Account.SObjectType); 
-        Id caseId = TestUtils.generateFakeId(Case.SObjectType);
+        Id accountId = DmlMock.generateFakeId(Account.SObjectType); 
+        Id caseId = DmlMock.generateFakeId(Case.SObjectType);
         List<Id> myIds = new List<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myIds); 
         System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
@@ -219,8 +219,8 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldProduceQuerySegmentForSetId() {
-        Id accountId = TestUtils.generateFakeId(Account.SObjectType); 
-        Id caseId = TestUtils.generateFakeId(Case.SObjectType);
+        Id accountId = DmlMock.generateFakeId(Account.SObjectType); 
+        Id caseId = DmlMock.generateFakeId(Case.SObjectType);
         Set<Id> myIds = new Set<Id>{accountId, caseId};
         Filter testFilter = new Filter('My_Custom_Field__c', Filter.IN_COLLECTION, myIds); 
         System.assertEquals('My_Custom_Field__c IN (\'' + accountId + '\', \'' + caseId + '\')', testFilter.toString(), 'Unexpected output');
@@ -349,7 +349,7 @@ private class Filter_Test {
     @IsTest 
     static void shouldEvaluateInCollection() {
         Opportunity testOpp = new Opportunity(
-            Id = TestUtils.generateFakeId(Opportunity.SObjectType)
+            Id = DmlMock.generateFakeId(Opportunity.SObjectType)
         );
         List<Id> oppList = new List<Id>{testOpp.Id};
 
@@ -365,7 +365,7 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldNotEvaluateInCollectionIfInvalidType() {
-        Opportunity testOpp = new Opportunity(Id = TestUtils.generateFakeId(Opportunity.SObjectType));
+        Opportunity testOpp = new Opportunity(Id = DmlMock.generateFakeId(Opportunity.SObjectType));
         Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>{testOpp.Id => testOpp};
         Set<Id> oppSet = oppMap.keySet();
 
@@ -386,10 +386,10 @@ private class Filter_Test {
     @IsTest 
     static void shouldEvaluateNotInCollection() {
         Opportunity testOpp = new Opportunity(
-            Id = TestUtils.generateFakeId(Opportunity.SObjectType)
+            Id = DmlMock.generateFakeId(Opportunity.SObjectType)
         );
 
-        Id newId = TestUtils.generateFakeId(Opportunity.SObjectType); 
+        Id newId = DmlMock.generateFakeId(Opportunity.SObjectType); 
         List<Id> oppList = new List<Id>{newId};
 
         Test.startTest();

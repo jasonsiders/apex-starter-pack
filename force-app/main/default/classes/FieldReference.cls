@@ -60,15 +60,19 @@ public class FieldReference {
         return this.soqlReference;
     }
 
+    // Note: These methods are necessary to allow this type to be safely used as a map key
+    // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
     public Boolean equals(Object obj) {
-        // Note: Necessary to allow this type to be safely used as a map key
-        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
         // Any FieldReferences with the same root object and SOQL reference can be considered equal
         FieldReference otherRef = (obj instanceOf FieldReference) ? (FieldReference) obj : null;
         return (
             otherRef?.rootSObjectType == this.rootSObjectType && 
             otherRef?.toString() == this.toString()
         );
+    }
+
+    public Integer hashCode() {
+        return System.hashCode(this.destinationFieldName);
     }
 
     private void setDestinationDetails(SObjectField field) {

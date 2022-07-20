@@ -1,5 +1,24 @@
 @IsTest
 public class DmlMock extends Dml {
+    static Integer numIdsGenerated = 0; 
+
+    public static Id generateFakeId(SObjectType objectType) {
+        String prefix = SchemaUtils.describeSObject(objectType)?.getKeyPrefix();
+        String suffix = String.valueOf(numIdsGenerated++);
+        return prefix + '0'.repeat(15-suffix?.length()) + suffix; 
+    }
+
+    public static SObject generateFakeId(SObject record) {
+        return generateFakeId(new List<SObject>{record})[0];
+    }
+
+    public static List<SObject> generateFakeId(List<SObject> records) {
+        for (SObject record : records) {
+            record.Id = (record?.Id != null) ? record?.Id : generateFakeId(record?.getSObjectType()); 
+        }
+        return records;
+    }
+
     public static void resetHistory() {
         // Sometimes in tests, it's useful to reset the Dml tracking,
         // especially to determine what changes were made during the test action itself, vs. setup
@@ -24,7 +43,7 @@ public class DmlMock extends Dml {
     
     // Insert Methods
     public override List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
-        records = TestUtils.generateFakeIds(records);
+        records = DmlMock.generateFakeId(records);
         Dml.Inserted.add(records); 
         return this.mockDmlResults(records);
     }
@@ -37,7 +56,7 @@ public class DmlMock extends Dml {
 
     // Upsert Methods
     public override List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
-        records = TestUtils.generateFakeIds(records); 
+        records = DmlMock.generateFakeId(records); 
         Dml.Upserted.add(records); 
         return this.mockDmlResults(records);
     }

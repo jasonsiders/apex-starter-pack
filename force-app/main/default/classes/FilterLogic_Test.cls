@@ -25,7 +25,7 @@ private class FilterLogic_Test {
         Account testAccount = new Account(
             AnnualRevenue = 1,
             BillingCountry = 'UK',
-            OwnerId = TestUtils.generateFakeId(User.SObjectType)
+            OwnerId = DmlMock.generateFakeId(User.SObjectType)
         );
         System.assertEquals(false, logic.meetsCriteria(testAccount), 'Unexpected FilterLogic.meetsCriteria() result. Logic: ' + logic + '. Item: ' + JSON.serialize(testAccount));
         // If just one is true, will return true
@@ -43,7 +43,7 @@ private class FilterLogic_Test {
         Account testAccount = new Account(
             AnnualRevenue = 9999,
             BillingCountry = 'USA',
-            OwnerId = TestUtils.generateFakeId(User.SObjectType)
+            OwnerId = DmlMock.generateFakeId(User.SObjectType)
         ); 
         System.assertEquals(true, logic.meetsCriteria(testAccount), 'Unexpected FilterLogic.meetsCriteria() result. Logic: ' + logic + '. Item: ' + JSON.serialize(testAccount));
         // If 1/3 (or less) meets criteria, will return false
@@ -88,8 +88,8 @@ private class FilterLogic_Test {
         // Note: IN_COLLECTION / NOT_IN_COLLECTION Filter Operators have proven to be especially difficult to output
         // Verify that they will produce a valid queries
         List<String> accountIds = new List<String>{
-            TestUtils.generateFakeId(Account.SObjectType),
-            TestUtils.generateFakeId(Account.SObjectType)
+            DmlMock.generateFakeId(Account.SObjectType),
+            DmlMock.generateFakeId(Account.SObjectType)
         };
         List<String> testNames = new List<String>{'Test1', 'Test2'};
         List<Filter> filters = new List<Filter>{

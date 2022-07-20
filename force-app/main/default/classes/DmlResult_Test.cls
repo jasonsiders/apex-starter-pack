@@ -113,7 +113,7 @@ private class DmlResult_Test {
     static void shouldLogErrors() {
         DatabaseLayer.setDmlEngine(new DmlMock());
         Logger.settings = new Log_Setting__c(Level__c = 'FINEST', Enabled__c = true);
-        Id fakeId = TestUtils.generateFakeId(Account.SObjectType);
+        Id fakeId = DmlMock.generateFakeId(Account.SObjectType);
         DmlResult.Error mockError = new DmlResult.Error(new List<String>(), 'Fake Error Message', null);
         List<DmlResult.Error> mockErrors = new List<DmlResult.Error>{mockError};
         DmlResult mockResult = new DmlResult(mockErrors, false, fakeId);

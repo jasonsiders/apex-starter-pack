@@ -136,7 +136,7 @@ private class Dml_Test {
     static void shouldDoPublish() {
         Log_Event__e event = new Log_Event__e(
             Message__c = 'Testing 123',
-            Running_User__c = TestUtils.generateFakeId(Account.SObjectType),
+            Running_User__c = DmlMock.generateFakeId(Account.SObjectType),
             Severity__c = 'NONE',
             Transaction_Id__c = '1234'
         );
@@ -233,7 +233,7 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldThrowErrorOnUpsertForIllegalUpsertValue() {
-        Account account = new Account(Id = TestUtils.generateFakeId(Account.SObjectType)); // illegal account Id value
+        Account account = new Account(Id = DmlMock.generateFakeId(Account.SObjectType)); // illegal account Id value
         
         Test.startTest();
         Exception caughtError; 
@@ -249,7 +249,7 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldThrowErrorOnDelete() {
-        Account account = new Account(Id = TestUtils.generateFakeId(Account.SObjectType)); // illegal account Id value
+        Account account = new Account(Id = DmlMock.generateFakeId(Account.SObjectType)); // illegal account Id value
         
         Test.startTest();
         Exception caughtError; 
@@ -265,7 +265,7 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldThrowErrorOnHardDelete() {
-        Account account = new Account(Id = TestUtils.generateFakeId(Account.SObjectType)); // illegal account Id value
+        Account account = new Account(Id = DmlMock.generateFakeId(Account.SObjectType)); // illegal account Id value
         
         Test.startTest();
         Exception caughtError; 
@@ -281,7 +281,7 @@ private class Dml_Test {
 
     @IsTest 
     static void shouldThrowErrorOnUndelete() {
-        Account account = new Account(Id = TestUtils.generateFakeId(Account.SObjectType)); // illegal account Id value
+        Account account = new Account(Id = DmlMock.generateFakeId(Account.SObjectType)); // illegal account Id value
         
         Test.startTest();
         Exception caughtError; 
