@@ -4,7 +4,7 @@ private class MaxCalculator_Test {
     static void shouldNotCalculateBooleanValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(
                 new Opportunity(), 
                 Opportunity.IsClosed, 
                 true
@@ -36,7 +36,7 @@ private class MaxCalculator_Test {
         List<Opportunity> opportunities = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
             maxDt = maxDt.addDays(10); 
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(
                 new Opportunity(), 
                 Opportunity.CreatedDate, 
                 maxDt
@@ -100,7 +100,7 @@ private class MaxCalculator_Test {
             if (newDt != null) {
                 maxDt = newDt; 
             }
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(
                 new Opportunity(), 
                 Opportunity.CreatedDate, 
                 newDt

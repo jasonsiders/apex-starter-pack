@@ -44,15 +44,15 @@ private class FieldReference_Test {
         // After serializiation, should still function the same as before
         FieldReference deserializedRef = (FieldReference) JSON.deserialize(JSON.serialize(ref), FieldReference.class); 
         Account testAccount = new Account(Name = 'Foo');
-        Contact testContact = (Contact) ObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount);
-        Case testCase = (Case) ObjectUtils.setLookupField(new Case(), Case.ContactId, testContact); 
+        Contact testContact = (Contact) SObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount);
+        Case testCase = (Case) SObjectUtils.setLookupField(new Case(), Case.ContactId, testContact); 
         System.assertEquals(testAccount.Name, deserializedRef.getValue(testCase), 'Post-serialization, could not retrieve the correct field value'); 
     }
 
     @IsTest 
     static void shouldThrowErrorIfGettingFieldFromSObjectOfWrongType() {
         Account testAccount = new Account(Name = 'Test'); 
-        Contact testContact = (Contact) ObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount); 
+        Contact testContact = (Contact) SObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount); 
         FieldReference ref = new FieldReference(Account.Name); 
 
         Test.startTest();

@@ -299,16 +299,16 @@ private class InvocableRollup_Test {
                 SObjectType__c = 'Opportunity',
                 Value__c = '"Closed Won"'
             );
-            Rollup_Filter__mdt rollupFilter = (Rollup_Filter__mdt) ObjectUtils.setLookupField(
+            Rollup_Filter__mdt rollupFilter = (Rollup_Filter__mdt) SObjectUtils.setLookupField(
                 new Rollup_Filter__mdt(Active__c = true),
                 Rollup_Filter__mdt.Filter__c,
                 closedWonFilter
             );
             rollupFilters.add(rollupFilter); 
         }
-        return (Rollup__mdt) ObjectUtils.setReadOnlyField(
+        return (Rollup__mdt) SObjectUtils.setRelatedList(
             rollupMdt, 
-            'Rollup_Filters__r', 
+            SchemaUtils.getChildRelationship(Rollup_Filter__mdt.Rollup__c),
             rollupFilters
         );
     }
@@ -342,6 +342,6 @@ private class InvocableRollup_Test {
         // One of the opportunities will NOT be closed won
         opportunities[0].StageName = 'New';
         Databaselayer.Dml.doInsert(opportunities); 
-        return (Account) ObjectUtils.setReadOnlyField(account, 'Opportunities', opportunities); 
+        return (Account) SObjectUtils.setRelatedList(account, SchemaUtils.getChildRelationship(Opportunity.AccountId), opportunities); 
     }
 }

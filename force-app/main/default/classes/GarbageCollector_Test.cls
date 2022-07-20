@@ -39,7 +39,7 @@ private class GarbageCollector_Test {
         // Note: Known issues for ApexTypeImplementor sometimes lead to incorrect query results when running all tests
         // To avoid this, stub out the query for the known type
         DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
-        ApexTypeImplementor mockImplementor = (ApexTypeImplementor) ObjectUtils.setReadOnlyField(
+        ApexTypeImplementor mockImplementor = (ApexTypeImplementor) SObjectUtils.setReadOnlyField(
             new ApexTypeImplementor(), 
             ApexTypeImplementor.ClassName, 
             String.valueOf(GarbageCollector_Test.TestExtension.class)

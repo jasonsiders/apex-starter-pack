@@ -4,7 +4,7 @@ private class AvgCalculator_Test {
     static void shouldNotCalculateBooleanValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.IsClosed, true)); 
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.IsClosed, true)); 
         }
         
         Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.IsClosed));
@@ -37,7 +37,7 @@ private class AvgCalculator_Test {
         for (Integer i = 0; i < 10; i++) {
             Integer extraDays = i * 10; 
             maxDt = minDt.addDays(extraDays);
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, maxDt));
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, maxDt));
         }
 
         Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate));
@@ -99,14 +99,14 @@ private class AvgCalculator_Test {
         DateTime minDt = DateTime.newInstanceGmt(2022, 01, 01); 
         DateTime maxDt = minDt; 
         List<Opportunity> opportunities = new List<Opportunity>();
-        opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, minDt)); 
+        opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, minDt)); 
         for (Integer i = 0; i < 10; i++) {
             Integer extraDays = i * 10; 
             DateTime newDt = (i != 0) ? minDt.addDays(extraDays) : null; 
             if (newDt != null) {
                 maxDt = newDt;
             }
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, newDt));
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, newDt));
         }
 
         Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate));

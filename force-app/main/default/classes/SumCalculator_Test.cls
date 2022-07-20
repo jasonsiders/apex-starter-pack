@@ -4,7 +4,7 @@ private class SumCalculator_Test {
     static void shouldNotCalculateBooleanValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(
                 new Opportunity(), 
                 Opportunity.IsClosed, 
                 true
@@ -32,7 +32,7 @@ private class SumCalculator_Test {
     static void shouldNotCalculateSumOfDateTimeValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         for (Integer i = 0; i < 10; i++) {
-            opportunities.add((Opportunity) ObjectUtils.setReadOnlyField(
+            opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(
                 new Opportunity(), 
                 Opportunity.CreatedDate, 
                 DateTime.now()

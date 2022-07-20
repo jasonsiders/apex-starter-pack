@@ -161,15 +161,15 @@ private class RollupMetadataHelper_Test {
         ); 
         Databaselayer.Dml.doInsert(filterMdt);
         Rollup_Filter__mdt rollupFilterMdt = new Rollup_Filter__mdt(Active__c = true);
-        rollupFilterMdt = (Rollup_Filter__mdt) ObjectUtils.setLookupField(
+        rollupFilterMdt = (Rollup_Filter__mdt) SObjectUtils.setLookupField(
             rollupFilterMdt, 
             Rollup_Filter__mdt.Filter__c, 
             filterMdt
         ); 
         Databaselayer.Dml.doInsert(rollupFilterMdt);
-        rollupMdt = (Rollup__mdt) ObjectUtils.setReadOnlyField(
+        rollupMdt = (Rollup__mdt) SObjectUtils.setRelatedList(
             rollupMdt, 
-            'Rollup_Filters__r', 
+            SchemaUtils.getChildRelationship(Rollup_Filter__mdt.Rollup__c),
             new List<Rollup_Filter__mdt>{rollupFilterMdt}
         );
 
@@ -231,13 +231,13 @@ private class RollupMetadataHelper_Test {
                 // Only 2/3 should be added to the request; 1st one is inactive
                 Active__c = (i == 0) ? false : true
             );
-            rollupFilter = (Rollup_Filter__mdt) ObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Filter__c, filterMdt);
+            rollupFilter = (Rollup_Filter__mdt) SObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Filter__c, filterMdt);
             rollupFilterMdts.add(rollupFilter);
         }
         Databaselayer.Dml.doInsert(rollupFilterMdts);
-        rollupmdt = (Rollup__mdt) ObjectUtils.setReadOnlyField(
+        rollupmdt = (Rollup__mdt) SObjectUtils.setRelatedList(
             rollupMdt, 
-            'Rollup_Filters__r', 
+            SchemaUtils.getChildRelationship(Rollup_Filter__mdt.Rollup__c),
             rollupFilterMdts
         );
 
@@ -315,11 +315,11 @@ private class RollupMetadataHelper_Test {
         List<Rollup__mdt> rollupRecords = new List<Rollup__mdt>(); 
         for (Rollup__mdt rollupMdt : rollupMdts) {
             Rollup_Filter__mdt rollupFilter = new Rollup_Filter__mdt(Active__c = true);
-            rollupFilter = (Rollup_Filter__mdt) ObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Rollup__c, rollupMdt);
-            rollupFilter = (Rollup_Filter__mdt) ObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Filter__c, oppIsClosedFilter); 
-            rollupRecords?.add((Rollup__mdt) ObjectUtils.setReadOnlyField(
+            rollupFilter = (Rollup_Filter__mdt) SObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Rollup__c, rollupMdt);
+            rollupFilter = (Rollup_Filter__mdt) SObjectUtils.setLookupField(rollupFilter, Rollup_Filter__mdt.Filter__c, oppIsClosedFilter); 
+            rollupRecords?.add((Rollup__mdt) SObjectUtils.setRelatedList(
                 rollupMdt, 
-                'Rollup_Filters__r', 
+                SchemaUtils.getChildRelationship(Rollup_Filter__mdt.Rollup__c),
                 new List<Rollup_Filter__mdt>{rollupFilter}
             ));
         }
