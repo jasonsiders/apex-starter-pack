@@ -1,7 +1,7 @@
 @IsTest 
 private class AsyncDml_Test {
     @IsTest 
-    static void shouldProcessDmlAsynchronously() {
+    static void shouldProcessDmlAsynchronously() { 
         List<Account> testAccounts = new List<Account>();
         for (Integer i = 0; i < 10; i++) {
             testAccounts.add(new Account(Name = 'Test Account')); 
@@ -45,10 +45,10 @@ private class AsyncDml_Test {
 
     @IsTest 
     static void shouldMakeRequestWithExternalId() {
-        AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), Case.CaseNumber);
+        AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), new FieldReference(Case.CaseNumber));
         System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation'); 
         System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
-        System.assertEquals(Case.CaseNumber, request?.externalIdField, 'Wrong externalIdField');
+        System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
         System.assertEquals(true, request?.allOrNone, 'Wrong allOrNone'); 
         System.assertEquals(false, request?.skipTriggers, 'Wrong skipTriggers'); 
     }
@@ -68,12 +68,12 @@ private class AsyncDml_Test {
         AsyncDml.Request request = new AsyncDml.Request(
             Dml.Operation.DO_INSERT, 
             new Case(), 
-            Case.CaseNumber, 
+            new FieldReference(Case.CaseNumber),
             false
         );
         System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation'); 
         System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
-        System.assertEquals(Case.CaseNumber, request?.externalIdField, 'Wrong externalIdField');
+        System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
         System.assertEquals(false, request?.allOrNone, 'Wrong allOrNone'); 
         System.assertEquals(false, request?.skipTriggers, 'Wrong skipTriggers'); 
     }

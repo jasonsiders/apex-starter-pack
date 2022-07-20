@@ -31,6 +31,28 @@ private class SObjectReference_Test {
         System.assertEquals(false, ref.isSObjectTypeOf(new Account()), ref?.toString() + '.SObjectType == new Account()?');
     }
 
+    @IsTest 
+    static void shouldBeUsableAsAMapKey() {
+        Map<SObjectReference, String> objectsByName = new Map<SObjectReference, String>();
+        List<SObjectType> objectTypes = new List<SObjectType>{
+            Account.SObjectType, 
+            Contact.SObjectType, 
+            Lead.SObjectType
+        };
+        for (SObjectType objectType : objectTypes) {
+            SObjectReference ref = new SObjectReference(objectType);
+            objectsByName.put(ref, ref?.toString()); 
+        }
+
+        Test.startTest();
+        for (SObjectType objectType : objectTypes) {
+            // Without the equals() method, this would fail!
+            SObjectReference ref = new SObjectReference(objectType); 
+            System.assertEquals(ref?.toString(), objectsByName?.get(ref), 'No value found for ' + ref + ': ' + JSON.serializePretty(objectsByName));
+        }
+        Test.stopTest();
+    }
+
     // **** HELPER **** //
     static Exception serialize(Object obj) {
         Exception caughtError;

@@ -25,7 +25,7 @@ public inherited sharing abstract class InvocableRollup {
     }
 
     // **** MEMBER **** // 
-    SObjectType objectType; 
+    SObjectReference objectType; 
     Timing timing; 
     Map<Id, SObject> records = new Map<Id, SObject>();
 
@@ -114,8 +114,8 @@ public inherited sharing abstract class InvocableRollup {
         Map<SObjectField, List<Rollup__mdt>> rollupMdts = new Map<SObjectField, List<Rollup__mdt>>();
         Map<SObjectField, Rollup> rollupMap = new Map<SObjectField, Rollup>();
 
-        private ChildRollup(List<Input> inputs, SObjectType objectType, Timing timing) {
-            this.objectType = objectType; 
+        private ChildRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
+            this.objectType = new SObjectReference(sObjectType);
             this.timing = timing; 
             for (Input input : inputs) {
                 this.records.putAll(new Map<Id, SObject>(input.getRecords())); 
@@ -165,8 +165,8 @@ public inherited sharing abstract class InvocableRollup {
     private class ParentRollup extends InvocableRollup {
         List<Rollup> rollups = new List<Rollup>();
 
-        private ParentRollup(List<Input> inputs, SObjectType objectType, Timing timing) {
-            this.objectType = objectType; 
+        private ParentRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
+            this.objectType = new SObjectReference(sObjectType);
             this.timing = timing; 
             List<Rollup__mdt> rollupMdts = this.getRollupsFromInputs(inputs); 
             this.validateMetadata(rollupMdts); 

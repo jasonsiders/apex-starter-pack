@@ -1,5 +1,5 @@
 @IsTest
-private class Rollup_Test {
+private class Rollup_Test { 
     @IsTest 
     static void shouldRunFromParent() {
         Soql accountQuery = Databaselayer.Soql.newQuery(Account.SObjectType)
@@ -42,9 +42,11 @@ private class Rollup_Test {
 
         Test.startTest(); 
         Rollup rollup = new Rollup(Account.SObjectType).addRelationship(
-            new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
-                Account.AnnualRevenue,
-                new SumCalculator()?.setCalcField(Opportunity.Amount)
+            new Rollup.Relationship(
+                new FieldReference(Opportunity.AccountId)
+            ).addRequest(new Rollup.Request(
+                new FieldReference(Account.AnnualRevenue), 
+                new SumCalculator()?.setCalcField(new FieldReference(Opportunity.Amount))
             ).addFilters(new Filter(
                 Opportunity.Amount, 
                 Filter.GREATER_THAN,
@@ -62,15 +64,15 @@ private class Rollup_Test {
     static void shouldProvideDefaultCalculatorValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         Rollup.Calculator calc = new MockCalculator(); 
-        calc.setCalcField(Opportunity.IsClosed); 
+        calc.setCalcField(new FieldReference(Opportunity.IsClosed)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Boolean');
-        calc.setCalcField(Opportunity.CloseDate);
+        calc.setCalcField(new FieldReference(Opportunity.CloseDate));
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Date');
-        calc.setCalcField(Opportunity.CreatedDate); 
+        calc.setCalcField(new FieldReference(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for DateTime');
-        calc.setCalcField(Opportunity.Amount);
+        calc.setCalcField(new FieldReference(Opportunity.Amount));
         System.assertEquals(0, calc.calculate(opportunities), 'Wrong default value for Number');
-        calc.setCalcField(Opportunity.Name); 
+        calc.setCalcField(new FieldReference(Opportunity.Name)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Text');
         calc.setCalcField(null); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for null calcField');
@@ -80,12 +82,16 @@ private class Rollup_Test {
     static void shouldPreventDuplicateRelationships() {
         Rollup rollup = new Rollup(Account.SObjectType); 
         // Create two relationship objects for the same ChildRelationship
-        Rollup.Relationship rel1 = new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
-            Account.NumberOfEmployees,
+        Rollup.Relationship rel1 = new Rollup.Relationship(
+            new FieldReference(Opportunity.AccountId)
+        ).addRequest(new Rollup.Request(
+            new FieldReference(Account.NumberOfEmployees),
             new MockCalculator()
         ));
-        Rollup.Relationship rel2 = new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
-            Account.AnnualRevenue,
+        Rollup.Relationship rel2 = new Rollup.Relationship(
+            new FieldReference(Opportunity.AccountId)
+        ).addRequest(new Rollup.Request(
+            new FieldReference(Account.AnnualRevenue),
             new MockCalculator()
         ));
 
@@ -118,9 +124,11 @@ private class Rollup_Test {
 
     private static Rollup getSumCalculator() {
         return new Rollup(Account.SObjectType).addRelationship(
-            new Rollup.Relationship(Opportunity.AccountId).addRequest(new Rollup.Request(
-                Account.AnnualRevenue,
-                new SumCalculator()?.setCalcField(Opportunity.Amount)
+            new Rollup.Relationship(
+                new FieldReference(Opportunity.AccountId)
+            ).addRequest(new Rollup.Request(
+                new FieldReference(Account.AnnualRevenue), 
+                new SumCalculator()?.setCalcField(new FieldReference(Opportunity.Amount))
             ))
         );
     }

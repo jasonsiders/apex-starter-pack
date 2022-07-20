@@ -12,8 +12,7 @@ public inherited sharing class SerializableLeadConvert {
     @TestVisible Id opportunityId;
     @TestVisible String opportunityName;
     @TestVisible Id ownerId;
-    // Note: Must be untyped SObject, since not all orgs have PersonAccounts enabled
-    @TestVisible SObject personAccount; 
+    @TestVisible SObject personAccount; // Note: Generic SObject, since not all orgs have PersonAccounts enabled
     @TestVisible Boolean doNotCreateOpportunity;
     @TestVisible Boolean overwriteLeadSource;
     @TestVisible Boolean sendNotificationEmail; 

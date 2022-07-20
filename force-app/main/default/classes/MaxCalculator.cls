@@ -2,7 +2,7 @@ public class MaxCalculator extends Rollup.Calculator {
     public override Date calculateDate(List<SObject> records) {
         Date maxDate; 
         for (SObject record : records) {
-            Date newDate = (Date) record?.get(this.calcField);
+            Date newDate = (Date) record?.get(this.calcField?.toSchemaType());
             Boolean newIsGreater = (maxDate == null || (newDate != null && newDate > maxDate));
             maxDate = (newIsGreater) ? newDate : maxDate;
         }
@@ -12,7 +12,7 @@ public class MaxCalculator extends Rollup.Calculator {
     public override DateTime calculateDateTime(List<SObject> records) {
         DateTime maxDate; 
         for (SObject record : records) {
-            DateTime newDate = (DateTime) record?.get(this.calcField);
+            DateTime newDate = (DateTime) record?.get(this.calcField?.toSchemaType());
             Boolean newIsGreater = (maxDate == null || (newDate != null && newDate > maxDate));
             maxDate = (newIsGreater) ? newDate : maxDate;
         }
@@ -22,7 +22,7 @@ public class MaxCalculator extends Rollup.Calculator {
     public override Decimal calculateNumber(List<SObject> records) {
         Decimal maxNum;
         for (SObject record : records) {
-            Decimal newNum = (Decimal) record?.get(this.calcField);
+            Decimal newNum = (Decimal) record?.get(this.calcField?.toSchemaType());
             Boolean newIsGreater = (maxNum == null || (newNum != null && newNum > maxNum));
             maxNum = (newIsGreater) ? newNum : maxNum;
         }

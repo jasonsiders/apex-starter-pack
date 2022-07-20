@@ -2,7 +2,7 @@ public class RollupMetadataHelper {
     // In addition to defining Rollup objects on the fly in apex,
     // callers have the option of defining Rollup__mdt custom metadata objects
     // This class is used to convert Rollup__mdt => Rollup objects
-    Map<SObjectType, Rollup> rollups = new Map<SObjectType, Rollup>();
+    Map<SObjectReference, Rollup> rollups = new Map<SObjectReference, Rollup>();
     public static final Soql BASE_QUERY = RollupMetadataHelper.getBaseQuery(); 
     @TestVisible static final String BASE_QUERY_KEY = 'Rollup_MDT_Base_Query';
     static final Map<String, Type> CALCULATOR_BY_TOKEN = new Map<String, Type>{
@@ -16,11 +16,12 @@ public class RollupMetadataHelper {
     public RollupMetadataHelper(List<Rollup__mdt> rollupMdts) {
         for (Rollup__mdt rollupMdt : rollupMdts) {
             SObjectType objectType = SchemaUtils.getSObjectType(rollupMdt.Parent_SObjectType__c); 
-            Rollup rollup = this.rollups.containsKey(objectType) 
-                ? this.rollups.get(objectType) 
+            SObjectReference objectRef = new SObjectReference(objectType); 
+            Rollup rollup = this.rollups.containsKey(objectRef) 
+                ? this.rollups.get(objectRef) 
                 : new Rollup(objectType);
             this.addRequest(rollup, rollupMdt); 
-            this.rollups.put(objectType, rollup); 
+            this.rollups.put(objectRef, rollup); 
         }
     }   
 
@@ -33,9 +34,10 @@ public class RollupMetadataHelper {
         SObjectType childSObjectType = SchemaUtils.getSObjectType(rollupMdt?.Child_SObjectType__c); 
         SObjectType parentSObjectType = SchemaUtils.getSObjectType(rollupMdt?.Parent_SObjectType__c); 
         SObjectField relationshipField = SchemaUtils.getSObjectField(childSObjectType, rollupMdt?.Relationship_Field__c);
+        SObjectField targetField = SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c);
         ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
         rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(new Rollup.Request(
-            SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c),
+            new FieldReference(targetField),
             this.getCalculator(rollupMdt),
             this.getFilters(rollupMdt?.Rollup_Filters__r)
         )));
@@ -47,7 +49,7 @@ public class RollupMetadataHelper {
         Type calcType = (String.isNotBlank(rollupMdt?.Calculator_Class_Name__c))
             ? Type.forName(rollupMdt?.Calculator_Class_Name__c)
             : RollupMetadataHelper.CALCULATOR_BY_TOKEN.get(rollupMdt?.Calculation_Type__c);
-        return ((Rollup.Calculator) calcType?.newInstance())?.setCalcField(calcField); 
+        return ((Rollup.Calculator) calcType?.newInstance())?.setCalcField(new FieldReference(calcField));
     } 
 
     private List<Filter> getFilters(List<Rollup_Filter__mdt> rollupFilters) {

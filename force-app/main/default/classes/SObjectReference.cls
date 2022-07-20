@@ -28,11 +28,19 @@ public class SObjectReference {
         return record?.getSObjectType() == this.toSchemaType();
     }
 
+    public SObjectType toSchemaType() {
+        return this.objectType;
+    }
+
     public override String toString() {
         return this.objectName; 
     }
 
-    public SObjectType toSchemaType() {
-        return this.objectType;
+    public Boolean equals(Object obj) {
+        // Note: Necessary to allow this type to be safely used as a map key
+        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
+        // Any SObjectReferences with a like getSchemaType() should be considered equal
+        SObjectReference otherRef = (obj instanceOf SObjectReference) ? (SObjectReference) obj : null;
+        return otherRef?.toSchemaType() == this.toSchemaType();
     }
 }

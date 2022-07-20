@@ -1,6 +1,6 @@
 public class CountCalculator extends Rollup.Calculator {
     // Note: COUNT is the only standard calculation type that does not use a calculation field
-    public override Rollup.Calculator setCalcField(SObjectField calcField) {
+    public override Rollup.Calculator setCalcField(FieldReference calcField) {
         return this; 
     }
 

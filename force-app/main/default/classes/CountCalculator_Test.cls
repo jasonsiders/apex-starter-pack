@@ -2,7 +2,7 @@
 private class CountCalculator_Test {
     @IsTest 
     static void shouldNotSetCalcField() {
-        Rollup.Calculator calc = new CountCalculator().setCalcField(Opportunity.Amount); 
+        Rollup.Calculator calc = new CountCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
         System.assertEquals(null, calc.calcField, 'COUNT calculator set a calc field, though it is not used'); 
     }
 

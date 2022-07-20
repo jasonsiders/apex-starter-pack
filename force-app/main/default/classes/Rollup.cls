@@ -1,15 +1,15 @@
 public without sharing class Rollup {
-    @TestVisible SObjectType targetObject { get; private set; }
-    @TestVisible Map<Schema.ChildRelationship, Relationship> relationships { get; private set;  }
+    @TestVisible SObjectReference targetObject { get; private set; }
+    @TestVisible Map<ChildRelationship, Relationship> relationships { get; private set;  }
     @TestVisible static final String ROLLUP_QUERY = 'Rollup_Query';
 
-    public Rollup(SObjectType targetObject) {
-        this.targetObject = targetObject;
-        this.relationships = new Map<Schema.ChildRelationship, Relationship>();
+    public Rollup(SObjectType sObjectType) {
+        this.targetObject = new SObjectReference(sObjectType);
+        this.relationships = new Map<ChildRelationship, Relationship>();
     }
 
     public Rollup addRelationship(Relationship relationship) {
-        Schema.ChildRelationship childRelationship = relationship?.childRelationship; 
+        ChildRelationship childRelationship = relationship?.childRelationship; 
         Relationship existingRelationship = (this.relationships.containsKey(childRelationship))
             ? this.relationships.get(childRelationship)?.addAllRequests(relationship)
             : relationship;
@@ -18,7 +18,7 @@ public without sharing class Rollup {
     }
 
     public List<SObject> run(Set<Id> targetRecordIds) {
-        Soql query = Databaselayer.Soql.newQuery(this.targetObject)
+        Soql query = Databaselayer.Soql.newQuery(this.targetObject?.toSchemaType())
             .setQueryKey(ROLLUP_QUERY)
             .whereFilters(new Filter(
                 'Id', 
@@ -57,15 +57,15 @@ public without sharing class Rollup {
     // **** INNER **** // 
     public class Relationship {
         public ChildRelationship childRelationship { get; private set; }
-        public Map<SObjectField, Request> requests { get; private set; }
+        public Map<FieldReference, Request> requests { get; private set; }
 
         public Relationship(ChildRelationship childRelationship) {
             this.childRelationship = childRelationship;
-            this.requests = new Map<SObjectField, Request>();
+            this.requests = new Map<FieldReference, Request>();
         }
 
-        public Relationship(SObjectField lookupField) {
-            this(SchemaUtils.getChildRelationship(lookupField));
+        public Relationship(FieldReference lookupField) {
+            this(SchemaUtils.getChildRelationship(lookupField?.toSchemaType()));
         }
         
         public Relationship addRequest(Request request) {
@@ -100,17 +100,17 @@ public without sharing class Rollup {
     }
 
     public class Request {
-        public SObjectField targetField { get; private set; } 
+        public FieldReference targetField { get; private set; } 
         public Calculator calculator { get; private set; }
         public List<Filter> filters { get; private set; }
 
-        public Request(SObjectField targetField, Calculator calculator, List<Filter> filters) {
+        public Request(FieldReference targetField, Calculator calculator, List<Filter> filters) {
             this.targetField = targetField;
             this.calculator = calculator;
             this.filters = filters;
         }
         
-        public Request(SObjectField targetField, Calculator calculator) {
+        public Request(FieldReference targetField, Calculator calculator) {
             this(targetField, calculator, new List<Filter>());
         }
 
@@ -125,13 +125,14 @@ public without sharing class Rollup {
 
         public void calculate(SObject targetRecord, List<SObject> childRecords) {
             List<SObject> filteredRecords = this.doFilter(childRecords);
-            Object targetValue = this.calculator.calculate(filteredRecords); 
-            targetRecord.put(this.targetField, targetValue);
+            SObjectField field = this.targetField?.toSchemaType();
+            Object value = this.calculator.calculate(filteredRecords); 
+            targetRecord.put(field, value);
         }
 
         private List<String> getFieldNames() {
             List<String> fieldNames = new List<String>();
-            SObjectField calcField = this.calculator.getCalcField();
+            SObjectField calcField = this.calculator.getCalcField()?.toSchemaType();
             if (calcField != null) {
                 fieldNames.add(String.valueOf(calcField));
             }
@@ -162,20 +163,20 @@ public without sharing class Rollup {
     }
 
     public abstract class Calculator {
-        public SObjectField calcField { get; protected set; }
+        public FieldReference calcField { get; protected set; }
 
-        public SObjectField getCalcField() {
+        public FieldReference getCalcField() {
             return this.calcField; 
         }
 
-        public virtual Calculator setCalcField(SObjectField calcField) {
+        public virtual Calculator setCalcField(FieldReference calcField) {
             this.calcField = calcField;
             return this; 
         }
 
         public virtual Object calculate(List<SObject> records) {
             records = (records != null) ? records : new List<SObject>();
-            Schema.SoapType dataType = SchemaUtils.describeField(this.calcField)?.getSoapType(); 
+            Schema.SoapType dataType = SchemaUtils.describeField(this.calcField?.toSchemaType())?.getSoapType();
             switch on dataType {
                 when BOOLEAN {
                     return this.calculateBoolean(records); 

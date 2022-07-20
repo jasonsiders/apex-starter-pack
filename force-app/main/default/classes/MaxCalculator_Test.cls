@@ -11,7 +11,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.IsClosed);
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.IsClosed));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Boolean values'); 
     }
     
@@ -26,7 +26,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CloseDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
         System.assertEquals(maxDate, calc.calculate(opportunities), 'Wrong MAX of Opportunity.CloseDate');
     }
 
@@ -43,7 +43,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CreatedDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
         System.assertEquals(maxDt, calc.calculate(opportunities), 'Wrong MAX of Opportunity.CreatedDate');
     }
 
@@ -58,7 +58,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.Amount); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
         System.assertEquals(maxAmount, calc.calculate(opportunities), 'Wrong MAX of Opportunity.Amount');
     }
 
@@ -69,7 +69,7 @@ private class MaxCalculator_Test {
             opportunities.add(new Opportunity(Name = 'Test Opp'));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.Name);
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.Name));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Text values'); 
     }
 
@@ -87,7 +87,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CloseDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
         System.assertEquals(maxDate, calc.calculate(opportunities), 'Wrong MAX of Opportunity.CloseDate');
     }
 
@@ -107,7 +107,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CreatedDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
         System.assertEquals(maxDt, calc.calculate(opportunities), 'Wrong MAX of Opportunity.CreatedDate');
     }
 
@@ -125,7 +125,7 @@ private class MaxCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.Amount); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
         System.assertEquals(maxAmount, calc.calculate(opportunities), 'Wrong MAX of Opportunity.Amount');
     }
 
@@ -137,7 +137,7 @@ private class MaxCalculator_Test {
             opportunities.add(new Opportunity());
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CloseDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'All Opportunity.CloseDate values are null, but did not return null');
     }
 
@@ -149,7 +149,7 @@ private class MaxCalculator_Test {
             opportunities.add(new Opportunity());
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CreatedDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'All Opportunity.CreatedDate values are null, but did not return null');
     }
 
@@ -161,28 +161,28 @@ private class MaxCalculator_Test {
             opportunities.add(new Opportunity());
         }
 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.Amount); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'All Opportunity.Amount values are null, but did not return 0');
     }
 
     @IsTest 
     static void shouldNotCalculateNullRecordsOnDateFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CloseDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'All Opportunity.CloseDate values are null, but did not return null');
     }
 
     @IsTest 
     static void shouldNotCalculateNullRecordsOnDateTimeFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.CreatedDate); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'All Opportunity.CreatedDate values are null, but did not return null');
     }
 
     @IsTest 
     static void shouldCalculateNullRecordsOnNumberFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new MaxCalculator().setCalcField(Opportunity.Amount); 
+        Rollup.Calculator calc = new MaxCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'All Opportunity.Amount values are null, but did not return 0');
     }
 

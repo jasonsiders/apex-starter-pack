@@ -27,13 +27,18 @@ public abstract class SchemaUtils {
     public static SObjectType getSObjectType(SObjectField field) {
         // Retrieves the current SObjectType from any SObjectField
         // Surprising there isn't an easier/built in DescribeFieldResult method to do this
-        try {
-            new Account().put(field, null);
-            return Account.SObjectType;
-        } catch (System.SObjectException error) {
-            final String objectName = error.getMessage()?.substringBefore('.');
-            return getSObjectType(objectName);
+        SObjectType objectType; 
+        if (field != null) {
+            // If field is null => ! "System.NullPointerException: Argument cannot be null"
+            try {
+                new Account().put(field, null);
+                objectType = Account.SObjectType;
+            } catch (System.SObjectException error) {
+                final String objectName = error.getMessage()?.substringBefore('.');
+                objectType = getSObjectType(objectName);
+            }
         }
+        return objectType;
     }
 
     public static SObjectType getParentSObjectType(SObjectField lookupField) {

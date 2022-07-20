@@ -66,6 +66,29 @@ private class FieldReference_Test {
 
         System.assertNotEquals(null, caughtError, 'An error was not thrown');
     }
+
+    @IsTest 
+    static void shouldBeUsableAsAMapKey() {
+        Map<FieldReference, String> fieldMap = new Map<FieldReference, String>();
+        List<SObjectField> chainedFields = new List<SObjectField>{Case.ContactId, Contact.AccountId, Account.Name};
+        List<FieldReference> fieldReferences = new List<FieldReference>{
+            new FieldReference(chainedFields),
+            new FieldReference(Case.ContactId),
+            new FieldReference(Contact.AccountId),
+            new FieldReference(Account.Name)
+        };
+        for (FieldReference fieldReference : fieldReferences) {
+            fieldMap.put(fieldReference, fieldReference.toString()); 
+        }
+
+        Test.startTest();
+        FieldReference ref = new FieldReference(chainedFields);
+        for (FieldReference fieldReference : fieldReferences) {
+            FieldReference newRef = fieldReference.clone();
+            System.assertEquals(true, fieldMap.containsKey(newRef), 'Map does not contain ' + newRef);
+        }
+        Test.stopTest();
+    }
     
     // **** HELPER **** // 
     static Exception testSerialize(Object obj) {

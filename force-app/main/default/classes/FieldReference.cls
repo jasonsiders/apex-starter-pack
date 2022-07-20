@@ -1,9 +1,9 @@
 public class FieldReference {
-    String soqlReference;
-    SObjectReference rootSObjectType;
-    List<FieldReference> relationshipFields = new List<FieldReference>();
-    String destinationFieldName;
-    SObjectReference destinationSObjectType; 
+    public String soqlReference { get; private set; }
+    private SObjectReference rootSObjectType;
+    private List<FieldReference> relationshipFields = new List<FieldReference>();
+    private String destinationFieldName;
+    private SObjectReference destinationSObjectType; 
     transient SObjectField destinationField {
         // Note: SObjectFields aren't serializable; use a getter to manually reconstruct if null
         get {
@@ -52,12 +52,23 @@ public class FieldReference {
         return record?.getSObject(this.destinationField); 
     }
 
+    public SObjectField toSchemaType() {
+        return this.destinationField;
+    }
+
     public override String toString() {
         return this.soqlReference;
     }
 
-    public SObjectField toSchemaType() {
-        return this.destinationField;
+    public Boolean equals(Object obj) {
+        // Note: Necessary to allow this type to be safely used as a map key
+        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
+        // Any FieldReferences with the same root object and SOQL reference can be considered equal
+        FieldReference otherRef = (obj instanceOf FieldReference) ? (FieldReference) obj : null;
+        return (
+            otherRef?.rootSObjectType == this.rootSObjectType && 
+            otherRef?.toString() == this.toString()
+        );
     }
 
     private void setDestinationDetails(SObjectField field) {

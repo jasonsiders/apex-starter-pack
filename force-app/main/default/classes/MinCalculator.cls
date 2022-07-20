@@ -2,7 +2,7 @@ public class MinCalculator extends Rollup.Calculator {
     public override Date calculateDate(List<SObject> records) {
         Date minDate; 
         for (SObject record : records) {
-            Date newDate = (Date) record?.get(this.calcField);
+            Date newDate = (Date) record?.get(this.calcField?.toSchemaType());
             Boolean newIsLess = (minDate == null || (newDate != null && newDate < minDate));
             minDate = (newIsLess) ? newDate : minDate;
         }
@@ -12,7 +12,7 @@ public class MinCalculator extends Rollup.Calculator {
     public override DateTime calculateDateTime(List<SObject> records) {
         DateTime minDate; 
         for (SObject record : records) {
-            DateTime newDate = (DateTime) record?.get(this.calcField);
+            DateTime newDate = (DateTime) record?.get(this.calcField?.toSchemaType());
             Boolean newIsLess = (minDate == null || (newDate != null && newDate < minDate));
             minDate = (newIsLess) ? newDate : minDate;
         }
@@ -22,7 +22,7 @@ public class MinCalculator extends Rollup.Calculator {
     public override Decimal calculateNumber(List<SObject> records) {
         Decimal minNum;
         for (SObject record : records) {
-            Decimal newNum = (Decimal) record?.get(this.calcField);
+            Decimal newNum = (Decimal) record?.get(this.calcField?.toSchemaType());
             Boolean newIsLess = (minNum == null || (newNum != null && newNum < minNum));
             minNum = (newIsLess) ? newNum : minNum;
         }

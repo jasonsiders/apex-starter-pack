@@ -235,7 +235,7 @@ public virtual inherited sharing class Dml {
 
     public class History {
         // A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
-        private Map<SObjectType, List<SObject>> recordsBySObjectType = new Map<SObjectType, List<SObject>>(); 
+        private Map<SObjectReference, List<SObject>> recordsBySObjectType = new Map<SObjectReference, List<SObject>>(); 
         private Map<Id, SObject> recordsById = new Map<Id, SObject>();
         private String idField = 'Id';
 
@@ -266,8 +266,8 @@ public virtual inherited sharing class Dml {
             return this.getRecord(recordId);
         }   
 
-        public List<SObject> getRecords(Schema.SObjectType objectType) {
-            return this.recordsBySObjectType.get(objectType); 
+        public List<SObject> getRecords(SObjectType objectType) {
+            return this.recordsBySObjectType.get(new SObjectReference(objectType));
         }
 
         public List<SObject> getAll() {
@@ -279,7 +279,7 @@ public virtual inherited sharing class Dml {
         }
 
         public void clear() {
-            this.recordsBySObjectType = new Map<SObjectType, List<SObject>>(); 
+            this.recordsBySObjectType?.clear(); 
         }
 
         public void add(List<SObject> records) {
@@ -289,11 +289,11 @@ public virtual inherited sharing class Dml {
                 SObject clone = record.clone(true, true, true, true); 
                 this.recordsById.put(idField, clone); 
                 // Map the record by its SObjectType (1:many)
-                SObjectType objectType = record?.getSObjectType();
-                List<SObject> matchingRecords = this.recordsBySObjectType.get(objectType); 
+                SObjectReference objectRef = new SObjectReference(record?.getSObjectType()); 
+                List<SObject> matchingRecords = this.recordsBySObjectType.get(objectRef);
                 matchingRecords = (matchingRecords != null) ? matchingRecords : new List<SObject>();
                 matchingRecords?.add(clone);
-                this.recordsBySObjectType.put(objectType, matchingRecords); 
+                this.recordsBySObjectType.put(objectRef, matchingRecords); 
             }
         }
     }

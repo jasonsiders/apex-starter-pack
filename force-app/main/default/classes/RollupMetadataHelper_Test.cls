@@ -1,6 +1,6 @@
 @IsTest 
 private class RollupMetadataHelper_Test {
-    @IsTest 
+    @IsTest  
     static void shouldConstructSimpleRollupFromMdt() {
         Rollup__mdt rollupMdt = new Rollup__mdt(
             Calculation_Field__c = null, 
@@ -17,12 +17,12 @@ private class RollupMetadataHelper_Test {
 
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups generated');
         Rollup rollup = rollups[0];
-        System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject'); 
+        System.assertEquals(Account.SObjectType, rollup.targetObject?.toSchemaType(), 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollup.relationships?.values()[0];
         System.assertEquals(1, relationship?.requests?.size(), 'Wrong # of requests');
         Rollup.Request request = relationship?.requests?.values()[0];
-        System.assertEquals(Account.AnnualRevenue, request?.targetField, 'Wrong targetField');
+        System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
         System.assertEquals(true, request?.calculator instanceOf CountCalculator, 'Wrong Calculator type');
         System.assertEquals(0, request?.filters?.size(), 'Wrong # of filters');
     }
@@ -65,7 +65,7 @@ private class RollupMetadataHelper_Test {
 
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups');
         Rollup rollup = rollups[0];
-        System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject');
+        System.assertEquals(Account.SObjectType, rollup.targetObject?.toSchemaType(), 'Wrong targetObject');
         System.assertEquals(1, rollup?.relationships?.size(), 'Wrong # of relationships');
         Rollup.Relationship relationship = rollup?.relationships.values()[0];
         System.assertEquals('Opportunities', relationship?.childRelationship?.getRelationshipName(), 'Wrong relationship name');
@@ -101,7 +101,7 @@ private class RollupMetadataHelper_Test {
 
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups generated');
         Rollup rollup = rollups[0];
-        System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject'); 
+        System.assertEquals(Account.SObjectType, rollup.targetObject?.toSchemaType(), 'Wrong targetObject'); 
         System.assertEquals(2, rollup.relationships?.size(), 'Wrong # of relationships'); 
         for (Rollup.Relationship relationship : rollup?.relationships.values()) {
             System.assertEquals(1, relationship?.requests?.values()?.size(), 'Wrong # of requests: ' + relationship?.requests?.values());
@@ -179,12 +179,12 @@ private class RollupMetadataHelper_Test {
             
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups generated');
         Rollup rollup = rollups[0];
-        System.assertEquals(Account.SObjectType, rollup.targetObject, 'Wrong targetObject'); 
+        System.assertEquals(Account.SObjectType, rollup.targetObject?.toSchemaType(), 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollup.relationships?.values()[0];
         System.assertEquals(1, relationship?.requests?.values()?.size(), 'Wrong # of requests');
         Rollup.Request request = relationship?.requests?.values()[0];
-        System.assertEquals(Account.AnnualRevenue, request?.targetField, 'Wrong targetField');
+        System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
         System.assertEquals(true, request?.calculator instanceOf CountCalculator, 'Wrong Calculator type');
         System.assertEquals(1, request?.filters?.size(), 'Wrong # of filters');
         Filter filterObj = request?.filters[0];
@@ -337,7 +337,7 @@ private class RollupMetadataHelper_Test {
 
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups'); 
         Rollup rollup = rollups[0];
-        System.assertEquals(Account.SObjectType, rollup?.targetObject, 'Wrong targetObject'); 
+        System.assertEquals(Account.SObjectType, rollup?.targetObject?.toSchemaType(), 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollups[0].relationships?.values()[0];
         System.assertEquals('Opportunities', relationship?.childRelationship?.getRelationshipName(), 'Wrong ChildRelationship');
@@ -345,9 +345,9 @@ private class RollupMetadataHelper_Test {
         for (Rollup.Request request : relationship?.requests?.values()) {
             System.assertEquals(1, request?.filters?.size(), 'Wrong # of filters');
             System.assertEquals('IsClosed = true', request?.filters[0]?.toString(), 'Wrong filter'); 
-            if (request?.targetField == Account.AnnualRevenue) {
+            if (request?.targetField?.toSchemaType() == Account.AnnualRevenue) {
                 System.assertEquals(true, request?.calculator instanceOf SumCalculator, 'Wrong type of calculator: ' + TypeUtils.getTypeName(request?.calculator));
-            } else if (request?.targetField == Account.NumberOfEmployees) {
+            } else if (request?.targetField?.toSchemaType() == Account.NumberOfEmployees) {
                 System.assertEquals(true, request?.calculator instanceOf CountCalculator, 'Wrong type of calculator: ' + TypeUtils.getTypeName(request?.calculator));
             } else {
                 System.assert(false, 'Unexpected target field: ' + request?.targetField + ': Request: ' + request);
