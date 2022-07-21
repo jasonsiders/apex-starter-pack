@@ -1,8 +1,8 @@
 public inherited sharing virtual class SubQuery extends Soql {
-    @TestVisible Schema.ChildRelationship relationship; 
+    @TestVisible ChildRelationshipReference relationship; 
     
     public SubQuery(Schema.ChildRelationship relationship) {
-        this.relationship = relationship; 
+        this.relationship = new ChildRelationshipReference(relationship);
     }
 
     public SubQuery(SObjectField lookupField) {
@@ -14,6 +14,6 @@ public inherited sharing virtual class SubQuery extends Soql {
     }
 
     protected override String getFrom() {
-        return this.relationship?.getRelationshipName();
+        return this.relationship?.toSchemaType()?.getRelationshipName();
     }
 }

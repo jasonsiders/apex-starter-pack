@@ -1,4 +1,4 @@
-public class SObjectReference {
+public class SObjectReference implements Mappable {
     // Wraps the SObjectType class, which is not JSON serializable
     String objectName;
     transient SObjectType objectType {
@@ -36,14 +36,11 @@ public class SObjectReference {
         return this.objectName; 
     }
 
-    // Note: These methods are necessary to allow this type to be safely used as a map key
-    // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
+    // **** MAPPABLE **** // 
     public Boolean equals(Object obj) {
         // Any SObjectReferences with a like getSchemaType() should be considered equal
         SObjectReference otherRef = (obj instanceOf SObjectReference) ? (SObjectReference) obj : null;
-        Boolean isEqual = otherRef?.toSchemaType() == this.toSchemaType();
-        System.debug(this + ' == ' + obj + '? ' + isEqual);
-        return isEqual;
+        return otherRef?.toSchemaType() == this.toSchemaType();
     }
 
     public Integer hashCode() {

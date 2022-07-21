@@ -61,14 +61,14 @@ private class RollupMetadataHelper_Test {
 
         Test.startTest();
         List<Rollup> rollups = new RollupMetadataHelper(rollupMdts).getRollups();
-        Test.stopTest();
+        Test.stopTest(); 
 
         System.assertEquals(1, rollups?.size(), 'Wrong # of rollups');
         Rollup rollup = rollups[0];
         System.assertEquals(Account.SObjectType, rollup.targetObject?.toSchemaType(), 'Wrong targetObject');
         System.assertEquals(1, rollup?.relationships?.size(), 'Wrong # of relationships');
         Rollup.Relationship relationship = rollup?.relationships.values()[0];
-        System.assertEquals('Opportunities', relationship?.childRelationship?.getRelationshipName(), 'Wrong relationship name');
+        System.assertEquals('Opportunities', relationship?.childRelationship?.toSchemaType()?.getRelationshipName(), 'Wrong relationship name');
         System.assertEquals(rollupMdts?.size(), relationship?.requests?.values()?.size(), 'Wrong # of requests');
     }
 
@@ -340,7 +340,7 @@ private class RollupMetadataHelper_Test {
         System.assertEquals(Account.SObjectType, rollup?.targetObject?.toSchemaType(), 'Wrong targetObject'); 
         System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationships'); 
         Rollup.Relationship relationship = rollups[0].relationships?.values()[0];
-        System.assertEquals('Opportunities', relationship?.childRelationship?.getRelationshipName(), 'Wrong ChildRelationship');
+        System.assertEquals('Opportunities', relationship?.childRelationship?.toSchemaType()?.getRelationshipName(), 'Wrong ChildRelationship');
         System.assertEquals(2, relationship?.requests?.values()?.size(), 'Wrong # of requests');
         for (Rollup.Request request : relationship?.requests?.values()) {
             System.assertEquals(1, request?.filters?.size(), 'Wrong # of filters');

@@ -1,15 +1,15 @@
 public without sharing class Rollup {
     @TestVisible SObjectReference targetObject { get; private set; }
-    @TestVisible Map<ChildRelationship, Relationship> relationships { get; private set;  }
+    @TestVisible Map<ChildRelationshipReference, Relationship> relationships { get; private set;  }
     @TestVisible static final String ROLLUP_QUERY = 'Rollup_Query';
 
     public Rollup(SObjectType sObjectType) {
         this.targetObject = new SObjectReference(sObjectType);
-        this.relationships = new Map<ChildRelationship, Relationship>();
+        this.relationships = new Map<ChildRelationshipReference, Relationship>();
     }
 
     public Rollup addRelationship(Relationship relationship) {
-        ChildRelationship childRelationship = relationship?.childRelationship; 
+        ChildRelationshipReference childRelationship = relationship?.childRelationship; 
         Relationship existingRelationship = (this.relationships.containsKey(childRelationship))
             ? this.relationships.get(childRelationship)?.addAllRequests(relationship)
             : relationship;
@@ -56,11 +56,11 @@ public without sharing class Rollup {
     
     // **** INNER **** // 
     public class Relationship {
-        public ChildRelationship childRelationship { get; private set; }
+        public ChildRelationshipReference childRelationship { get; private set; }
         public Map<FieldReference, Request> requests { get; private set; }
 
         public Relationship(ChildRelationship childRelationship) {
-            this.childRelationship = childRelationship;
+            this.childRelationship = new ChildRelationshipReference(childRelationship);
             this.requests = new Map<FieldReference, Request>();
         }
 
@@ -80,7 +80,7 @@ public without sharing class Rollup {
         }
 
         private SubQuery getSubQuery() {
-            SubQuery subQuery = new SubQuery(this.childRelationship);
+            SubQuery subQuery = new SubQuery(this.childRelationship?.toSchemaType());
             for (Request request : this.requests?.values()) {
                 subQuery.selectFields(request.getFieldNames());   
             }
@@ -88,7 +88,7 @@ public without sharing class Rollup {
         }
 
         private void calculate(SObject targetRecord) {
-            String relationshipName = this.childRelationship?.getRelationshipName(); 
+            String relationshipName = this.childRelationship?.toSchemaType()?.getRelationshipName(); 
             // ! Supplying a null value to SObject.getSObjects() will cause a System.NullPointerException
             if (relationshipName != null) {
                 List<SObject> childRecords = targetRecord?.getSObjects(relationshipName);

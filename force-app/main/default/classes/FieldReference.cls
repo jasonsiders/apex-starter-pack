@@ -1,9 +1,9 @@
-public class FieldReference {
+public class FieldReference implements Mappable {
     public String soqlReference { get; private set; }
-    private SObjectReference rootSObjectType;
-    private List<FieldReference> relationshipFields = new List<FieldReference>();
+    public SObjectReference rootSObjectType { get; private set; }
+    public List<FieldReference> relationshipFields = new List<FieldReference>();
+    public SObjectReference destinationSObjectType { get; private set; }
     private String destinationFieldName;
-    private SObjectReference destinationSObjectType; 
     transient SObjectField destinationField {
         // Note: SObjectFields aren't serializable; use a getter to manually reconstruct if null
         get {
@@ -59,9 +59,14 @@ public class FieldReference {
     public override String toString() {
         return this.soqlReference;
     }
+    
+    private void setDestinationDetails(SObjectField field) {
+        this.destinationField = field; 
+        this.destinationFieldName = String.valueOf(field);
+        this.destinationSObjectType = new SObjectReference(field); 
+    }
 
-    // Note: These methods are necessary to allow this type to be safely used as a map key
-    // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/langCon_apex_collections_maps_keys_userdefined.htm
+    // **** MAPPABLE **** // 
     public Boolean equals(Object obj) {
         // Any FieldReferences with the same root object and SOQL reference can be considered equal
         FieldReference otherRef = (obj instanceOf FieldReference) ? (FieldReference) obj : null;
@@ -73,11 +78,5 @@ public class FieldReference {
 
     public Integer hashCode() {
         return System.hashCode(this.destinationFieldName);
-    }
-
-    private void setDestinationDetails(SObjectField field) {
-        this.destinationField = field; 
-        this.destinationFieldName = String.valueOf(field);
-        this.destinationSObjectType = new SObjectReference(field); 
     }
 }

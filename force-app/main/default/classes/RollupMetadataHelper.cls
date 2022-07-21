@@ -13,7 +13,7 @@ public class RollupMetadataHelper {
         'SUM' => SumCalculator.class
     };
     
-    public RollupMetadataHelper(List<Rollup__mdt> rollupMdts) {
+    public RollupMetadataHelper(List<Rollup__mdt> rollupMdts) { 
         for (Rollup__mdt rollupMdt : rollupMdts) {
             SObjectType objectType = SchemaUtils.getSObjectType(rollupMdt.Parent_SObjectType__c); 
             SObjectReference objectRef = new SObjectReference(objectType); 
@@ -69,7 +69,7 @@ public class RollupMetadataHelper {
         Filter activeFilter = new Filter('Active__c', Filter.EQUALS, true);
         SubQuery filtersQuery = (SubQuery) new SubQuery(Rollup_Filter__mdt.Rollup__c);
         filtersQuery.selectFields(Rollup_Filter__mdt.Active__c); 
-        for (SObjectField parentField : new List<SObjectField>{
+        for (SObjectField parentField : new List<SObjectField>{ 
             Filter__mdt.Operator__c, 
             Filter__mdt.SObjectField__c, 
             Filter__mdt.SObjectType__c,

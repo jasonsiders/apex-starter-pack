@@ -1,10 +1,10 @@
-public inherited sharing abstract class InvocableRollup {
+public inherited sharing abstract class InvocableRollup implements System.Queueable {
     /**
      *  This class provides a flexible, metadata-driven way to execute Rollups from flow
      *  It has a number of features:
-     *  - Can process parent or child rollups
-     *  - Can process all rollups for the record, or a specific list passed in
-     *  - Can process asynchronously, or in real-time
+     *  - Can run parent or child rollups
+     *  - Can run all rollups for the record, or a specific list passed in
+     *  - Can run asynchronously, or in real-time
     **/
     @InvocableMethod(
         category='Rollup'
@@ -21,7 +21,7 @@ public inherited sharing abstract class InvocableRollup {
         InvocableRollup job = (context == InvocableRollup.RollupContext.CHILD) 
             ? (InvocableRollup) new ChildRollup(inputs, objectType, timing)
             : (InvocableRollup) new ParentRollup(inputs, objectType, timing); 
-        job.process(); 
+        job.run(); 
     }
 
     // **** MEMBER **** // 
@@ -30,23 +30,24 @@ public inherited sharing abstract class InvocableRollup {
     Map<Id, SObject> records = new Map<Id, SObject>();
 
     // **** ABSTRACT **** // 
-    protected abstract List<SObject> doRollups(); 
+    protected abstract List<SObject> calculateRollups(); 
     protected abstract SObjectField getMatchingField(); 
 
-    protected virtual void process() {
-        List<SObject> rollupResults = this.doRollups(); 
-        this.doDml(rollupResults, this.timing); 
+    protected virtual void run() {
+        if (this.timing == InvocableRollup.Timing.ASYNCHRONOUS) {
+            System.enqueueJob(this); 
+        } else {
+            this.runSynchronously();
+        }
     }
 
-    protected void doDml(List<SObject> records, Timing timing) {
-        switch on timing {
-            when ASYNCHRONOUS {
-                AsyncDml.Request updates = new AsyncDml.Request(Dml.Operation.DO_UPDATE, records); 
-                AsyncDml.getInstance().addRequest(updates).runJob(); 
-            } when else {
-                Databaselayer.Dml.doUpdate(records); 
-            }
-        }
+    public void execute(System.QueueableContext context) {
+        this.runSynchronously();
+    }
+
+    protected void runSynchronously() {
+        List<SObject> rollupResults = this.calculateRollups(); 
+        DatabaseLayer.Dml.doUpdate(rollupResults); 
     }
 
     protected List<Rollup__mdt> getAllMatchingRollups() {
@@ -148,7 +149,7 @@ public inherited sharing abstract class InvocableRollup {
             }
         }
 
-        public override List<SObject> doRollups() {
+        public override List<SObject> calculateRollups() {
             List<SObject> results = new List<SObject>();
             for (SObjectField field : this.rollupMap.keySet()) {
                 Rollup rollup = this.rollupMap.get(field); 
@@ -173,7 +174,7 @@ public inherited sharing abstract class InvocableRollup {
             this.rollups = new RollupMetadataHelper(rollupMdts).getRollups(); 
         }
     
-        public override List<SObject> doRollups() {
+        public override List<SObject> calculateRollups() {
             // Proecss the Rollups
             Map<Id, SObject> updates = this.records;
             for (Rollup rollup : this.rollups) {
