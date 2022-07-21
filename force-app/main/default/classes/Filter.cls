@@ -51,7 +51,7 @@ public virtual class Filter {
         this.validate(); 
     }
 
-    public Filter(FieldReference fieldReference, Type operatorType, Object value) {
+    public Filter(FieldRef fieldReference, Type operatorType, Object value) {
         this(fieldReference?.toString(), operatorType, value); 
     }
 

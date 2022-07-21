@@ -19,7 +19,7 @@ private class Soql_Test {
 
     @IsTest 
     static void shouldGenerateQueryWithParentFields() {
-        Soql query = new Soql(Account.SObjectType).selectFields(new FieldReference(new List<SObjectField>{Account.OwnerId, User.Name}));
+        Soql query = new Soql(Account.SObjectType).selectFields(new FieldRef(new List<SObjectField>{Account.OwnerId, User.Name}));
         Soql_Test.checkQueryString('SELECT Id, Owner.Name FROM Account', query);
         Soql_Test.runTestQuery(query); 
     }
@@ -63,7 +63,7 @@ private class Soql_Test {
 
     @IsTest 
     static void shouldGenerateAggregateQueryGroupedByParentField() {
-        FieldReference fieldRef = new FieldReference(new List<SObjectField>{Lead.ConvertedAccountId, Account.Name});
+        FieldRef fieldRef = new FieldRef(new List<SObjectField>{Lead.ConvertedAccountId, Account.Name});
         SoqlAggregation aggregation = new SoqlAggregation(SoqlAggregation.Function.MAX, Lead.CreatedDate); 
         Soql query = new Soql(Lead.SObjectType)
             .selectFields(fieldRef)
@@ -269,7 +269,7 @@ private class Soql_Test {
     static void shouldHandleComplextQuery() {
         Soql query = new Soql(Account.SObjectType)
             .selectFields(new List<SObjectField>{Account.Id, Account.CreatedDate, Account.Name})
-            .selectFields(new FieldReference(new List<SObjectField>{Account.OwnerId, User.ProfileId}))
+            .selectFields(new FieldRef(new List<SObjectField>{Account.OwnerId, User.ProfileId}))
             .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
             .whereFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 01, 01)))
             .whereFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))

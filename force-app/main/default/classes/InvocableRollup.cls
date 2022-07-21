@@ -25,7 +25,7 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
     }
 
     // **** MEMBER **** // 
-    SObjectReference objectType; 
+    SObjectRef objectType; 
     Timing timing; 
     Map<Id, SObject> records = new Map<Id, SObject>();
 
@@ -116,7 +116,7 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
         Map<SObjectField, Rollup> rollupMap = new Map<SObjectField, Rollup>();
 
         private ChildRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
-            this.objectType = new SObjectReference(sObjectType);
+            this.objectType = new SObjectRef(sObjectType);
             this.timing = timing; 
             for (Input input : inputs) {
                 this.records.putAll(new Map<Id, SObject>(input.getRecords())); 
@@ -167,7 +167,7 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
         List<Rollup> rollups = new List<Rollup>();
 
         private ParentRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
-            this.objectType = new SObjectReference(sObjectType);
+            this.objectType = new SObjectRef(sObjectType);
             this.timing = timing; 
             List<Rollup__mdt> rollupMdts = this.getRollupsFromInputs(inputs); 
             this.validateMetadata(rollupMdts); 

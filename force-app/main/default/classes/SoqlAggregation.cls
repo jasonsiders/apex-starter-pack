@@ -13,20 +13,20 @@ public class SoqlAggregation {
         this(function, fieldName, ''); 
     }
 
-    public SoqlAggregation(Function function, FieldReference fieldReference, String alias) {
+    public SoqlAggregation(Function function, FieldRef fieldReference, String alias) {
         this(function, fieldReference?.toString(), alias);
     }
 
-    public SoqlAggregation(Function function, FieldReference fieldReference) {
+    public SoqlAggregation(Function function, FieldRef fieldReference) {
         this(function, fieldReference?.toString(), ''); 
     }
 
     public SoqlAggregation(Function function, SObjectField field, String alias) {
-        this(function, new FieldReference(field), alias);
+        this(function, new FieldRef(field), alias);
     }
 
     public SoqlAggregation(Function function, SObjectField field) {
-        this(function, new FieldReference(field)); 
+        this(function, new FieldRef(field)); 
     }
     
     public override String toString() {

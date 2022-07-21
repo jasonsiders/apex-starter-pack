@@ -11,7 +11,7 @@ private class SumCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.IsClosed));
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.IsClosed));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Boolean values'); 
     }
     
@@ -24,7 +24,7 @@ private class SumCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.CloseDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Date values');
     }
 
@@ -39,7 +39,7 @@ private class SumCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate));
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.CreatedDate));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for DateTime values'); 
     }
 
@@ -55,7 +55,7 @@ private class SumCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(totalAmount, calc.calculate(opportunities), 'Wrong SUM of Opportunity.Amount');
     }
 
@@ -66,7 +66,7 @@ private class SumCalculator_Test {
             opportunities.add(new Opportunity(Name = 'Test Opp'));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.Name));
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.Name));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Text values'); 
     }
 
@@ -84,7 +84,7 @@ private class SumCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(totalAmount, calc.calculate(opportunities), 'Wrong SUM of Opportunity.Amount');
     }
 
@@ -96,14 +96,14 @@ private class SumCalculator_Test {
             opportunities.add(new Opportunity());
         }
 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'All Opportunity.Amount values are null, but did not return 0');
     }
 
     @IsTest 
     static void shouldCalculateNullRecordsOnNumberFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new SumCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'All Opportunity.Amount values are null, but did not return 0');
     }
 

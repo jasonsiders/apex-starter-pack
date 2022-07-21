@@ -43,10 +43,10 @@ private class Rollup_Test {
         Test.startTest(); 
         Rollup rollup = new Rollup(Account.SObjectType).addRelationship(
             new Rollup.Relationship(
-                new FieldReference(Opportunity.AccountId)
+                new FieldRef(Opportunity.AccountId)
             ).addRequest(new Rollup.Request(
-                new FieldReference(Account.AnnualRevenue), 
-                new SumCalculator()?.setCalcField(new FieldReference(Opportunity.Amount))
+                new FieldRef(Account.AnnualRevenue), 
+                new SumCalculator()?.setCalcField(new FieldRef(Opportunity.Amount))
             ).addFilters(new Filter(
                 Opportunity.Amount, 
                 Filter.GREATER_THAN,
@@ -64,15 +64,15 @@ private class Rollup_Test {
     static void shouldProvideDefaultCalculatorValues() {
         List<Opportunity> opportunities = new List<Opportunity>();
         Rollup.Calculator calc = new MockCalculator(); 
-        calc.setCalcField(new FieldReference(Opportunity.IsClosed)); 
+        calc.setCalcField(new FieldRef(Opportunity.IsClosed)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Boolean');
-        calc.setCalcField(new FieldReference(Opportunity.CloseDate));
+        calc.setCalcField(new FieldRef(Opportunity.CloseDate));
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Date');
-        calc.setCalcField(new FieldReference(Opportunity.CreatedDate)); 
+        calc.setCalcField(new FieldRef(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for DateTime');
-        calc.setCalcField(new FieldReference(Opportunity.Amount));
+        calc.setCalcField(new FieldRef(Opportunity.Amount));
         System.assertEquals(0, calc.calculate(opportunities), 'Wrong default value for Number');
-        calc.setCalcField(new FieldReference(Opportunity.Name)); 
+        calc.setCalcField(new FieldRef(Opportunity.Name)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for Text');
         calc.setCalcField(null); 
         System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for null calcField');
@@ -83,15 +83,15 @@ private class Rollup_Test {
         Rollup rollup = new Rollup(Account.SObjectType); 
         // Create two relationship objects for the same ChildRelationship
         Rollup.Relationship rel1 = new Rollup.Relationship(
-            new FieldReference(Opportunity.AccountId)
+            new FieldRef(Opportunity.AccountId)
         ).addRequest(new Rollup.Request(
-            new FieldReference(Account.NumberOfEmployees),
+            new FieldRef(Account.NumberOfEmployees),
             new MockCalculator()
         ));
         Rollup.Relationship rel2 = new Rollup.Relationship(
-            new FieldReference(Opportunity.AccountId)
+            new FieldRef(Opportunity.AccountId)
         ).addRequest(new Rollup.Request(
-            new FieldReference(Account.AnnualRevenue),
+            new FieldRef(Account.AnnualRevenue),
             new MockCalculator()
         ));
 
@@ -125,10 +125,10 @@ private class Rollup_Test {
     private static Rollup getSumCalculator() {
         return new Rollup(Account.SObjectType).addRelationship(
             new Rollup.Relationship(
-                new FieldReference(Opportunity.AccountId)
+                new FieldRef(Opportunity.AccountId)
             ).addRequest(new Rollup.Request(
-                new FieldReference(Account.AnnualRevenue), 
-                new SumCalculator()?.setCalcField(new FieldReference(Opportunity.Amount))
+                new FieldRef(Account.AnnualRevenue), 
+                new SumCalculator()?.setCalcField(new FieldRef(Opportunity.Amount))
             ))
         );
     }

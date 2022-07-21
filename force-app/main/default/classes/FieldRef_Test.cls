@@ -1,9 +1,9 @@
 @IsTest
-private class FieldReference_Test {
+private class FieldRef_Test {
     @IsTest 
     static void shouldConstructFromSingleField() {
         SObjectField field = Account.Name; 
-        FieldReference ref = new FieldReference(field); 
+        FieldRef ref = new FieldRef(field); 
         System.assertEquals('Name', ref.toString(), 'Wrong SOQL reference');
         System.assertEquals(field, ref.toSchemaType(), 'Wrong destination SObjectField');
     }
@@ -15,7 +15,7 @@ private class FieldReference_Test {
             Contact.AccountId,
             Account.Name
         };
-        FieldReference ref = new FieldReference(fields); 
+        FieldRef ref = new FieldRef(fields); 
         System.assertEquals('Contact.Account.Name', ref.toString(), 'Wrong SOQL reference');
         System.assertEquals(Account.Name, ref.toSchemaType(), 'Wrong destination SObjectField');
     }
@@ -24,10 +24,10 @@ private class FieldReference_Test {
     static void simpleFieldShouldBeSerializable() {
         SObjectField field = Account.Name;
         System.assertNotEquals(null, testSerialize(field), 'SObjectField is serializable?');
-        FieldReference ref = new FieldReference(field); 
-        System.assertEquals(null, testSerialize(ref), 'FieldReference is not serializable?');
+        FieldRef ref = new FieldRef(field); 
+        System.assertEquals(null, testSerialize(ref), 'FieldRef is not serializable?');
         // After serializiation, should still function the same as before
-        FieldReference deserializedRef = (FieldReference) JSON.deserialize(JSON.serialize(ref), FieldReference.class); 
+        FieldRef deserializedRef = (FieldRef) JSON.deserialize(JSON.serialize(ref), FieldRef.class); 
         Account testAcount = new Account(Name = 'Foo');
         System.assertEquals(testAcount.Name, deserializedRef.getValue(testAcount), 'Post-serialization, could not retrieve the correct field value'); 
     }
@@ -39,10 +39,10 @@ private class FieldReference_Test {
             Contact.AccountId,
             Account.Name
         };
-        FieldReference ref = new FieldReference(fields); 
-        System.assertEquals(null, testSerialize(ref), 'FieldReference is not serializable?');
+        FieldRef ref = new FieldRef(fields); 
+        System.assertEquals(null, testSerialize(ref), 'FieldRef is not serializable?');
         // After serializiation, should still function the same as before
-        FieldReference deserializedRef = (FieldReference) JSON.deserialize(JSON.serialize(ref), FieldReference.class); 
+        FieldRef deserializedRef = (FieldRef) JSON.deserialize(JSON.serialize(ref), FieldRef.class); 
         Account testAccount = new Account(Name = 'Foo');
         Contact testContact = (Contact) SObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount);
         Case testCase = (Case) SObjectUtils.setLookupField(new Case(), Case.ContactId, testContact); 
@@ -53,7 +53,7 @@ private class FieldReference_Test {
     static void shouldThrowErrorIfGettingFieldFromSObjectOfWrongType() {
         Account testAccount = new Account(Name = 'Test'); 
         Contact testContact = (Contact) SObjectUtils.setLookupField(new Contact(), Contact.AccountId, testAccount); 
-        FieldReference ref = new FieldReference(Account.Name); 
+        FieldRef ref = new FieldRef(Account.Name); 
 
         Test.startTest();
         Exception caughtError;
@@ -69,22 +69,22 @@ private class FieldReference_Test {
 
     @IsTest 
     static void shouldBeUsableAsAMapKey() {
-        Map<FieldReference, String> fieldMap = new Map<FieldReference, String>();
+        Map<FieldRef, String> fieldMap = new Map<FieldRef, String>();
         List<SObjectField> chainedFields = new List<SObjectField>{Case.ContactId, Contact.AccountId, Account.Name};
-        List<FieldReference> fieldReferences = new List<FieldReference>{
-            new FieldReference(chainedFields),
-            new FieldReference(Case.ContactId),
-            new FieldReference(Contact.AccountId),
-            new FieldReference(Account.Name)
+        List<FieldRef> fieldReferences = new List<FieldRef>{
+            new FieldRef(chainedFields),
+            new FieldRef(Case.ContactId),
+            new FieldRef(Contact.AccountId),
+            new FieldRef(Account.Name)
         };
-        for (FieldReference fieldReference : fieldReferences) {
+        for (FieldRef fieldReference : fieldReferences) {
             fieldMap.put(fieldReference, fieldReference.toString()); 
         }
 
         Test.startTest();
-        FieldReference ref = new FieldReference(chainedFields);
-        for (FieldReference fieldReference : fieldReferences) {
-            FieldReference newRef = fieldReference.clone();
+        FieldRef ref = new FieldRef(chainedFields);
+        for (FieldRef fieldReference : fieldReferences) {
+            FieldRef newRef = fieldReference.clone();
             System.assertEquals(true, fieldMap.containsKey(newRef), 'Map does not contain ' + newRef);
         }
         Test.stopTest();

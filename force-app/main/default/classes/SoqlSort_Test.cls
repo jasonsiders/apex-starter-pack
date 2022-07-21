@@ -19,7 +19,7 @@ private class SoqlSort_Test {
 
     @IsTest 
     static void shouldHandleParentFields() {
-        FieldReference fieldReference = new FieldReference(new List<SObjectField>{
+        FieldRef fieldReference = new FieldRef(new List<SObjectField>{
             Contact.AccountId, 
             Account.OwnerId,
             User.ProfileId,
@@ -31,10 +31,10 @@ private class SoqlSort_Test {
 
     @IsTest 
     static void shouldHandleMultipleParentFields() {
-        List<FieldReference> fieldReferences = new List<FieldReference>{
-            new FieldReference(new List<SObjectField>{Account.OwnerId, User.Name}),
-            new FieldReference(new List<SObjectField>{Account.OwnerId, User.ProfileId}),
-            new FieldReference(new List<SObjectField>{Account.OwnerId, User.ManagerId, User.Name})
+        List<FieldRef> fieldReferences = new List<FieldRef>{
+            new FieldRef(new List<SObjectField>{Account.OwnerId, User.Name}),
+            new FieldRef(new List<SObjectField>{Account.OwnerId, User.ProfileId}),
+            new FieldRef(new List<SObjectField>{Account.OwnerId, User.ManagerId, User.Name})
         };
         SoqlSort sorter = new SoqlSort(fieldReferences, SoqlSort.Order.ASCENDING);
         System.assertEquals('Owner.Name, Owner.ProfileId, Owner.Manager.Name ASC', sorter.toString(), 'Unexpected output');

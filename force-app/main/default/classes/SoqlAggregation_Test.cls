@@ -14,7 +14,7 @@ private class SoqlAggregation_Test {
 
     @IsTest 
     static void shouldOutputAggregationWithParentField() {
-        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+        FieldRef fieldRef = new FieldRef(new List<SObjectField>{
             Case.ContactId,
             Contact.AccountId,
             Account.AnnualRevenue

@@ -1,5 +1,5 @@
-public class ChildRelationshipReference implements Mappable {
-    FieldReference lookupReference;
+public class ChildRelationshipRef implements Mappable {
+    FieldRef lookupReference;
     transient ChildRelationship relationship {
         get {
             if (this.relationship == null) {
@@ -11,14 +11,14 @@ public class ChildRelationshipReference implements Mappable {
         private set;
     }
 
-    public ChildRelationshipReference(ChildRelationship relationship) {
+    public ChildRelationshipRef(ChildRelationship relationship) {
         SObjectField lookupField = relationship?.getField(); 
-        this.lookupReference = new FieldReference(lookupField);
+        this.lookupReference = new FieldRef(lookupField);
         this.relationship = relationship; 
     }
 
-    public ChildRelationshipReference(SObjectField lookupField) {
-        this.lookupReference = new FieldReference(lookupField);
+    public ChildRelationshipRef(SObjectField lookupField) {
+        this.lookupReference = new FieldRef(lookupField);
         this.relationship = SchemaUtils.getChildRelationship(lookupField);
         if (this.relationship == null) {
             throw new InvalidFieldException(this.lookupReference);
@@ -37,8 +37,8 @@ public class ChildRelationshipReference implements Mappable {
 
     // **** MAPPABLE **** //
     public Boolean equals(Object obj) {
-        ChildRelationshipReference otherRef = (obj instanceOf ChildRelationshipReference) 
-            ? (ChildRelationshipReference) obj : null;
+        ChildRelationshipRef otherRef = (obj instanceOf ChildRelationshipRef) 
+            ? (ChildRelationshipRef) obj : null;
         return otherRef?.toSchemaType() == this.toSchemaType();
     }
 
@@ -48,7 +48,7 @@ public class ChildRelationshipReference implements Mappable {
 
     // **** INNER **** //
     public class InvalidFieldException extends Exception {
-        public InvalidFieldException(FieldReference fieldRef) {
+        public InvalidFieldException(FieldRef fieldRef) {
             this.setMessage(fieldRef?.toString() + ' is not a lookup field');
         }
     }

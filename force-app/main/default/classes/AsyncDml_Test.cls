@@ -45,7 +45,7 @@ private class AsyncDml_Test {
 
     @IsTest 
     static void shouldMakeRequestWithExternalId() {
-        AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), new FieldReference(Case.CaseNumber));
+        AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), new FieldRef(Case.CaseNumber));
         System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation'); 
         System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
         System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
@@ -68,7 +68,7 @@ private class AsyncDml_Test {
         AsyncDml.Request request = new AsyncDml.Request(
             Dml.Operation.DO_INSERT, 
             new Case(), 
-            new FieldReference(Case.CaseNumber),
+            new FieldRef(Case.CaseNumber),
             false
         );
         System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation'); 

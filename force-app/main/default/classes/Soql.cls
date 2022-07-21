@@ -1,7 +1,7 @@
 public inherited sharing virtual class Soql {
     @TestVisible protected String queryKey { get; private set; }
     @TestVisible protected Set<String> selectClauses = new Set<String>{'Id'};
-    protected SObjectReference fromSObject;
+    protected SObjectRef fromSObject;
     protected Scope scope; 
     protected SoqlWithClause withExpression;
     protected FilterLogic whereFilters = new FilterLogic.AndLogic(); 
@@ -14,7 +14,7 @@ public inherited sharing virtual class Soql {
     
     @TestVisible
     protected Soql(SObjectType fromSObject) {
-        this.fromSObject = new SObjectReference(fromSObject); 
+        this.fromSObject = new SObjectRef(fromSObject); 
     }
 
     protected Soql() {
@@ -54,15 +54,15 @@ public inherited sharing virtual class Soql {
     }
 
     // **** Building a Query **** //
-    public Soql selectFields(List<FieldReference> fieldReferences) {
-        for (FieldReference fieldReference : fieldReferences) {
+    public Soql selectFields(List<FieldRef> fieldReferences) {
+        for (FieldRef fieldReference : fieldReferences) {
             this.selectClauses.add(fieldReference?.toString());
         }
         return this;
     }
 
-    public Soql selectFields(FieldReference fieldReference) {
-        return this.selectFields(new List<FieldReference>{fieldReference});
+    public Soql selectFields(FieldRef fieldReference) {
+        return this.selectFields(new List<FieldRef>{fieldReference});
     }
 
     public Soql selectFields(List<SObjectField> fields) {
@@ -131,15 +131,15 @@ public inherited sharing virtual class Soql {
         return this;
     }
 
-    public Soql groupBy(List<FieldReference> fieldReferences) {
-        for (FieldReference fieldReference : fieldReferences) {
+    public Soql groupBy(List<FieldRef> fieldReferences) {
+        for (FieldRef fieldReference : fieldReferences) {
             this.groupByClauses?.add(fieldReference?.toString());
         }
         return this; 
     }
 
-    public Soql groupBy(FieldReference fieldReference) {
-        return this.groupBy(new List<FieldReference>{fieldReference});
+    public Soql groupBy(FieldRef fieldReference) {
+        return this.groupBy(new List<FieldRef>{fieldReference});
     }
 
     public Soql groupBy(List<SObjectField> fields) {

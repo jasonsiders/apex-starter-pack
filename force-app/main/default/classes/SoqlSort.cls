@@ -8,23 +8,23 @@ public class SoqlSort {
         Order.DESCENDING => 'DESC'
     };
 
-    public SoqlSort(List<FieldReference> fieldReferences, Order order, NullOrder nullOrder) {
-        for (FieldReference fieldReference : fieldReferences) {
+    public SoqlSort(List<FieldRef> fieldReferences, Order order, NullOrder nullOrder) {
+        for (FieldRef fieldReference : fieldReferences) {
             this.fieldNames.add(fieldReference?.toString());
         }
         this.order = order; 
         this.nullOrder = nullOrder;
     }
 
-    public SoqlSort(List<FieldReference> fieldReferences, Order order) {
+    public SoqlSort(List<FieldRef> fieldReferences, Order order) {
         this(fieldReferences, order, null); 
     }
 
-    public SoqlSort(FieldReference fieldReference, Order order, NullOrder nullOrder) {
-        this(new List<FieldReference>{fieldReference}, order, nullOrder);
+    public SoqlSort(FieldRef fieldReference, Order order, NullOrder nullOrder) {
+        this(new List<FieldRef>{fieldReference}, order, nullOrder);
     }
 
-    public SoqlSort(FieldReference fieldReference, Order order) {
+    public SoqlSort(FieldRef fieldReference, Order order) {
         this(fieldReference, order, null); 
     }
 

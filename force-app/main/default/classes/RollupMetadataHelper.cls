@@ -2,7 +2,7 @@ public class RollupMetadataHelper {
     // In addition to defining Rollup objects on the fly in apex,
     // callers have the option of defining Rollup__mdt custom metadata objects
     // This class is used to convert Rollup__mdt => Rollup objects
-    Map<SObjectReference, Rollup> rollups = new Map<SObjectReference, Rollup>();
+    Map<SObjectRef, Rollup> rollups = new Map<SObjectRef, Rollup>();
     public static final Soql BASE_QUERY = RollupMetadataHelper.getBaseQuery(); 
     @TestVisible static final String BASE_QUERY_KEY = 'Rollup_MDT_Base_Query';
     static final Map<String, Type> CALCULATOR_BY_TOKEN = new Map<String, Type>{
@@ -16,7 +16,7 @@ public class RollupMetadataHelper {
     public RollupMetadataHelper(List<Rollup__mdt> rollupMdts) { 
         for (Rollup__mdt rollupMdt : rollupMdts) {
             SObjectType objectType = SchemaUtils.getSObjectType(rollupMdt.Parent_SObjectType__c); 
-            SObjectReference objectRef = new SObjectReference(objectType); 
+            SObjectRef objectRef = new SObjectRef(objectType); 
             Rollup rollup = this.rollups.containsKey(objectRef) 
                 ? this.rollups.get(objectRef) 
                 : new Rollup(objectType);
@@ -37,7 +37,7 @@ public class RollupMetadataHelper {
         SObjectField targetField = SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c);
         ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
         rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(new Rollup.Request(
-            new FieldReference(targetField),
+            new FieldRef(targetField),
             this.getCalculator(rollupMdt),
             this.getFilters(rollupMdt?.Rollup_Filters__r)
         )));
@@ -49,7 +49,7 @@ public class RollupMetadataHelper {
         Type calcType = (String.isNotBlank(rollupMdt?.Calculator_Class_Name__c))
             ? Type.forName(rollupMdt?.Calculator_Class_Name__c)
             : RollupMetadataHelper.CALCULATOR_BY_TOKEN.get(rollupMdt?.Calculation_Type__c);
-        return ((Rollup.Calculator) calcType?.newInstance())?.setCalcField(new FieldReference(calcField));
+        return ((Rollup.Calculator) calcType?.newInstance())?.setCalcField(new FieldRef(calcField));
     } 
 
     private List<Filter> getFilters(List<Rollup_Filter__mdt> rollupFilters) {
@@ -75,7 +75,7 @@ public class RollupMetadataHelper {
             Filter__mdt.SObjectType__c,
             Filter__mdt.Value__c
         }) {
-            FieldReference reference = new FieldReference(new List<SObjectField>{Rollup_Filter__mdt.Filter__c, parentField});
+            FieldRef reference = new FieldRef(new List<SObjectField>{Rollup_Filter__mdt.Filter__c, parentField});
             filtersQuery.selectFields(reference);
         }
         return Databaselayer.Soql.newQuery(Rollup__mdt.SObjectType)

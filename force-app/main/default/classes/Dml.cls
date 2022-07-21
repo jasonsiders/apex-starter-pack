@@ -235,7 +235,7 @@ public virtual inherited sharing class Dml {
 
     public class History {
         // A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
-        private Map<SObjectReference, List<SObject>> recordsBySObjectType = new Map<SObjectReference, List<SObject>>(); 
+        private Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>(); 
         private Map<Id, SObject> recordsById = new Map<Id, SObject>();
         private String idField = 'Id';
 
@@ -267,7 +267,7 @@ public virtual inherited sharing class Dml {
         }   
 
         public List<SObject> getRecords(SObjectType objectType) {
-            return this.recordsBySObjectType.get(new SObjectReference(objectType));
+            return this.recordsBySObjectType.get(new SObjectRef(objectType));
         }
 
         public List<SObject> getAll() {
@@ -289,7 +289,7 @@ public virtual inherited sharing class Dml {
                 SObject clone = record.clone(true, true, true, true); 
                 this.recordsById.put(idField, clone); 
                 // Map the record by its SObjectType (1:many)
-                SObjectReference objectRef = new SObjectReference(record?.getSObjectType()); 
+                SObjectRef objectRef = new SObjectRef(record?.getSObjectType()); 
                 List<SObject> matchingRecords = this.recordsBySObjectType.get(objectRef);
                 matchingRecords = (matchingRecords != null) ? matchingRecords : new List<SObject>();
                 matchingRecords?.add(clone);

@@ -7,7 +7,7 @@ private class AvgCalculator_Test {
             opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.IsClosed, true)); 
         }
         
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.IsClosed));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.IsClosed));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Boolean values');
     }
     
@@ -24,7 +24,7 @@ private class AvgCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CloseDate));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CloseDate));
         Date expected = minDate.addDays(Integer.valueOf((minDate.daysBetween(maxDate) / 2)));
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.CloseDate');
     }
@@ -40,7 +40,7 @@ private class AvgCalculator_Test {
             opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, maxDt));
         }
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CreatedDate));
         DateTime expected = minDt.addSeconds(Integer.valueOf(((maxDt.getTime() - minDt.getTime()) / 1000) / 2));
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.CreatedDate');
     }
@@ -57,7 +57,7 @@ private class AvgCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.Amount));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.Amount));
         Decimal expected = (sum / opportunities?.size()); 
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.Amount');
     }
@@ -71,7 +71,7 @@ private class AvgCalculator_Test {
             ));
         }
         
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.Name));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.Name));
         System.assertEquals(null, calc.calculate(opportunities), 'Did not return null for Text values');
     }
 
@@ -89,7 +89,7 @@ private class AvgCalculator_Test {
             ));
         } 
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CloseDate)); 
         Date expected = minDate.addDays(Integer.valueOf((minDate.daysBetween(maxDate) / 2)));
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.CloseDate');
     }
@@ -109,7 +109,7 @@ private class AvgCalculator_Test {
             opportunities.add((Opportunity) SObjectUtils.setReadOnlyField(new Opportunity(), Opportunity.CreatedDate, newDt));
         }
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate));
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CreatedDate));
         DateTime expected = minDt.addSeconds(Integer.valueOf(((maxDt.getTime() - minDt.getTime()) / 1000) / 2));
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.CreatedDate');
     }
@@ -128,7 +128,7 @@ private class AvgCalculator_Test {
             ));
         }
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         Decimal expected = (sum / opportunities?.size());
         System.assertEquals(expected, calc.calculate(opportunities), 'Wrong AVG of Opportunity.Amount');
     }
@@ -141,7 +141,7 @@ private class AvgCalculator_Test {
             opportunities.add(new Opportunity());
         }   
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CloseDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Did not default AVG of null date values to null');
     }
 
@@ -153,7 +153,7 @@ private class AvgCalculator_Test {
             opportunities.add(new Opportunity());
         }   
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Did not default AVG of null values to null');
     }
 
@@ -165,28 +165,28 @@ private class AvgCalculator_Test {
             opportunities.add(new Opportunity());
         }   
 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'Did not default AVG of null number values to 0');
     }
 
     @IsTest 
     static void shouldNotCalculateNullRecordsOnDateFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CloseDate)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CloseDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Did not default AVG of null records to 0');
     }
 
     @IsTest 
     static void shouldNotCalculateNullRecordsOnDateTimeFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.CreatedDate)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.CreatedDate)); 
         System.assertEquals(null, calc.calculate(opportunities), 'Did not default AVG of null records to 0');
     }
 
     @IsTest 
     static void shouldCalculateNullRecordsOnNumberFields() {
         List<Opportunity> opportunities = null; 
-        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldReference(Opportunity.Amount)); 
+        Rollup.Calculator calc = new AvgCalculator().setCalcField(new FieldRef(Opportunity.Amount)); 
         System.assertEquals(0, calc.calculate(opportunities), 'Did not default AVG of null records to 0');
     }
 

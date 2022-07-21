@@ -1,4 +1,4 @@
-public class SObjectReference implements Mappable {
+public class SObjectRef implements Mappable {
     // Wraps the SObjectType class, which is not JSON serializable
     String objectName;
     transient SObjectType objectType {
@@ -11,16 +11,16 @@ public class SObjectReference implements Mappable {
         private set;
     }
 
-    public SObjectReference(SObjectType objectType) {
+    public SObjectRef(SObjectType objectType) {
         this.objectName = String.valueOf(objectType); 
         this.objectType = objectType;
     }
 
-    public SObjectReference(SObjectField field) {
+    public SObjectRef(SObjectField field) {
         this(SchemaUtils.getSObjectType(field));
     }
 
-    public SObjectReference(SObject record) {
+    public SObjectRef(SObject record) {
         this(record?.getSObjectType());
     }
 
@@ -39,7 +39,7 @@ public class SObjectReference implements Mappable {
     // **** MAPPABLE **** // 
     public Boolean equals(Object obj) {
         // Any SObjectReferences with a like getSchemaType() should be considered equal
-        SObjectReference otherRef = (obj instanceOf SObjectReference) ? (SObjectReference) obj : null;
+        SObjectRef otherRef = (obj instanceOf SObjectRef) ? (SObjectRef) obj : null;
         return otherRef?.toSchemaType() == this.toSchemaType();
     }
 

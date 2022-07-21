@@ -40,18 +40,18 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
     public virtual class Request {
         @TestVisible Dml.Operation operation;
         @TestVisible List<SObject> records;
-        @TestVisible FieldReference externalIdField;
+        @TestVisible FieldRef externalIdField;
         @TestVisible Boolean allOrNone = true; 
         @TestVisible Boolean skipTriggers = false;
 
-        public Request(Dml.Operation operation, List<SObject> records, FieldReference externalIdField, Boolean allOrNone) {
+        public Request(Dml.Operation operation, List<SObject> records, FieldRef externalIdField, Boolean allOrNone) {
             this.operation = operation; 
             this.records = records;
             this.externalIdField = externalIdField;
             this.allOrNone = allOrNone; 
         }
 
-        public Request(Dml.Operation operation, List<SObject> records, FieldReference externalIdField) {
+        public Request(Dml.Operation operation, List<SObject> records, FieldRef externalIdField) {
             this(operation, records, externalIdField, true); 
         }
 
@@ -63,11 +63,11 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
             this(operation, records, null, true); 
         }
 
-        public Request(Dml.Operation operation, SObject record, FieldReference externalIdField, Boolean allOrNone) {
+        public Request(Dml.Operation operation, SObject record, FieldRef externalIdField, Boolean allOrNone) {
             this(operation, new List<SObject>{record}, externalIdField, allOrNone);
         }
 
-        public Request(Dml.Operation operation, SObject record, FieldReference externalIdField) {
+        public Request(Dml.Operation operation, SObject record, FieldRef externalIdField) {
             this(operation, new List<SObject>{record}, externalIdField); 
         }
 

@@ -8,7 +8,7 @@ private class Filter_Test {
 
     @IsTest 
     static void shouldAllowParentQuery() {
-        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+        FieldRef fieldRef = new FieldRef(new List<SObjectField>{
             Case.ContactId,
             Contact.AccountId,
             Account.Type
@@ -301,12 +301,12 @@ private class Filter_Test {
         );
         Databaselayer.Dml.doInsert(testOpp); 
         testOpp = (Opportunity) Databaselayer.Soql.newQuery(Opportunity.SObjectType)
-            .selectFields(new FieldReference(new List<SObjectField>{Opportunity.AccountId, Account.Name}))
+            .selectFields(new FieldRef(new List<SObjectField>{Opportunity.AccountId, Account.Name}))
             .whereFilters(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
             .run()[0];
 
         Test.startTest();
-        FieldReference fieldRef = new FieldReference(new List<SObjectField>{
+        FieldRef fieldRef = new FieldRef(new List<SObjectField>{
             Opportunity.AccountId,
             Account.Name
         });

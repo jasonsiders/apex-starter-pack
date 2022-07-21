@@ -1,12 +1,12 @@
 @IsTest
-private class SObjectReference_Test {
+private class SObjectRef_Test {
     @IsTest 
     static void shouldConstruct() {
-        SObjectReference fromSchemaType = new SObjectReference(Account.SObjectType);
+        SObjectRef fromSchemaType = new SObjectRef(Account.SObjectType);
         System.assertEquals(Account.SObjectType, fromSchemaType?.toSchemaType(), 'Represents the wrong SObjectType');
-        SObjectReference fromSchemaField = new SObjectReference(Account.OwnerId);
+        SObjectRef fromSchemaField = new SObjectRef(Account.OwnerId);
         System.assertEquals(Account.SObjectType, fromSchemaField?.toSchemaType(), 'Represents the wrong SObjectType');
-        SObjectReference fromSObject = new SObjectReference(new Account()); 
+        SObjectRef fromSObject = new SObjectRef(new Account()); 
         System.assertEquals(Account.SObjectType, fromSObject?.toSchemaType(), 'Represents the wrong SObjectType');
     }
 
@@ -14,40 +14,40 @@ private class SObjectReference_Test {
     static void shouldSerialize() {
         SObjectType objectType = Account.SObjectType; 
         System.assertNotEquals(null, serialize(objectType), 'An error was not thrown while serializing a Schema.SObjectType');
-        SObjectReference reference = new SObjectReference(objectType);
-        System.assertEquals(null, serialize(reference), 'An error was thrown when serializing an SObjectReference');
+        SObjectRef reference = new SObjectRef(objectType);
+        System.assertEquals(null, serialize(reference), 'An error was thrown when serializing an SObjectRef');
         // Once serialized, should still be able to access the Schema type
-        reference = (SObjectReference) JSON.deserialize(JSON.serialize(reference), SObjectReference.class);
+        reference = (SObjectRef) JSON.deserialize(JSON.serialize(reference), SObjectRef.class);
         System.assertEquals(objectType, reference?.toSchemaType(), 'The SObjectType was lost after serialization');
     }
 
     @IsTest
     static void shouldDetermineIfRecordIsInstanceOfSObjectType() {
-        SObjectReference ref = new SObjectReference(Account.SObjectType); 
+        SObjectRef ref = new SObjectRef(Account.SObjectType); 
         System.assertEquals(true, ref.isSObjectTypeOf(new Account()), ref?.toString() + '.SObjectType != new Account()?');
         System.assertEquals(false, ref.isSObjectTypeOf(new Contact()), ref?.toString() + '.SObjectType == new Contact()?');
         SObjectType nullObjectType = null; 
-        ref = new SObjectReference(nullObjectType); 
+        ref = new SObjectRef(nullObjectType); 
         System.assertEquals(false, ref.isSObjectTypeOf(new Account()), ref?.toString() + '.SObjectType == new Account()?');
     }
 
     @IsTest 
     static void shouldBeUsableAsAMapKey() {
-        Map<SObjectReference, String> objectsByName = new Map<SObjectReference, String>();
+        Map<SObjectRef, String> objectsByName = new Map<SObjectRef, String>();
         List<SObjectType> objectTypes = new List<SObjectType>{
             Account.SObjectType, 
             Contact.SObjectType, 
             Lead.SObjectType
         };
         for (SObjectType objectType : objectTypes) {
-            SObjectReference ref = new SObjectReference(objectType);
+            SObjectRef ref = new SObjectRef(objectType);
             objectsByName.put(ref, ref?.toString()); 
         }
 
         Test.startTest();
         for (SObjectType objectType : objectTypes) {
             // Without the equals() method, this would fail!
-            SObjectReference ref = new SObjectReference(objectType); 
+            SObjectRef ref = new SObjectRef(objectType); 
             System.assertEquals(ref?.toString(), objectsByName?.get(ref), 'No value found for ' + ref + ': ' + JSON.serializePretty(objectsByName));
         }
         Test.stopTest();

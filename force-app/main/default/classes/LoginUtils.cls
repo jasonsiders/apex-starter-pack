@@ -8,7 +8,7 @@ public abstract class LoginUtils {
             LoginUtils.activeSessions = new Map<Id, List<AuthSession>>(); 
             Soql query = Databaselayer.Soql.newQuery(AuthSession.SObjectType)
                 .setQueryKey(AUTH_SESSION_QUERY)
-                .selectFields(new FieldReference(new List<SObjectField>{
+                .selectFields(new FieldRef(new List<SObjectField>{
                     AuthSession.LoginHistoryId, 
                     LoginHistory.Application
                 })).selectFields(new List<SObjectField>{

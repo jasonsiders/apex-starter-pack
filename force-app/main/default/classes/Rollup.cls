@@ -1,15 +1,15 @@
 public without sharing class Rollup {
-    @TestVisible SObjectReference targetObject { get; private set; }
-    @TestVisible Map<ChildRelationshipReference, Relationship> relationships { get; private set;  }
+    @TestVisible SObjectRef targetObject { get; private set; }
+    @TestVisible Map<ChildRelationshipRef, Relationship> relationships { get; private set;  }
     @TestVisible static final String ROLLUP_QUERY = 'Rollup_Query';
 
     public Rollup(SObjectType sObjectType) {
-        this.targetObject = new SObjectReference(sObjectType);
-        this.relationships = new Map<ChildRelationshipReference, Relationship>();
+        this.targetObject = new SObjectRef(sObjectType);
+        this.relationships = new Map<ChildRelationshipRef, Relationship>();
     }
 
     public Rollup addRelationship(Relationship relationship) {
-        ChildRelationshipReference childRelationship = relationship?.childRelationship; 
+        ChildRelationshipRef childRelationship = relationship?.childRelationship; 
         Relationship existingRelationship = (this.relationships.containsKey(childRelationship))
             ? this.relationships.get(childRelationship)?.addAllRequests(relationship)
             : relationship;
@@ -56,15 +56,15 @@ public without sharing class Rollup {
     
     // **** INNER **** // 
     public class Relationship {
-        public ChildRelationshipReference childRelationship { get; private set; }
-        public Map<FieldReference, Request> requests { get; private set; }
+        public ChildRelationshipRef childRelationship { get; private set; }
+        public Map<FieldRef, Request> requests { get; private set; }
 
         public Relationship(ChildRelationship childRelationship) {
-            this.childRelationship = new ChildRelationshipReference(childRelationship);
-            this.requests = new Map<FieldReference, Request>();
+            this.childRelationship = new ChildRelationshipRef(childRelationship);
+            this.requests = new Map<FieldRef, Request>();
         }
 
-        public Relationship(FieldReference lookupField) {
+        public Relationship(FieldRef lookupField) {
             this(SchemaUtils.getChildRelationship(lookupField?.toSchemaType()));
         }
         
@@ -100,17 +100,17 @@ public without sharing class Rollup {
     }
 
     public class Request {
-        public FieldReference targetField { get; private set; } 
+        public FieldRef targetField { get; private set; } 
         public Calculator calculator { get; private set; }
         public List<Filter> filters { get; private set; }
 
-        public Request(FieldReference targetField, Calculator calculator, List<Filter> filters) {
+        public Request(FieldRef targetField, Calculator calculator, List<Filter> filters) {
             this.targetField = targetField;
             this.calculator = calculator;
             this.filters = filters;
         }
         
-        public Request(FieldReference targetField, Calculator calculator) {
+        public Request(FieldRef targetField, Calculator calculator) {
             this(targetField, calculator, new List<Filter>());
         }
 
@@ -163,13 +163,13 @@ public without sharing class Rollup {
     }
 
     public abstract class Calculator {
-        public FieldReference calcField { get; protected set; }
+        public FieldRef calcField { get; protected set; }
 
-        public FieldReference getCalcField() {
+        public FieldRef getCalcField() {
             return this.calcField; 
         }
 
-        public virtual Calculator setCalcField(FieldReference calcField) {
+        public virtual Calculator setCalcField(FieldRef calcField) {
             this.calcField = calcField;
             return this; 
         }

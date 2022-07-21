@@ -1,11 +1,11 @@
 @IsTest 
-private class ChildRelationshipReference_Test {
+private class ChildRelationshipRef_Test {
     @IsTest 
     static void shouldConstrcutFromChildRelationship() {
         ChildRelationship rel = SchemaUtils.getChildRelationship(Contact.AccountId);
 
         Test.startTest();
-        ChildRelationshipReference ref = new ChildRelationshipReference(rel);
+        ChildRelationshipRef ref = new ChildRelationshipRef(rel);
         Test.stopTest();
 
         System.assertEquals(rel, ref?.toSchemaType(), 'Wrong ChildRelationship');
@@ -17,7 +17,7 @@ private class ChildRelationshipReference_Test {
         SObjectField field = Contact.AccountId;
 
         Test.startTest();
-        ChildRelationshipReference ref = new ChildRelationshipReference(field);
+        ChildRelationshipRef ref = new ChildRelationshipRef(field);
         Test.stopTest();
 
         System.assertEquals(field, ref?.toSchemaType()?.getField(), 'Wrong ChildRelationship.getField()');
@@ -31,8 +31,8 @@ private class ChildRelationshipReference_Test {
         Test.startTest();
         Exception caughtError;
         try {
-            ChildRelationshipReference ref = new ChildRelationshipReference(field);
-        } catch (ChildRelationshipReference.InvalidFieldException thrownError) {
+            ChildRelationshipRef ref = new ChildRelationshipRef(field);
+        } catch (ChildRelationshipRef.InvalidFieldException thrownError) {
             caughtError = thrownError; 
         }
         Test.stopTest();
@@ -44,7 +44,7 @@ private class ChildRelationshipReference_Test {
     static void shouldBeSerializable() {
         // Note: Unlike the other Schema objects, ChildRelationship seems to be serializable in synchronous contexts
         // However, it's still not serializable in asynchronous operations (like Queueable/Batchable)
-        ChildRelationshipReference ref = new ChildRelationshipReference(Contact.AccountId);
+        ChildRelationshipRef ref = new ChildRelationshipRef(Contact.AccountId);
         // Populating the `ChildRelationship` property should cause an error
         Exception caughtError;
         try {
@@ -55,7 +55,7 @@ private class ChildRelationshipReference_Test {
         }
         System.assertNotEquals(null, caughtError, 'No issue serializing ChildRelationship in async-context');
 
-        // Populating the `ChildRelationshipReference` property instead should not cause an error
+        // Populating the `ChildRelationshipRef` property instead should not cause an error
         try {
             System.enqueueJob(new AsyncContainer(ref));
         } catch (System.SerializationException thrownError) {
@@ -65,28 +65,28 @@ private class ChildRelationshipReference_Test {
 
     @IsTest 
     static void shouldBeUsableAsAMapKey() {
-        Map<ChildRelationshipReference, SObjectField> refs = new Map<ChildRelationshipReference, SObjectField>();
+        Map<ChildRelationshipRef, SObjectField> refs = new Map<ChildRelationshipRef, SObjectField>();
         List<SObjectField> lookupFields = new List<SObjectField>{
             Case.AccountId,
             Contact.AccountId,
             Opportunity.AccountId
         };
         for (SObjectField lookupField : lookupFields) {
-            refs.put(new ChildRelationshipReference(lookupField), lookupField);
+            refs.put(new ChildRelationshipRef(lookupField), lookupField);
         }
 
         for (SObjectField lookupField : lookupFields) {
-            ChildRelationshipReference newRef = new ChildRelationshipReference(lookupField);
+            ChildRelationshipRef newRef = new ChildRelationshipRef(lookupField);
             System.assertEquals(true, refs.containsKey(newRef), 'Map does not contain ' + newRef.toString());
         }
     }
 
     // **** HELPER **** // 
     public class AsyncContainer implements System.Queueable {
-        ChildRelationshipReference reference;
+        ChildRelationshipRef reference;
         ChildRelationship relationship;
 
-        public AsyncContainer(ChildRelationshipReference reference) {
+        public AsyncContainer(ChildRelationshipRef reference) {
             this.reference = reference;
         }
 
