@@ -77,6 +77,6 @@ public class FieldRef implements Mappable {
     }
 
     public Integer hashCode() {
-        return System.hashCode(this.destinationFieldName);
+        return System.hashCode(this.toString()); 
     }
 }
