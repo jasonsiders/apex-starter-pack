@@ -59,6 +59,10 @@ public class FieldRef implements Mappable {
     public override String toString() {
         return this.soqlReference;
     }
+
+    public String getFullName() {
+        return String.valueOf(this.rootSObjectType) + '.' + this.toString(); 
+    }
     
     private void setDestinationDetails(SObjectField field) {
         this.destinationField = field; 
@@ -77,6 +81,6 @@ public class FieldRef implements Mappable {
     }
 
     public Integer hashCode() {
-        return System.hashCode(this.toString()); 
+        return System.hashCode(this.getFullName()); 
     }
 }
