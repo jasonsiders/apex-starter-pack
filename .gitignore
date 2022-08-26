@@ -42,3 +42,6 @@ $RECYCLE.BIN/
 # SFDC Metadata
 force-app/main/default/customMetadata*
 force-app/main/default/profiles*
+
+# VS Code Settings
+.vscode/settings.json

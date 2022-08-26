@@ -13,10 +13,12 @@ public without sharing class GarbageCollectorSoql extends GarbageCollector {
 
     public Database.QueryLocator start(Database.BatchableContext context) {
         try {
-            Logger.logAndPublish(LoggingLevel.INFO, 'Executing query: ' + this.soql); 
+            Logger.info('Executing query: ' + this.soql); 
+            Logger.publish();
             return Database.getQueryLocator(soql); 
         } catch (System.QueryException caughtError) {
-            Logger.logAndPublish(LoggingLevel.ERROR, caughtError.getMessage()); 
+            Logger.error(caughtError.getMessage()); 
+            Logger.publish();
             throw caughtError; 
         }
     }

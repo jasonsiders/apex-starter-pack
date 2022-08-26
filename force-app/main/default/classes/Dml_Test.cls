@@ -137,7 +137,7 @@ private class Dml_Test {
         Log_Event__e event = new Log_Event__e(
             Message__c = 'Testing 123',
             Running_User__c = DmlMock.generateFakeId(Account.SObjectType),
-            Severity__c = 'NONE',
+            Level__c = 'NONE',
             Transaction_Id__c = '1234'
         );
         Test.startTest();

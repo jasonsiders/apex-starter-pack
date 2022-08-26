@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Severity__c</fullName>
-    <description>The chosen LoggingLevel for the current log. 
-Corresponds with the standard LoggingLevel enum: https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_enum_System_LoggingLevel.htm</description>
+    <fullName>Level__c</fullName>
+    <description>Indicates the severity of the log message. Values are derived from Apex&apos;s standard LoggingLevel enum:
+https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_enum_System_LoggingLevel.htm</description>
     <externalId>false</externalId>
-    <label>Severity</label>
+    <label>Level</label>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
@@ -12,6 +12,11 @@ Corresponds with the standard LoggingLevel enum: https://developer.salesforce.co
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
+            <value>
+                <fullName>NONE</fullName>
+                <default>false</default>
+                <label>NONE</label>
+            </value>
             <value>
                 <fullName>ERROR</fullName>
                 <default>false</default>

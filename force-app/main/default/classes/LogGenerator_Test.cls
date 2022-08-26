@@ -1,69 +1,61 @@
 @IsTest
 private class LogGenerator_Test {
-    @IsTest 
-    static void shouldGenerateOneTransactionRecordPerTransactionId() { 
-        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
-        Set<String> transactionIds = new Set<String>(); 
-        List<Log_Event__e> logEvents = new List<Log_Event__e>(); 
-        // Generate 200 transaction Ids - should generate 200 Log Transaction records
-        for (Integer i = 0; i < 200; i++) {
-            String transactionId = 'Transaction #' + Crypto.getRandomInteger() + '_' + i;
-            transactionIds.add(transactionId);
-            // Add one event per transactionId
-            logEvents.add(new Log_Event__e(
-                Message__c = 'Testing 123',
-                Running_User__c = UserInfo.getUserId(),
-                Severity__c = 'FINEST',
-                Transaction_Id__c = transactionId
-            )); 
-
-        }
+    @IsTest
+    static void shouldLogFromTrigger() {
+        List<Log_Event__e> events = generateTestEvents();
 
         Test.startTest();
-        LogGenerator generator = new LogGenerator(logEvents); 
-        generator.generateLogs(); 
-        Test.stopTest(); 
-        
-        List<Log_Transaction__c> logTransactions = Dml.Upserted.getRecords(Log_Transaction__c.SObjectType); 
-        System.assertEquals(transactionIds?.size(), logTransactions?.size(), 'Wrong # of Log Transactions generated');
-        List<Log__c> logRecords = Dml.Inserted.getRecords(Log__c.SObjectType); 
-        System.assertEquals(transactionIds?.size(), logRecords?.size(), 'Wrong # of Log Records generated. DmlMock: ' + JSON.serializePretty(dmlMock)); 
+        new LogGenerator(events).createLogRecords();
+        Test.stopTest();
+
+        List<Log__c> logs = getLogs();
+        System.assertEquals(events?.size(), logs?.size(), 'Wrong # of logs');
+        for (Integer i = 0; i < 200; i++) {
+            Log__c log = logs[i];
+            Log_Event__e event = events[i];
+            System.assertEquals(event.Apex_Class__c, log.Apex_Class__c, 'Wrong Apex_Class__c');
+            System.assertEquals(event.Context__c, log.Context__c, 'Wrong Context__c');
+            System.assertEquals(event.Level__c, log.Level__c, 'Wrong Level__c');
+            System.assertEquals(event.Logged_At__c, log.Logged_At__c, 'Wrong Logged_At__c');
+            System.assert(log.Logged_At__c < log.CreatedDate, 'Logged At should be before CreatedDate');
+            System.assertEquals(event.Message__c, log.Message__c, 'Wrong Message__c');
+            System.assertEquals(event.Running_User__c, log.Running_User__c, 'Wrong Running_User__c');
+            System.assertEquals(event.Sequence__c, log.Sequence__c, 'Wrong Sequence__c');
+            System.assertEquals(event.Stack_Trace__c, log.Stack_Trace__c, 'Wrong Stack_Trace__c');
+            System.assertEquals(event.Transaction_Id__c, log.Transaction_Id__c, 'Wrong Transaction_Id__c');
+        }
     }
 
-    @IsTest 
-    static void shouldGenerateOneLogRecordPerEvent() {
-        DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock()); 
-        Request context = Request.getCurrent(); 
+    // **** HELPER **** //
+    static List<Log_Event__e> generateTestEvents() {
         List<Log_Event__e> logEvents = new List<Log_Event__e>();
+        Id userId = UserInfo.getUserId();
+        System.Request req = System.Request.getCurrent();
+        String stack = new System.DmlException()?.getStackTraceString();
         for (Integer i = 0; i < 200; i++) {
-            logEvents.add(new Log_Event__e(
-                Message__c = 'Testing 123',
-                Running_User__c = UserInfo.getUserId(),
-                Severity__c = String.valueOf(LoggingLevel.FINEST),
-                Source__c = String.valueOf(context.getQuiddity()),
-                Stack_Trace__c = 'n/a',
-                Transaction_Id__c = context.getRequestId()           
+            logEvents?.add(new Log_Event__e(
+                Apex_Class__c = String.valueOf(LogGenerator_Test.class),
+                Context__c = req.getQuiddity()?.name(),
+                Level__c = 'FINEST',
+                Logged_At__c = DateTime.now().addSeconds(-5),
+                Message__c = 'Test Log #' + (i + 1),
+                Running_User__c = userId,
+                Sequence__c = (i + 1),
+                Stack_Trace__c = stack,
+                Transaction_Id__c = req.getRequestId()
             ));
         }
-        
-        Test.startTest();
-        LogGenerator generator = new LogGenerator(logEvents); 
-        generator.generateLogs(); 
-        Test.stopTest(); 
+        return logEvents;
+    }
 
-        List<Log_Transaction__c> logTransactions = (List<Log_Transaction__c>) 
-        Dml.Upserted.getRecords(Log_Transaction__c.SObjectType);
-        System.assertEquals(1, logTransactions?.size(), 'Wrong number of transactions inserted');
-        Log_Transaction__c logTransaction = logTransactions[0]; 
-        System.assertEquals(UserInfo.getUserId(), logTransaction.OwnerId, 'Wrong running user'); 
-        System.assertEquals(context.getRequestId(), logTransaction.Transaction_Id__c, 'Wrong Transaction Id');
-
-        List<Log__c> logs = (List<Log__c>) Dml.Inserted.getRecords(Log__c.SObjectType);
-        for (Log__c log : logs) {
-            System.assertEquals('Testing 123', log.Message__c, 'Wrong Message');
-            System.assertEquals('FINEST', log.Severity__c, 'Wrong Severity');
-            System.assertEquals(String.valueOf(context.getQuiddity()), log.Source__c, 'Wrong Source');
-            System.assertEquals('n/a', log.Stack_Trace__c, 'Wrong Stack Trace');
-        }
+    static List<Log__c> getLogs() {
+        return [
+            SELECT 
+                Id, Apex_Class__c, Context__c, CreatedDate, 
+                Level__c, Logged_At__c, Message__c, Running_User__c, 
+                Sequence__c, Stack_Trace__c, Transaction_Id__c
+            FROM Log__c
+            ORDER BY Sequence__c ASC
+        ];
     }
 }

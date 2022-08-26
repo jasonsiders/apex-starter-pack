@@ -29,7 +29,8 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
             final String message = 
                 'Unexpected error (Job: ' + context?.getJobId() + ')\n' + 
                 '"' + caughtError.getMessage() + '"';
-            Logger.logAndPublish(LoggingLevel.ERROR, message);
+            Logger.error(message);
+            Logger.publish();
             throw caughtError;
         }
     }
@@ -53,7 +54,8 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
             String.valueOf(numCompletedBatches),
             String.valueOf(numTotalBatches)
         });
-        Logger.logAndPublish(LoggingLevel.INFO, message);
+        Logger.info(message);
+        Logger.publish();
     }
 
     // **** STATIC **** // 
@@ -107,7 +109,8 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
                 JSON.serializePretty(VALID_APEX_CLASSES),
                 JSON.serializePretty(job)
             }));
-            Logger.logAndPublish(LoggingLevel.ERROR, this.getMessage()); 
+            Logger.error(this.getMessage()); 
+            Logger.publish(); 
         }
     }
 

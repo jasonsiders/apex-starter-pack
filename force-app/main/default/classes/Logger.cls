@@ -1,152 +1,208 @@
-@RestResource(urlMapping='/log/*')
-global without sharing class Logger {
-    @TestVisible static final Integer MAX_PUBLISH_CALLS = Logger.getMaxPublishCalls();  
-    @TestVisible static List<Log_Event__e> pendingEvents = new List<Log_Event__e>();  
-    @TestVisible static Log_Setting__c settings = Log_Setting__c.getInstance(UserInfo.getUserId());
-    @TestVisible static LoggingLevel threshold { get { 
-        return (LoggingLevel) EnumUtils.valueOf(
-            Logger.settings?.Level__c, 
-            LoggingLevel.class
-        );
-    }}
-    
-    // Indicates how severe something is. A log will only be published
-    // if a log's logging level < the current user's "Level" threshold
-    // LoggingLevel enum : https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_enum_System_LoggingLevel.htm
-    static final Map<LoggingLevel, Integer> SEVERITY_MATRIX = new Map<LoggingLevel, Integer>{
-        LoggingLevel.NONE => 0,
-        LoggingLevel.ERROR => 1, 
-        LoggingLevel.WARN => 2,
-        LoggingLevel.INFO => 3,
-        LoggingLevel.DEBUG => 4,
-        LoggingLevel.FINE => 5,
-        LoggingLevel.FINER => 6,
-        LoggingLevel.FINEST => 7
-    };
+@RestResource(urlMapping='/log')
+global without sharing abstract class Logger {
+    static final Integer MAX_LENGTH = Log__c.Message__c.getDescribe()?.getLength();
+    static Integer Sequence = 1;
 
+    @TestVisible
+    static List<Log_Event__e> PendingLogs = new List<Log_Event__e>();
+
+    @TestVisible
+    static List<Log_Event__e> PublishedLogs = new List<Log_Event__e>();
+
+    @TestVisible
+    static Log_Setting__c Settings = Logger.getLogSettings();
+
+    @TestVisible
+    static LoggingLevel Threshold {
+        get {
+            Boolean matchesSettings = Logger.Threshold?.name()?.equalsIgnoreCase(Logger.Settings?.Level__c);
+            if (matchesSettings != true) {
+                LoggingLevel newLevel = (LoggingLevel) EnumUtils.valueOf(Settings?.Level__c, LoggingLevel.class);
+                Logger.Threshold = (newLevel != null) ? newLevel : LoggingLevel.NONE;
+            }
+            return Logger.Threshold;
+        }
+        private set;
+    }
+
+    // **** GLOBAL **** //
     @HttpPost
-    global static void logFromApi(List<Input> inputs) {
-        // Only one method per type can be defined with: HttpPost, 
-        // so callers must supply an array of Inputs
-        Logger.logFromExternalSource(inputs);
+    global static void logFromApi() {
+        // Exposes the logger to external solutions
+        String requestBody = RestContext.request?.requestBody?.toString();
+        List<LogInput> logInputs = (List<LogInput>) JSON.deserialize(requestBody, List<LogInput>.class);
+        Logger.logFromExternalSource(logInputs);
     }
-    
+
+    @InvocableMethod(category='Logging' label='Post to Log')
+    global static void logFromFlow(List<LogInput> logInputs) {
+        // Exposes the logger to Flows
+        Logger.logFromExternalSource(logInputs);
+    }
+
     @AuraEnabled
-    public static void logFromLightning(List<Input> inputs) {
-        Logger.logFromExternalSource(inputs); 
+    global static void logFromLightning(List<LogInput> logInputs) {
+        // Exposes the logger to Aura Components & LWCs
+        Logger.logFromExternalSource(logInputs);
     }
 
-    @AuraEnabled 
-    public static void logFromLightning(Input input) {
-        Logger.logFromLightning(new List<Input>{input});
-    }
-
-    @InvocableMethod(label='Post to Log')
-    public static void logFromFlow(List<Input> inputs) {
-        Logger.logFromExternalSource(inputs); 
-    }
-
-    public static void log(LoggingLevel level, String message) {
-        System.debug(level, message); 
-        if (settings?.Enabled__c == true && clearsSeverityThreshold(level)) {
-            Request context = Request.getCurrent(); 
-            pendingEvents.add(new Log_Event__e(
-                Message__c = message,
-                Running_User__c = UserInfo.getUserId(),
-                Severity__c = String.valueOf(level),
-                Source__c = String.valueOf(context.getQuiddity()),
-                Stack_Trace__c = getStackTrace(),
-                Transaction_Id__c = context.getRequestId()           
-            ));
-        }
-    }
-
-    public static void log(String message) {
-        // This will default the logging level to the current threshold
-        Logger.log(threshold, message); 
-    }
-
-    public static void logAndPublish(LoggingLevel level, String message) {
-        Logger.log(level, message); 
-        Logger.publish(); 
-    }
-
-    public static void logAndPublish(String message) {
-        Logger.logAndPublish(threshold, message); 
-    }
-
+    // **** PUBLIC **** //
     public static void publish() {
-        Integer currentPublishCalls = Limits.getPublishImmediateDml();
-        if (currentPublishCalls < Logger.MAX_PUBLISH_CALLS) {
-            Databaselayer.Dml.doPublish(Logger.pendingEvents); 
-            Logger.pendingEvents.clear(); 
+        Logger.PublishedLogs.addAll(Logger.PendingLogs);
+        DatabaseLayer.Dml.doPublish(Logger.PendingLogs); 
+        System.debug('Published Logs: ' + Logger.PublishedLogs?.size());
+        Logger.PendingLogs.clear();
+    }
+
+    public static void log(LoggingLevel level, Type apexClass, Object messageObj) {
+        // Note: Since Exception.getStackTraceString() returns null in managed packages,
+        // callers can use the optional `apexClass` param for rudimentary stack tracing
+        if (Logger.isEnabled(level)) {
+            System.debug(level, messageObj);
+            Logger.PendingLogs.add(
+                new Log_Event__e(
+                    Apex_Class__c = String.valueOf(apexClass),
+                    Context__c = System.Request.getCurrent().getQuiddity()?.name(),
+                    Level__c = level?.name(),
+                    Logged_At__c = DateTime.now(),
+                    Message__c = String.valueOf(messageObj)?.abbreviate(MAX_LENGTH),
+                    Running_User__c = UserInfo.getUserId(),
+                    Sequence__c = Logger.Sequence++,
+                    Stack_Trace__c = Logger.getStackTrace()?.abbreviate(MAX_LENGTH),
+                    Transaction_Id__c = System.Request.getCurrent()?.getRequestId()
+                )
+            );
         }
     }
 
-    public static void logException(Exception error) {
-        String message = error?.getTypeName() + ': ' + error?.getMessage() + '\n' + error?.getStackTraceString();
-        Logger.logAndPublish(LoggingLevel.ERROR, message);
+    public static void log(LoggingLevel level, Object message) {
+        Logger.log(level, null, message);
     }
 
-    public static void clear() {
-        Logger.pendingEvents?.clear(); 
+    public static void error(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.ERROR, apexClass, message);
+    }
+
+    public static void error(Object message) {
+        Logger.error(null, message);
+    }
+
+    public static void warn(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.WARN, apexClass, message);
+    }
+
+    public static void info(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.INFO, apexClass, message);
+    }
+
+    public static void info(Object message) {
+        Logger.info(null, message);
+    }
+
+    public static void warn(Object message) {
+        Logger.warn(null, message);
+    }
+
+    public static void debug(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.DEBUG, apexClass, message);
+    }
+
+    public static void debug(Object message) {
+        Logger.debug(null, message);
+    }
+
+    public static void fine(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.FINE, apexClass, message);
+    }
+
+    public static void fine(Object message) {
+        Logger.fine(null, message);
+    }
+
+    public static void finer(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.FINER, apexClass, message);
+    }
+
+    public static void finer(Object message) {
+        Logger.finer(null, message);
+    }
+
+    public static void finest(Type apexClass, Object message) {
+        Logger.log(LoggingLevel.FINEST, apexClass, message);
+    }
+
+    public static void finest(Object message) {
+        Logger.finest(null, message);
     }
 
     // **** PRIVATE **** //
-    static void logFromExternalSource(List<Input> inputs) {
-        // Private, because all apex code should call the log() method directly
-        // External sources (API, Flow, LWC) should call their respective logFrom*() method
-        for (Input input : inputs) {
-            Logger.log(input.getLevel(), input.message);
+    @TestVisible
+    static Log_Setting__c getLogSettings() {
+        // Returns a Custom Setting record that corresponds to the running user/their profile/their organization
+        Log_Setting__c logSettings = Log_Setting__c.getInstance();
+        LoggingLevel level = (LoggingLevel) EnumUtils.valueOf(logSettings?.Level__c, LoggingLevel.class);
+        if (level == null) {
+            // Either no org defaults exist, or it has a missing/invalid Level__c
+            // If this happens, upsert a valid settings record and set as org default
+            Log_Setting__c defaultSettings = Log_Setting__c.getOrgDefaults();
+            defaultSettings.Enabled__c = (defaultSettings.Enabled__c) ? defaultSettings.Enabled__c : false;
+            defaultSettings.Level__c = LoggingLevel.NONE?.name();
+            defaultSettings.SetupOwnerId = UserInfo.getOrganizationId();
+            upsert defaultSettings;
+            logSettings = defaultSettings;
+        }
+        return logSettings;
+    }
+
+    static void logFromExternalSource(List<LogInput> logInputs) {
+        for (LogInput logInput : logInputs) {
+            logInput.log();
         }
         Logger.publish();
     }
 
-    static Integer getMaxPublishCalls() {
-        Integer publishCalls = Integer.valueOf(Log_Setting__c.getOrgDefaults().Max_Publish_Calls__c);
-        return (publishCalls != null) ? publishCalls : 100;
-    }
-
-    static Boolean clearsSeverityThreshold(LoggingLevel current) {
-        // Returns true if the threshold != 'NONE',
-        // and the current level has a lower severity number
-        Integer thresholdSeverity = getSeverity(Logger.threshold); 
-        Integer currentSeverity = getSeverity(current); 
-        return 
-            thresholdSeverity > 0 && 
-            currentSeverity > 0 && 
-            currentSeverity <= thresholdSeverity;
-    }
-
-    static Integer getSeverity(LoggingLevel logLevel) {
-        Integer severity = Logger.SEVERITY_MATRIX.get(logLevel); 
-        return (severity != null) ? severity : 0; 
+    static Boolean isEnabled(LoggingLevel currentLevel) {
+        // Returns TRUE if logging is enabled, and the current level is
+        // as/more severe than the minimum threshold specified in Custom Settings.
+        // This is done to mimick the way traditional debug logs are set up in Salesforce.
+        // Severity is indicated by the LoggingLevel enum's ordinal(), in order:
+        // NONE(0), INTERNAL(1), FINEST(2), FINER(3), FINE(4), DEBUG(5), INFO(6), WARN(7), ERROR(8)
+        Integer thresholdSeverity = (Logger.Threshold != null) ? Logger.Threshold?.ordinal() : 0;
+        Integer currentSeverity = (currentLevel != null) ? currentLevel?.ordinal() : 0;
+        Boolean results =
+            Logger.Settings?.Enabled__c == true &&
+            thresholdSeverity > 0 && // Prevent logging when Logger.Threshold == NONE
+            currentSeverity >= thresholdSeverity;
+        return results;
     }
 
     static String getStackTrace() {
-        // Generate an exception, grab its stack trace, and erase the elements that come from this class 
         return new LogException().sourceStackTrace(); 
     }
 
     // **** INNER **** //
-    global class Input {
-        @InvocableVariable 
-        global String loggingLevel; 
+    global class LogInput {
+        @InvocableVariable(description='Possible values: ERROR, WARN, INFO, DEBUG, FINE, FINER, FINEST' label='Log Level' required=true)
+        global String logLevelName;
 
-        @InvocableVariable 
-        global String message; 
+        @InvocableVariable(label='Log Message' required=true)
+        global String logMessage;
 
-        global LoggingLevel getLevel() {
-            return (LoggingLevel) EnumUtils.valueOf(this.loggingLevel, LoggingLevel.class);
+        public void log() {
+            LoggingLevel level = (LoggingLevel) EnumUtils.valueOf(logLevelName, LoggingLevel.class);
+            if (level != null) {
+                Logger.log(level, logMessage);
+            }
         }
     }
-    
+
     private class LogException extends Exception {
         private String sourceStackTrace() {
             List<String> stackTraceLines = new List<String>();
             for (String stackTraceLine : this.getStackTraceString().split('\n')) {
                 // Do not include this class in the stack trace info
-                if (!stackTraceLine?.startsWithIgnoreCase('Class.Logger.')) {
+                final String loggerPrefix = 'Class.' + String.valueOf(Logger.class) + '.';
+                if (!stackTraceLine?.startsWith(loggerPrefix)) {
                     stackTraceLines.add(stackTraceLine); 
                 }
             }

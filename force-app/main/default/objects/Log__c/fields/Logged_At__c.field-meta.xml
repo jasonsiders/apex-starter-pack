@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Logged_At__c</fullName>
+    <description>Shows when the log was generated. 
+Different from Created Date, which shows when the log was published.</description>
+    <externalId>false</externalId>
+    <label>Logged At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

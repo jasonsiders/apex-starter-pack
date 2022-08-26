@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Transaction_Id__c</fullName>
-    <description>An identifier unique to each apex transaction. Use this to group logs from the same transaction together.</description>
+    <fullName>Apex_Class__c</fullName>
+    <description>The name of the apex class which generated the log. Since Exception.getStackTraceString() does not work in managed packages, this can be used to give at least some context of where the log was generated.</description>
     <externalId>false</externalId>
     <isFilteringDisabled>false</isFilteringDisabled>
     <isNameField>false</isNameField>
     <isSortingDisabled>false</isSortingDisabled>
-    <label>Transaction Id</label>
+    <label>Apex Class</label>
     <length>255</length>
     <required>false</required>
     <type>Text</type>

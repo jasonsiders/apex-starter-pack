@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Transaction_Id__c</fullName>
-    <description>An identifier unique to each apex transaction. Use this to group logs from the same transaction together.</description>
+    <fullName>Context__c</fullName>
+    <description>Details the current execution context when the log was generated.
+Displays a System.Quiddity value:
+https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_enum_System_Quiddity.htm#topic-title</description>
     <externalId>false</externalId>
     <isFilteringDisabled>false</isFilteringDisabled>
     <isNameField>false</isNameField>
     <isSortingDisabled>false</isSortingDisabled>
-    <label>Transaction Id</label>
+    <label>Context</label>
     <length>255</length>
     <required>false</required>
     <type>Text</type>
