@@ -5,4 +5,8 @@ public without sharing class LogEventHandler extends TriggerHandler {
     public override void afterInsert() {
         new LogGenerator(this.triggerNew)?.createLogRecords(); 
     }
+
+    protected override Type getHandlerType() {
+        return LogEventHandler.class; 
+    }
 }

@@ -4,14 +4,18 @@ public abstract class TriggerHandler {
     public Map<Id, SObject> triggerNewMap { get; protected set; } 
     public Map<Id, SObject> triggerOldMap { get; protected set; }
     @TestVisible System.TriggerOperation operation = Trigger.operationType; 
-    static Boolean isEnabled = true; 
+    static Boolean IsEnabled = true;
+    static Set<Type> BypassedHandlers = new Set<Type>();
 
     public TriggerHandler() {
         this.setTriggerCollections(); 
     }
+
+    // Required for bypass purposes. This method should always return the current type (ex., AccountTriggerHandler.class)
+    protected abstract Type getHandlerType(); 
     
     public virtual void run() {
-        if (isEnabled) {
+        if (this.isEnabled()) {
             switch on this.operation {
                 when BEFORE_INSERT  { 
                     this.beforeInsert();  
@@ -30,14 +34,6 @@ public abstract class TriggerHandler {
                 }
             }
         }
-    }
-
-    public static void disable() {
-        isEnabled = false;
-    }
-
-    public static void enable() {
-        isEnabled = true; 
     }
 
     public Boolean isNew(SObject record) {
@@ -80,11 +76,43 @@ public abstract class TriggerHandler {
     public virtual void afterUpdate() {}
     public virtual void afterDelete() {}
     public virtual void afterUndelete() {}
-
+    
     protected virtual void setTriggerCollections() {
         this.triggerNew = (Trigger.isExecuting) ? Trigger.new : new List<SObject>();
         this.triggerOld = (Trigger.isExecuting) ? Trigger.old : new List<SObject>();
         this.triggerNewMap = (Trigger.isExecuting) ? Trigger.newMap : new Map<Id, SObject>();
         this.triggerOldMap = (Trigger.isExecuting) ? Trigger.oldMap : new Map<Id, SObject>();
+    } 
+
+    protected virtual Boolean isEnabled() {
+        // For the handler to run, the TriggerHandler must be enabled,
+        // and the specific handler must not be bypassed
+        return (
+            TriggerHandler.IsEnabled && 
+            TriggerHandler.BypassedHandlers?.contains(this.getHandlerType()) == false
+        );
+    }
+    
+    // **** STATIC **** //
+    public static void enableAll() {
+        TriggerHandler.enable();
+        TriggerHandler.BypassedHandlers?.clear();
+    }
+
+    public static void enable() {
+        TriggerHandler.IsEnabled = true;
+    }
+
+    public static void disable() {
+        TriggerHandler.IsEnabled = false;
+    }
+
+    public static void enable(Type handlerType) {
+        TriggerHandler.IsEnabled = true;
+        TriggerHandler.BypassedHandlers?.remove(handlerType); 
+    }
+
+    public static void disable(Type handlerType) {
+        TriggerHandler.BypassedHandlers?.add(handlerType); 
     }
 }

@@ -6,7 +6,7 @@ private class TriggerHandler_Test extends TriggerHandler {
         List<Account> accounts = initAccounts(); 
         TriggerHandler handler = new BlankTriggerHandler(); 
         handler.triggerNew = accounts;
-        Test.startTest(); 
+        Test.startTest();  
         // Before Insert
         handler.beforeInsert();
         for (Account account : (List<Account>) handler.triggerNew) {
@@ -63,18 +63,33 @@ private class TriggerHandler_Test extends TriggerHandler {
         }
         // Reset the test, and Disable the handler
         handler.triggerNew = initAccounts(); 
-        ExampleTriggerHandler.disable(); 
+        ExampleTriggerHandler.disable(ExampleTriggerHandler.class); 
         handler.run(); 
         for (Account account : (List<Account>) handler.triggerNew) {
-            System.assertEquals(false, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
+            System.assertEquals(false, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name: "' + account.Name + '".');
         }
         // Reset the test, and re-enable the handler
         handler.triggerNew = initAccounts(); 
-        ExampleTriggerHandler.enable(); 
+        ExampleTriggerHandler.enable(ExampleTriggerHandler.class); 
         handler.run();
         for (Account account : (List<Account>) handler.triggerNew) {
             System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
         }
+        // Reset the test, and disable all handlers
+        handler.triggerNew = initAccounts(); 
+        ExampleTriggerHandler.disable(); 
+        handler.run(); 
+        for (Account account : (List<Account>) handler.triggerNew) {
+            System.assertEquals(false, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name: "' + account.Name + '".');
+        }
+        // Reset the test, and re-enable all handlers
+        handler.triggerNew = initAccounts(); 
+        ExampleTriggerHandler.enableAll(); 
+        handler.run();
+        for (Account account : (List<Account>) handler.triggerNew) {
+            System.assertEquals(true, account.Name.startsWithIgnoreCase('beforeInsert'), 'Invalid Account Name. Expected: "beforeInsert%". Actual: "' + account.Name + '".');
+        }
+        // 
     }
     
     @IsTest 
@@ -351,6 +366,10 @@ private class TriggerHandler_Test extends TriggerHandler {
             this.setAccountNameTo('afterUndelete');
         }
 
+        protected override Type getHandlerType() {
+            return ExampleTriggerHandler.class;
+        }
+
         private void setAccountNameTo(String newAccountName) {
             for (Account account : (List<Account>) this.triggerNew) {
                 account.Name = (newAccountName + ': ' + account.Name); 
@@ -360,5 +379,13 @@ private class TriggerHandler_Test extends TriggerHandler {
 
     private class BlankTriggerHandler extends TriggerHandler {
         // Keeps the default implementation
+        protected override Type getHandlerType() {
+            return BlankTriggerHandler.class;
+        }
+    }
+
+    protected override Type getHandlerType() {
+        // We need to override the abstract method, but this class should never be instantiated
+        throw null; 
     }
 }
