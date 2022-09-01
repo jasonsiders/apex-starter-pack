@@ -1,9 +1,12 @@
 public abstract class OrgUtils {
-    @TestVisible static Organization currentOrg;
+    @TestVisible static Organization CurrentOrg;
+    @TestVisible static Soql CurrentOrgQuery = Databaselayer.Soql.newQuery(Organization.SObjectType)
+        .selectFields(new List<SObjectField>{
+            Organization.IsSandbox, 
+            Organization.OrganizationType
+        });
     static Decimal currentApiVersion;
     static final String DEV_ED_ORG_TYPE = 'Developer Edition';
-    // TODO: Find a better way around this; mocking framework could be improved 
-    @TestVisible static final String CURRENT_ORG_QUERY = 'CURRENT_ORG_QUERY';
     static final Decimal DEFAULT_API_VERSION = 55.0; 
 
     public static Boolean isSandboxOrg() {
@@ -20,16 +23,10 @@ public abstract class OrgUtils {
     
     static Organization getCurrentOrg() {
         // Avoids querying more than once per transaction
-        if (OrgUtils.currentOrg == null) {
-            Soql query = Databaselayer.Soql.newQuery(Organization.SObjectType)
-                .setQueryKey(OrgUtils.CURRENT_ORG_QUERY)
-                .selectFields(new List<SObjectField>{
-                    Organization.IsSandbox, 
-                    Organization.OrganizationType
-                });
-            OrgUtils.currentOrg = ((List<Organization>) query.run())[0];
+        if (OrgUtils.CurrentOrg == null) {
+            OrgUtils.CurrentOrg = ((List<Organization>) OrgUtils.CurrentOrgQuery?.run())[0];
         }
-        return OrgUtils.currentOrg;
+        return OrgUtils.CurrentOrg;
     }
 
     public static Decimal getCurrentApiVersion() {

@@ -1,19 +1,17 @@
 @IsTest
 public class SoqlMock extends Soql {
-    public static Map<String, List<SObject>> mockResults = new Map<String, List<SObject>>(); 
+    List<SObject> mockResults = new List<SObject>();
 
     public SoqlMock(SObjectType objectType) {
         super(objectType);
     }
 
     public override List<SObject> run() {
-        String queryKey = super.queryKey;
-        List<SObject> mockResults = SoqlMock.mockResults?.get(queryKey);  
-        return (mockResults != null) ? mockResults : new List<SObject>(); 
+        return this.mockResults;
     }
 
-    public static void setMockResults(String queryKey, List<SObject> mockResults) {
-        SoqlMock.mockResults.put(queryKey, mockResults);
+    public void setMockResults(List<SObject> mockResults) {
+        this.mockResults = mockResults; 
     }
 
     public class Factory implements DatabaseLayer.QueryFactory {

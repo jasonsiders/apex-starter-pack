@@ -13,16 +13,15 @@ private class SoqlMock_Test {
             )); 
         } 
         Databaselayer.Dml.doInsert(accounts); 
-        final String queryKey = 'MOCK_QUERY';
-        SoqlMock.setMockResults(queryKey, accounts); 
-        
-        Test.startTest();
         Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
             .selectFields(new List<SObjectField>{Account.Name, Account.AnnualRevenue})
-            .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
-            .setQueryKey(queryKey); 
+            .whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
+        query?.toMock()?.setMockResults(accounts);
+        
+        Test.startTest();
         List<Account> results = (List<Account>) query.run(); 
         Test.stopTest();
+        
         System.assertEquals(results?.size(), accounts?.size(), 'Wrong # of results'); 
         for (Account account : results) {
             System.assertNotEquals(null, account.Id, 'Account does not have an Id'); 
@@ -35,13 +34,13 @@ private class SoqlMock_Test {
     static void shouldMockQueryResults() {
         DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
         String key = 'My_Cool_Query';
-        Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)?.setQueryKey(key); 
+        Soql query = Databaselayer.Soql.newQuery(Account.SObjectType);
         // In test environments, no Accounts exist
         // Without setting mock data, this will return an empty List<SObject>
         System.assertEquals(0, query?.run()?.size(), 'Wrong # of results'); 
         // Add some mock data to the query, indirectly. Now it should return those results
         List<Account> mockData = new List<Account>{new Account(Name = 'Test Account')};
-        SoqlMock.setMockResults(key, mockData);
+        query?.toMock()?.setMockResults(mockData); 
         System.assertEquals(mockData, query?.run(), 'Did not return mockData'); 
     }
 

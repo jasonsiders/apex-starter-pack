@@ -368,12 +368,10 @@ private class Soql_Test {
     }
 
     @IsTest 
-    static void shouldSetQueryKey() {
-        // Query keys can be used to assign a unique value to a specific query
-        // Before a query runs in test context, it looks to see if any mock data has been supplied to it
-        String key = 'My cool query';
-        Soql query = new Soql(Account.SObjectType).setQueryKey(key); 
-        System.assertEquals(key, query?.queryKey, 'queryKey was not set'); 
+    static void shouldReturnAMockVersionOfItself() {
+        Soql query = new SoqlMock(Account.SObjectType); 
+        SoqlMock mock = query?.toMock(); 
+        System.assertEquals(query?.toString(), mock?.toString(), 'Mock does not match the original query'); 
     }
 
     // **** HELPER **** // 

@@ -1,9 +1,27 @@
 public abstract inherited sharing class GarbageCollector implements Database.Batchable<SObject>, GarbageCollector.IGarbageCollector {
     public Id jobId { get; private set; }
     public Integer batchSize { get; private set; }
+    
+    @TestVisible
+    static Soql InterfaceQuery = Databaselayer.Soql.newQuery(ApexTypeImplementor.SObjectType)
+        .selectFields(ApexTypeImplementor.ClassName)
+        .whereFilters(new Filter(
+            ApexTypeImplementor.InterfaceName, 
+            Filter.EQUALS, 
+            String.valueOf(GarbageCollector.IGarbageCollector.class)
+        )).whereFilters(new Filter(
+            ApexTypeImplementor.IsConcrete, 
+            Filter.EQUALS, 
+            true
+        ));
 
-    static final String INTERFACE_NAME = String.valueOf(GarbageCollector.IGarbageCollector.class);
-    static final Set<String> VALID_APEX_CLASSES = GarbageCollector.getExtendingTypes();
+    static Set<String> ValidApexClasses {
+        get {
+            ValidApexClasses = (ValidApexClasses != null) ? ValidApexClasses : GarbageCollector.getExtendingTypes();
+            return ValidApexClasses;
+        } 
+        private set;
+    }
     
     // **** INTERFACE **** //
     public GarbageCollector runBatch() {
@@ -67,7 +85,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     private static IGarbageCollector parseJobMetadata(Garbage_Collection_Job__mdt job) {
         if (!String.isBlank(job.SOQL_Filter__c)) {
             return new GarbageCollectorSoql(job);
-        } else if (VALID_APEX_CLASSES.contains(job?.Apex_Class_Name__c)) {
+        } else if (ValidApexClasses.contains(job?.Apex_Class_Name__c)) {
             // If the name is contained in the list of implementing types, it can be safely cast
             return (IGarbageCollector) Type.forName(job?.Apex_Class_Name__c).newInstance();
         } else {
@@ -76,23 +94,11 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
     }
 
     private static Set<String> getExtendingTypes() {
-        Set<String> extendingTypeNames = new Set<String>();
-        Soql query = Databaselayer.Soql.newQuery(ApexTypeImplementor.SObjectType) 
-            .setQueryKey('IGarbageCollector_Query')
-            .selectFields(ApexTypeImplementor.ClassName)
-            .whereFilters(new Filter(
-                ApexTypeImplementor.InterfaceName, 
-                Filter.EQUALS, 
-                INTERFACE_NAME
-            )).whereFilters(new Filter(
-                ApexTypeImplementor.IsConcrete, 
-                Filter.EQUALS, 
-                true
-            ));
-        for (ApexTypeImplementor apexClass : (List<ApexTypeImplementor>) query.run()) {
-            extendingTypeNames.add(apexClass.ClassName);
-        }
-        return extendingTypeNames;
+        return (Set<String>) CollectionUtils.extractValues(
+            GarbageCollector.InterfaceQuery?.run(), 
+            String.valueOf(ApexTypeImplementor.ClassName), 
+            Set<String>.class
+        );
     }
 
     // **** INNER **** //
@@ -106,7 +112,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 
         private InvalidCriteriaException(Garbage_Collection_Job__mdt job) {
             this.setMessage(String.format(this.template, new List<String>{
-                JSON.serializePretty(VALID_APEX_CLASSES),
+                JSON.serializePretty(ValidApexClasses),
                 JSON.serializePretty(job)
             }));
             Logger.error(this.getMessage()); 

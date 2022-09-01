@@ -1,7 +1,9 @@
 public without sharing class Rollup {
     @TestVisible SObjectRef targetObject { get; private set; }
     @TestVisible Map<ChildRelationshipRef, Relationship> relationships { get; private set;  }
-    @TestVisible static final String ROLLUP_QUERY = 'Rollup_Query';
+    
+    // Note: this query's FromSObject isn't known until runtime; set by the run() method
+    @TestVisible static Soql RollupQuery = DatabaseLayer.Soql.newQuery(null); 
 
     public Rollup(SObjectType sObjectType) {
         this.targetObject = new SObjectRef(sObjectType);
@@ -18,8 +20,7 @@ public without sharing class Rollup {
     }
 
     public List<SObject> run(Set<Id> targetRecordIds) {
-        Soql query = Databaselayer.Soql.newQuery(this.targetObject?.toSchemaType())
-            .setQueryKey(ROLLUP_QUERY)
+        Rollup.RollupQuery = Rollup.RollupQuery.fromSObject(this.targetObject?.toSchemaType())
             .whereFilters(new Filter(
                 'Id', 
                 Filter.IN_COLLECTION, 
@@ -27,9 +28,9 @@ public without sharing class Rollup {
             ));
         for (Relationship relationship : this.relationships.values()) {
             SubQuery subQuery = relationship?.getSubQuery(); 
-            query.selectSubQuery(subQuery); 
+            Rollup.RollupQuery.selectSubQuery(subQuery); 
         }
-        List<SObject> queryResults = query.run(); 
+        List<SObject> queryResults = Rollup.RollupQuery.run(); 
         for (SObject record : queryResults) {
             for (Relationship relationship : this.relationships.values()) {
                 relationship.calculate(record); 

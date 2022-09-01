@@ -3,8 +3,8 @@ public class RollupMetadataHelper {
     // callers have the option of defining Rollup__mdt custom metadata objects
     // This class is used to convert Rollup__mdt => Rollup objects
     Map<SObjectRef, Rollup> rollups = new Map<SObjectRef, Rollup>();
-    public static final Soql BASE_QUERY = RollupMetadataHelper.getBaseQuery(); 
-    @TestVisible static final String BASE_QUERY_KEY = 'Rollup_MDT_Base_Query';
+
+    public static Soql BaseQuery = RollupMetadataHelper.getBaseQuery(); 
     static final Map<String, Type> CALCULATOR_BY_TOKEN = new Map<String, Type>{
         'AVG' => AvgCalculator.class,
         'COUNT' => CountCalculator.class,
@@ -81,7 +81,6 @@ public class RollupMetadataHelper {
         return Databaselayer.Soql.newQuery(Rollup__mdt.SObjectType)
             .selectAll()
             .selectSubQuery(filtersQuery).whereFilters(activeFilter)
-            .whereFilters(activeFilter)
-            .setQueryKey(BASE_QUERY_KEY); 
+            .whereFilters(activeFilter);
     }
 }

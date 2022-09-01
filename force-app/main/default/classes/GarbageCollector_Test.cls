@@ -44,7 +44,7 @@ private class GarbageCollector_Test {
             ApexTypeImplementor.ClassName, 
             String.valueOf(GarbageCollector_Test.TestExtension.class)
         );
-        SoqlMock.setMockResults('IGarbageCollector_Query', new List<ApexTypeImplementor>{mockImplementor});
+        GarbageCollector.InterfaceQuery?.toMock().setMockResults(new List<ApexTypeImplementor>{mockImplementor});
         
         Test.startTest(); 
         GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt);

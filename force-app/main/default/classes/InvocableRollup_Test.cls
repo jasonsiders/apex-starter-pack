@@ -4,11 +4,11 @@ private class InvocableRollup_Test {
     static void shouldPerformSingleChildRollup() {
         setMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, new List<Rollup__mdt>{rollupMdt});
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory(); 
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -31,11 +31,11 @@ private class InvocableRollup_Test {
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, rollups);
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollups);
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory();
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -59,11 +59,11 @@ private class InvocableRollup_Test {
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, rollups);
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollups);
         
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory();
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -87,11 +87,11 @@ private class InvocableRollup_Test {
     static void shouldPerformSingleParentRollup() {
         setMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, new List<Rollup__mdt>{rollupMdt});
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory(); 
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -114,11 +114,11 @@ private class InvocableRollup_Test {
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, rollups);
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollups);
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory();
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -142,11 +142,11 @@ private class InvocableRollup_Test {
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, rollups);
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollups);
         
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory();
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -171,11 +171,11 @@ private class InvocableRollup_Test {
     static void shouldRunAsync() {
         setMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, new List<Rollup__mdt>{rollupMdt});
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory(); 
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -197,11 +197,11 @@ private class InvocableRollup_Test {
     static void shouldPerformRollupFromId() {
         setMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, new List<Rollup__mdt>{rollupMdt});
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
         DmlMock.resetHistory(); 
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
@@ -226,7 +226,7 @@ private class InvocableRollup_Test {
         Account account = getTestAccount(numOpps); 
         Databaselayer.Dml.doInsert(account); 
         DmlMock.resetHistory(); 
-        SoqlMock.setMockResults(Rollup.ROLLUP_QUERY, new List<Account>{account});
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
 
         Rollup__mdt template = new Rollup__mdt(
             Active__c = true,

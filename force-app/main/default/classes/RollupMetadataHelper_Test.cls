@@ -323,10 +323,10 @@ private class RollupMetadataHelper_Test {
                 new List<Rollup_Filter__mdt>{rollupFilter}
             ));
         }
-        SoqlMock.setMockResults(RollupMetadataHelper.BASE_QUERY_KEY, rollupRecords); 
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollupRecords); 
 
         Test.startTest();
-        Soql mdtQuery = RollupMetadataHelper.BASE_QUERY.whereFilters(new Filter(
+        Soql mdtQuery = RollupMetadataHelper.BaseQuery.whereFilters(new Filter(
             Rollup__mdt.Child_SObjectType__c,
             Filter.EQUALS,
             String.valueOf(Opportunity.SObjectType)
@@ -357,7 +357,7 @@ private class RollupMetadataHelper_Test {
 
     @IsTest 
     static void shouldProvideBaseQuery() {
-        Soql query = RollupMetadataHelper.BASE_QUERY; 
+        Soql query = RollupMetadataHelper.BaseQuery; 
         List<Rollup__mdt> results; 
 
         Test.startTest(); 

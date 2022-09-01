@@ -1,5 +1,4 @@
 public inherited sharing virtual class Soql {
-    @TestVisible protected String queryKey { get; private set; }
     @TestVisible protected Set<String> selectClauses = new Set<String>{'Id'};
     protected SObjectRef fromSObject;
     protected Scope scope; 
@@ -13,8 +12,8 @@ public inherited sharing virtual class Soql {
     protected Usage usage;
     
     @TestVisible
-    protected Soql(SObjectType fromSObject) {
-        this.fromSObject = new SObjectRef(fromSObject); 
+    protected Soql(SObjectType objectType) {
+        this.fromSObject(objectType); 
     }
 
     protected Soql() {
@@ -103,6 +102,11 @@ public inherited sharing virtual class Soql {
         // By default, Id will always be included in queries
         // Occasionally, (i.e., aggregate & inner queries), this isn't desirable
         this.selectClauses?.remove('Id');
+        return this; 
+    }
+
+    public Soql fromSObject(SObjectType objectType) {
+        this.fromSObject = new SObjectRef(objectType); 
         return this; 
     }
 
@@ -197,12 +201,6 @@ public inherited sharing virtual class Soql {
         return this; 
     }
 
-    public Soql setQueryKey(String queryKey) {
-        // Adds a queryKey, which tests can use to supply individual queries with mock data
-        this.queryKey = queryKey; 
-        return this; 
-    }
-
     // **** PRIVATE **** // 
     private String getOptionalArgs() {
         List<String> optionalArgs = (List<String>) CollectionUtils.filterCollection(
@@ -256,6 +254,11 @@ public inherited sharing virtual class Soql {
 
     protected virtual String getUsage() {
         return (this.usage != null) ? String.valueOf(this.usage)?.replace('_', ' ') : null; 
+    }
+
+    @TestVisible
+    private SoqlMock toMock() {
+        return (SoqlMock) this; 
     }
 
     // **** INNER *** // 
