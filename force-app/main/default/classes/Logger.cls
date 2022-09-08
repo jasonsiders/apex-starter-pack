@@ -34,7 +34,7 @@ global without sharing abstract class Logger {
         Logger.logFromExternalSource(logInputs);
     }
 
-    @InvocableMethod(category='Logging' label='Post to Log')
+    @InvocableMethod(category='Logging' configurationEditor='c-cpe-logger' label='Post to Log')
     global static void logFromFlow(List<LogInput> logInputs) {
         // Exposes the logger to Flows
         Logger.logFromExternalSource(logInputs);
@@ -50,7 +50,6 @@ global without sharing abstract class Logger {
     public static void publish() {
         Logger.PublishedLogs.addAll(Logger.PendingLogs);
         DatabaseLayer.Dml.doPublish(Logger.PendingLogs); 
-        System.debug('Published Logs: ' + Logger.PublishedLogs?.size());
         Logger.PendingLogs.clear();
     }
 
@@ -182,10 +181,10 @@ global without sharing abstract class Logger {
 
     // **** INNER **** //
     global class LogInput {
-        @InvocableVariable(description='Possible values: ERROR, WARN, INFO, DEBUG, FINE, FINER, FINEST' label='Log Level' required=true)
+        @InvocableVariable
         global String logLevelName;
 
-        @InvocableVariable(label='Log Message' required=true)
+        @InvocableVariable
         global String logMessage;
 
         public void log() {

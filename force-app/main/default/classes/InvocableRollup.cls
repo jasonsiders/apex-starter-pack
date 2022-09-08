@@ -6,12 +6,7 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
      *  - Can run all rollups for the record, or a specific list passed in
      *  - Can run asynchronously, or in real-time
     **/
-    @InvocableMethod(
-        category='Rollup'
-        configurationEditor='c-cpe-rollup'
-        description='Execute rollup(s) from metadata on parent or child records'
-        label='Rollup'
-    )
+    @InvocableMethod(category='Rollup' configurationEditor='c-cpe-rollup' label='Rollup')
     public static void invoke(List<Input> inputs) {
         // Group all inputs by their RollupContext, SObjectType, and Timing. Like inputs can all be run together
         // Note: It's best practice to design your flows so that as few of these will run at once - else, may hit limits
