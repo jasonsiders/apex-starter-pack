@@ -43,7 +43,7 @@ public class ChildRelationshipRef implements Mappable {
     }
 
     public Integer hashCode() {
-        return System.hashCode(this.relationship);
+        return (this.relationship != null) ? System.hashCode(this.relationship) : null; 
     }
 
     // **** INNER **** //

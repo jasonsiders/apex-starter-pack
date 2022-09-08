@@ -2,7 +2,7 @@
 private class InvocableRollup_Test {
     @IsTest 
     static void shouldPerformSingleChildRollup() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
         RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
@@ -13,9 +13,9 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.CHILD); 
+        input.context = String.valueOf(InvocableRollup.RollupContext.CHILD); 
         input.records = account.Opportunities;
-        input.rollup = rollupMdt;
+        input.rollups = new List<Rollup__mdt>{rollupMdt};
 
         Test.startTest();
         InvocableRollup.invoke(new List<InvocableRollup.Input>{input});
@@ -27,7 +27,7 @@ private class InvocableRollup_Test {
 
     @IsTest 
     static void shouldPerformMultipleChildRollupsForSameParentSObject() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
@@ -40,7 +40,7 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.CHILD); 
+        input.context = String.valueOf(InvocableRollup.RollupContext.CHILD); 
         input.records = account.Opportunities; 
         input.rollups = rollups;
 
@@ -55,7 +55,7 @@ private class InvocableRollup_Test {
 
     @IsTest 
     static void shouldPerformAllChildRollups() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
@@ -68,10 +68,9 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.CHILD); 
+        input.context = String.valueOf(InvocableRollup.RollupContext.CHILD); 
         input.records = account.Opportunities;
         // If no Rollup__mdts are defined, the method will query for & process all with a matching Parent_SObjectType__c
-        input.rollup = null;
         input.rollups = null; 
 
         Test.startTest();
@@ -85,7 +84,7 @@ private class InvocableRollup_Test {
 
     @IsTest 
     static void shouldPerformSingleParentRollup() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
         RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
@@ -96,9 +95,9 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-        input.record = account; 
-        input.rollup = rollupMdt;
+        input.context = String.valueOf(InvocableRollup.RollupContext.PARENT); 
+        input.records = new List<Account>{account}; 
+        input.rollups = new List<Rollup__mdt>{rollupMdt};
 
         Test.startTest();
         InvocableRollup.invoke(new List<InvocableRollup.Input>{input});
@@ -110,7 +109,7 @@ private class InvocableRollup_Test {
 
     @IsTest 
     static void shouldPerformMultipleParentRollups() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
@@ -123,8 +122,8 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-        input.record = account; 
+        input.context = String.valueOf(InvocableRollup.RollupContext.PARENT); 
+        input.records = new List<Account>{account}; 
         input.rollups = rollups;
 
         Test.startTest();
@@ -138,7 +137,7 @@ private class InvocableRollup_Test {
 
     @IsTest 
     static void shouldPerformAllParentRollups() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt withoutFilter = getAccountRollup(Account.AnnualRevenue, false); 
         Rollup__mdt withFilter = getAccountRollup(Account.NumberOfEmployees, true); 
         List<Rollup__mdt> rollups = new List<Rollup__mdt>{withFilter, withoutFilter};
@@ -151,10 +150,9 @@ private class InvocableRollup_Test {
 
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-        input.record = account;
+        input.context = String.valueOf(InvocableRollup.RollupContext.PARENT); 
+        input.records = new List<Account>{account};
         // If no Rollup__mdts are defined, the method will query for & process all with a matching Parent_SObjectType__c
-        input.rollup = null;
         input.rollups = null; 
 
         Test.startTest();
@@ -164,12 +162,11 @@ private class InvocableRollup_Test {
         System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated'); 
         System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
         System.assertEquals(Decimal.valueOf(numOpps) - 1, account.NumberOfEmployees, 'Wrong COUNT of Closed Won Opportunities');
-
     }
 
     @IsTest 
     static void shouldRunAsync() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
         RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
 
@@ -181,9 +178,9 @@ private class InvocableRollup_Test {
         InvocableRollup.Input input = new InvocableRollup.Input(); 
         // Since DML Behavior is ASYNC, everything will be done in a Queueable, later
         input.timing = String.valueOf(InvocableRollup.Timing.ASYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-        input.record = account; 
-        input.rollup = rollupMdt;
+        input.context = String.valueOf(InvocableRollup.RollupContext.PARENT); 
+        input.records = new List<Account>{account}; 
+        input.rollups = new List<Rollup__mdt>{rollupMdt};
 
         Test.startTest();
         InvocableRollup.invoke(new List<InvocableRollup.Input>{input});
@@ -194,34 +191,71 @@ private class InvocableRollup_Test {
     }
 
     @IsTest 
-    static void shouldPerformRollupFromId() {
-        setMocks(); 
-        Rollup__mdt rollupMdt = getAccountRollup(Account.AnnualRevenue, false); 
-        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(new List<Rollup__mdt>{rollupMdt});
-
+    static void shouldHandleMultipleInputsOfSameType() {
+        setDatabaseMocks();
         Integer numOpps = 10; 
-        Account account = getTestAccount(numOpps); 
-        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{account});
-        DmlMock.resetHistory(); 
+        Account testAccount = getTestAccount(numOpps); 
+        List<SObjectField> fields = new List<SObjectField>{Account.AnnualRevenue, Account.NumberOfEmployees};
+        List<Rollup__mdt> rollupMdts = new List<Rollup__mdt>();
+        List<InvocableRollup.Input> inputs = new List<InvocableRollup.Input>();
+        for (SObjectField field : fields) {
+            Rollup__mdt rollupMdt = getAccountRollup(field, false);
+            rollupMdts.add(rollupMdt);
+            InvocableRollup.Input input = new InvocableRollup.Input(); 
+            input.timing = String.valueOf(InvocableRollup.TIMING.SYNCHRONOUS);
+            input.context = String.valueOf(InvocableRollup.RollupContext.CHILD);
+            input.records = testAccount.Opportunities; 
+            input.rollups = new List<Rollup__mdt>{rollupMdt}; 
+            inputs.add(input);
+        }
 
-        InvocableRollup.Input input = new InvocableRollup.Input(); 
-        // Since DML Behavior is ASYNC, everything will be done in a Queueable, later
-        input.timing = String.valueOf(InvocableRollup.Timing.ASYNCHRONOUS);
-        input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-        input.recordId = account.Id;
-        input.rollup = rollupMdt;
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollupMdts);
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{testAccount});
 
         Test.startTest();
-        InvocableRollup.invoke(new List<InvocableRollup.Input>{input});
+        InvocableRollup.invoke(inputs); 
         Test.stopTest();
 
-        System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated'); 
-        System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
+        System.assertEquals(true, Dml.Updated.containsRecord(testAccount), 'Account was not updated');
+        System.assertEquals(Decimal.valueOf(numOpps), testAccount.AnnualRevenue, 'Wrong COUNT of Opportunities in AnnualRevenue');
+        System.assertEquals(Decimal.valueOf(numOpps), testAccount.NumberOfEmployees, 'Wrong COUNT of Opportunities in NumberOfEmployees');
+    }
+
+    @IsTest
+    static void shouldHandleMultipleInputsOfDifferentTypes() {
+        setDatabaseMocks();
+        Integer numOpps = 10; 
+        Account testAccount = getTestAccount(numOpps); 
+        List<Rollup__mdt> rollups = new List<Rollup__mdt>{ 
+            getAccountRollup(Account.AnnualRevenue, false), 
+            getAccountRollup(Account.NumberOfEmployees, false) 
+        };
+        InvocableRollup.Input childInput = new InvocableRollup.Input(); 
+        childInput.timing = String.valueOf(InvocableRollup.TIMING.SYNCHRONOUS);
+        childInput.context = String.valueOf(InvocableRollup.RollupContext.CHILD);
+        childInput.records = testAccount.Opportunities; 
+        childInput.rollups = new List<Rollup__mdt>{rollups[0]};
+        InvocableRollup.Input parentInput = new InvocableRollup.Input(); 
+        parentInput.timing = String.valueOf(InvocableRollup.TIMING.ASYNCHRONOUS);
+        parentInput.context = String.valueOf(InvocableRollup.RollupContext.PARENT);
+        parentInput.records = new List<Account>{testAccount};
+        parentInput.rollups = new List<Rollup__mdt>{rollups[1]};
+
+        RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollups);
+        Rollup.RollupQuery?.toMock()?.setMockResults(new List<Account>{testAccount});
+
+        Test.startTest();
+        InvocableRollup.invoke(new List<InvocableRollup.Input>{ childInput, parentInput });
+        Test.stopTest();
+
+        System.assertEquals(true, Dml.Updated.containsRecord(testAccount), 'Account was not updated');
+        System.assertEquals(Decimal.valueOf(numOpps), testAccount.AnnualRevenue, 'Wrong COUNT of Opportunities in AnnualRevenue');
+        System.assertEquals(Decimal.valueOf(numOpps), testAccount.NumberOfEmployees, 'Wrong COUNT of Opportunities in NumberOfEmployees');
     }
 
     @IsTest 
     static void shouldThrowErrorForInvalidMdtFields() {
-        setMocks(); 
+        setDatabaseMocks(); 
         Integer numOpps = 10; 
         Account account = getTestAccount(numOpps); 
         Databaselayer.Dml.doInsert(account); 
@@ -258,9 +292,9 @@ private class InvocableRollup_Test {
         for (Rollup__mdt rollup : rollups) {
             InvocableRollup.Input input = new InvocableRollup.Input();
             input.timing = String.valueOf(InvocableRollup.Timing.SYNCHRONOUS);
-            input.rollupContext = String.valueOf(InvocableRollup.RollupContext.PARENT); 
-            input.record = account; 
-            input.rollup = rollup;
+            input.context = String.valueOf(InvocableRollup.RollupContext.PARENT); 
+            input.records = new List<Account>{account}; 
+            input.rollups = new List<Rollup__mdt>{rollup};
 
             Exception caughtError;
             try {
@@ -274,7 +308,7 @@ private class InvocableRollup_Test {
     }
 
     // **** HELPER **** //
-    static void setMocks() {
+    static void setDatabaseMocks() {
         DatabaseLayer.setDmlEngine(new DmlMock()); 
         DatabaseLayer.setQueryEngine(new SoqlMock.Factory()); 
     } 
@@ -311,19 +345,6 @@ private class InvocableRollup_Test {
             SchemaUtils.getChildRelationship(Rollup_Filter__mdt.Rollup__c),
             rollupFilters
         );
-    }
-
-    static Rollup__mdt getCampaignRollup(SObjectField targetField) {
-        Rollup__mdt rollup = new Rollup__mdt(
-            Active__c = true,
-            Calculation_Field__c = null, 
-            Calculation_Type__c = 'COUNT',
-            Child_SObjectType__c = 'Opportunity', 
-            Parent_SObjectType__c = 'Campaign',
-            Relationship_Field__c = 'CampaignId',
-            Target_Field__c = String.valueOf(targetField)
-        );
-        return rollup; 
     }
 
     static Account getTestAccount(Integer numOpps) {

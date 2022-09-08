@@ -12,8 +12,8 @@ public without sharing class Rollup {
 
     public Rollup addRelationship(Relationship relationship) {
         ChildRelationshipRef childRelationship = relationship?.childRelationship; 
-        Relationship existingRelationship = (this.relationships.containsKey(childRelationship))
-            ? this.relationships.get(childRelationship)?.addAllRequests(relationship)
+        Relationship existingRelationship = (this.relationships?.containsKey(childRelationship))
+            ? this.relationships?.get(childRelationship)?.addAllRequests(relationship)
             : relationship;
         this.relationships.put(childRelationship, existingRelationship); 
         return this; 
@@ -32,9 +32,7 @@ public without sharing class Rollup {
         }
         List<SObject> queryResults = Rollup.RollupQuery.run(); 
         for (SObject record : queryResults) {
-            for (Relationship relationship : this.relationships.values()) {
-                relationship.calculate(record); 
-            }
+            this.calculateRecord(record); 
         }
         return queryResults; 
     }
@@ -53,6 +51,12 @@ public without sharing class Rollup {
             targetIds.add(targetId); 
         }
         return this.run(new Set<Id>(targetIds));
+    }
+
+    private void calculateRecord(SObject record) {
+        for (Relationship relationship : this.relationships.values()) {
+            relationship.calculate(record); 
+        }
     }
     
     // **** INNER **** // 

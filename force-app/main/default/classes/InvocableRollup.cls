@@ -8,40 +8,47 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
     **/
     @InvocableMethod(
         category='Rollup'
+        configurationEditor='c-cpe-rollup'
         description='Execute rollup(s) from metadata on parent or child records'
         label='Rollup'
     )
     public static void invoke(List<Input> inputs) {
-        // Note: Because of the way Flow boxcars input values,
-        // we should treat certain values as consistent across the entire List<Input>
-        Input firstInput = (Input) CollectionUtils.getIndexOf(inputs, 0);
-        RollupContext context = (RollupContext) EnumUtils.valueOf(firstInput?.rollupContext, RollupContext.class);
-        Timing timing = firstInput?.getTiming(); 
-        SObjectType objectType = firstInput?.getSObjectType(); 
-        InvocableRollup job = (context == InvocableRollup.RollupContext.CHILD) 
-            ? (InvocableRollup) new ChildRollup(inputs, objectType, timing)
-            : (InvocableRollup) new ParentRollup(inputs, objectType, timing); 
-        job.run(); 
+        // Group all inputs by their RollupContext, SObjectType, and Timing. Like inputs can all be run together
+        // Note: It's best practice to design your flows so that as few of these will run at once - else, may hit limits
+        Map<SObjectType, Container> containers = new Map<SObjectType, Container>();
+        for (Input input : inputs) {
+            SObjectType objectType = input?.getSObjectType();
+            Container container = containers?.containsKey(objectType) 
+                ? containers?.get(objectType) 
+                : new Container(objectType);
+            containers?.put(objectType, container?.addInput(input));
+        }
+        // Run all valid rollups from each container
+        for (Container container : containers?.values()) {
+            container?.run(); 
+        }
     }
 
     // **** MEMBER **** // 
-    SObjectRef objectType; 
-    Timing timing; 
-    Map<Id, SObject> records = new Map<Id, SObject>();
+    protected SObjectRef objectType; 
+    protected Timing timing; 
+    protected Map<Id, SObject> records = new Map<Id, SObject>();
 
     // **** ABSTRACT **** // 
+    protected abstract InvocableRollup addInput(Input input);
     protected abstract List<SObject> calculateRollups(); 
     protected abstract SObjectField getMatchingField(); 
 
     protected virtual void run() {
-        if (this.timing == InvocableRollup.Timing.ASYNCHRONOUS) {
-            System.enqueueJob(this); 
-        } else {
-            this.runSynchronously();
+        if (this.isValidInstanceOf(InvocableRollup.Timing.ASYNCHRONOUS)) {
+            System.enqueueJob(this);
+        } else if (this.isValidInstanceOf(InvocableRollup.Timing.SYNCHRONOUS)) {
+            this.runSynchronously(); 
         }
     }
 
     public void execute(System.QueueableContext context) {
+        // Runs the Rollup logic asynchronously
         this.runSynchronously();
     }
 
@@ -75,13 +82,7 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
             SObjectField relField = SchemaUtils.getSObjectField(childObject, rollup.Relationship_Field__c); 
             ChildRelationship childRel = SchemaUtils.getChildRelationship(relField); 
             // Check Child Object values
-            for (Object item : new List<Object>{
-                parentObject, 
-                childObject, 
-                targetField, 
-                relField,
-                childRel
-            }) {
+            for (Object item : new List<Object>{parentObject, childObject, targetField, relField, childRel}) {
                 if (item == null) {
                     throw new InvalidInputException(rollup);
                 }
@@ -92,6 +93,11 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
                 throw new InvalidInputException(rollup);
             }
         }
+    }
+
+    protected Boolean isValidInstanceOf(Timing expectedTiming) {
+        // Returns true if the current Timing value matches, and the object has records
+        return this.timing == expectedTiming && this.records?.isEmpty() == false;
     }
 
     // **** INNER **** // 
@@ -111,30 +117,20 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
         }
     }
 
-    private class ChildRollup extends InvocableRollup {
+    private virtual class ChildRollup extends InvocableRollup {
+        // Defines logic for running rollups when given the child records (ex., the Opportunities of an Account)
         Map<SObjectField, List<Rollup__mdt>> rollupMdts = new Map<SObjectField, List<Rollup__mdt>>();
         Map<SObjectField, Rollup> rollupMap = new Map<SObjectField, Rollup>();
 
-        private ChildRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
+        private ChildRollup(SObjectType sObjectType, Timing timing) {
             this.objectType = new SObjectRef(sObjectType);
             this.timing = timing; 
-            for (Input input : inputs) {
-                this.records.putAll(new Map<Id, SObject>(input.getRecords())); 
-                this.mapByRelationshipField(input.getRollups()); 
-            } 
-            if (this.rollupMdts.isEmpty()) {
-                // If a user doesn't specify a Rollup__mdt(s), retrieve all that match the SObjectType
-                List<Rollup__mdt> allRollups = this.getAllMatchingRollups(); 
-                this.mapByRelationshipField(allRollups); 
-            }
-            for (SObjectField field : this.rollupMdts.keySet()) {
-                List<Rollup__mdt> matching = this.rollupMdts.get(field); 
-                this.validateMetadata(matching); 
-                RollupMetadataHelper helper = new RollupMetadataHelper(matching);
-                // Note: This should always a size 1 in this case
-                Rollup rollup = (Rollup) CollectionUtils.getIndexOf(helper.getRollups(), 0);
-                this.rollupMap.put(field, rollup);
-            }
+        }
+
+        protected override InvocableRollup addInput(Input input) {
+            this.records.putAll(new Map<Id, SObject>(input.getRecords())); 
+            this.mapByRelationshipField(input.getRollups()); 
+            return this; 
         }
 
         private void mapByRelationshipField(List<Rollup__mdt> rollups) {
@@ -149,7 +145,8 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
             }
         }
 
-        public override List<SObject> calculateRollups() {
+        protected override List<SObject> calculateRollups() {
+            this.preProcess();
             List<SObject> results = new List<SObject>();
             for (SObjectField field : this.rollupMap.keySet()) {
                 Rollup rollup = this.rollupMap.get(field); 
@@ -158,24 +155,40 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
             return results;
         }
 
-        public override SObjectField getMatchingField() {
+        protected override SObjectField getMatchingField() {
             return Rollup__mdt.Child_SObjectType__c; 
+        }
+
+        private void preProcess() {
+            if (this.rollupMdts.isEmpty()) {
+                // If a user doesn't specify a Rollup__mdt(s), retrieve all that match the SObjectType
+                List<Rollup__mdt> allRollups = this.getAllMatchingRollups(); 
+                this.mapByRelationshipField(allRollups); 
+            }
+            for (SObjectField field : this.rollupMdts.keySet()) {
+                List<Rollup__mdt> matching = this.rollupMdts.get(field); 
+                RollupMetadataHelper helper = new RollupMetadataHelper(matching);
+                this.validateMetadata(matching); 
+                // Note: This should always a size 1 in this case
+                Rollup rollup = (Rollup) CollectionUtils.getIndexOf(helper.getRollups(), 0);
+                this.rollupMap.put(field, rollup);
+            }
         }
     }
 
-    private class ParentRollup extends InvocableRollup {
+    private virtual class ParentRollup extends InvocableRollup {
+        // Defines logic for running rollups when given the parent records (ex., Accounts that have Opportunities)
         List<Rollup> rollups = new List<Rollup>();
+        List<Rollup__mdt> rollupMdts = new List<Rollup__mdt>(); 
 
-        private ParentRollup(List<Input> inputs, SObjectType sObjectType, Timing timing) {
+        private ParentRollup(SObjectType sObjectType, Timing timing) {
             this.objectType = new SObjectRef(sObjectType);
             this.timing = timing; 
-            List<Rollup__mdt> rollupMdts = this.getRollupsFromInputs(inputs); 
-            this.validateMetadata(rollupMdts); 
-            this.rollups = new RollupMetadataHelper(rollupMdts).getRollups(); 
         }
     
-        public override List<SObject> calculateRollups() {
-            // Proecss the Rollups
+        protected override List<SObject> calculateRollups() {
+            // Process the Rollups
+            this.preProcess();
             Map<Id, SObject> updates = this.records;
             for (Rollup rollup : this.rollups) {
                 List<SObject> results = rollup.run(updates?.values());
@@ -184,48 +197,93 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
             return updates.values(); 
         }
 
-        public override SObjectField getMatchingField() {
+        protected override SObjectField getMatchingField() {
             return Rollup__mdt.Parent_SObjectType__c; 
         }
 
-        private List<Rollup__mdt> getRollupsFromInputs(List<Input> inputs) {
-            List<Rollup__mdt> rollupMdts = new List<Rollup__mdt>();
-            for (Input input : inputs) {
-                rollupMdts.addAll(input.getRollups()); 
-                this.records.putAll(new Map<Id, SObject>(input.getRecords())); 
-            }
-            if (rollupMdts?.isEmpty()) {
+        public override InvocableRollup addInput(Input input) {
+            List<Rollup__mdt> inputMdts = input?.getRollups(); 
+            this.rollupMdts.addAll(input?.getRollups());
+            this.records?.putAll(new Map<Id, SObject>(input?.getRecords()));
+            return this; 
+        }
+
+        private void preProcess() {
+            if (this.rollupMdts?.isEmpty()) {
                 // If a user doesn't specify a Rollup__mdt(s), retrieve all that match the SObjectType
-                rollupMdts = this.getAllMatchingRollups(); 
+                this.rollupMdts = this.getAllMatchingRollups(); 
             }
-            return rollupMdts; 
+            this.rollups = new RollupMetadataHelper(this.rollupMdts).getRollups(); 
+            this.validateMetadata(this.rollupMdts);
+        }
+    }
+
+    private class Container {
+        // Used to group alike flow Inputs together. This class is necessary 
+        // because of the way that flow boxcars invocable inputs into one transaction
+        Map<InvocableRollup.RollupContext, Map<InvocableRollup.Timing, InvocableRollup>> matchingRollups = 
+            new Map<InvocableRollup.RollupContext, Map<InvocableRollup.Timing, InvocableRollup>>();
+
+        public Container(SObjectType objectType) {
+            this.matchingRollups.put(InvocableRollup.RollupContext.CHILD, new Map<InvocableRollup.Timing, InvocableRollup>{ 
+                InvocableRollup.Timing.ASYNCHRONOUS => new ChildRollup(objectType, InvocableRollup.Timing.ASYNCHRONOUS),
+                InvocableRollup.Timing.SYNCHRONOUS => new ChildRollup(objectType, InvocableRollup.Timing.SYNCHRONOUS)
+            });
+            this.matchingRollups.put(InvocableRollup.RollupContext.PARENT, new Map<InvocableRollup.Timing, InvocableRollup>{ 
+                InvocableRollup.Timing.ASYNCHRONOUS => new ParentRollup(objectType, InvocableRollup.Timing.ASYNCHRONOUS),
+                InvocableRollup.Timing.SYNCHRONOUS => new ParentRollup(objectType, InvocableRollup.Timing.SYNCHRONOUS)
+            });
+        }
+
+        public Container addInput(Input input) {
+            RollupContext context = input?.getContext(); 
+            Timing timing = input?.getTiming(); 
+            this.matchingRollups?.get(context)?.get(timing)?.addInput(input); 
+            return this;  
+        }
+
+        public void run() {
+            for (InvocableRollup job : this.getJobs()) {
+                job?.run();
+            }
+        }
+
+        private List<InvocableRollup>  getJobs() {
+            List<InvocableRollup> jobs = new List<InvocableRollup>();
+            for (Map<InvocableRollup.Timing, InvocableRollup> jobMap : this.matchingRollups?.values()) {
+                jobs.addAll(jobMap?.values());
+            }
+            return jobs; 
         }
     }
 
     public class Input {
-        @InvocableVariable(description='Indicates if the Rollup will be executed in real-time, or asynchronously' label='Timing' required=true)
+        @InvocableVariable
         public String timing;
 
-        @InvocableVariable(description='Indicates if the records are the parent or child records in the rollup equation' label='Rollup Context' required=true)
-        public String rollupContext; 
+        @InvocableVariable
+        public String context; 
 
-        @InvocableVariable(description='You must provide at least one Record/Id via the single/list variables' label='Record Id')
-        public Id recordId;
-
-        @InvocableVariable(description='You must provide at least one Record/Id via the single/list variables' label='Record')
+        @InvocableVariable
         public SObject record;
 
-        @InvocableVariable(description='You must provide at least one Record/Id via the single/list variables' label='Records')
-        public List<SObject> records = new List<SObject>(); 
+        @InvocableVariable
+        public List<SObject> records;
 
-        @InvocableVariable(description='You must provide at least one Rollup__mdt via single/list variables' label='Rollup')
+        @InvocableVariable
         public Rollup__mdt rollup; 
 
-        @InvocableVariable(description='You must provide at least one Rollup__mdt via single/list variables' label='Rollups')
-        public List<Rollup__mdt> rollups = new List<Rollup__mdt>(); 
+        @InvocableVariable
+        public List<Rollup__mdt> rollups;
 
+        // Note: These variables are necessary to handle single/list types for each
+        // Unfortunately, @InvocableVariables do not support { get; set; }
         private List<SObject> allRecords;
-        private List<Rollup__mdt> allRollups; 
+        private List<Rollup__mdt> allRollups;
+
+        public RollupContext getContext() {
+            return (RollupContext) EnumUtils.valueOf(this?.context, RollupContext.class);
+        }
 
         public SObjectType getSObjectType() {
             SObject record = (SObject) CollectionUtils.getIndexOf(this.getRecords(), 0);
@@ -237,31 +295,24 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
         }
 
         public List<SObject> getRecords() {
-            // Combine the multiple SObject/Id variables into a single List<SObject>
-            // Note: @InvocableVariables do not allow getter/setters, so lazy-load pattern employed here
-            if (this.allRecords == null) {
-                this.allRecords = (this.records != null) ? this.records : new List<SObject>(); 
-                if (this.recordId != null) {
-                    SObject newRecord = this.recordId?.getSobjectType()?.newSObject(this.recordId);
-                    this.allRecords.add(newRecord); 
-                }
-                if (this.record != null) {
-                    this.allRecords.add(this.record); 
-                }
-            }
+            this.allRecords = (this.allRecords == null) 
+                ? this.combineRecordVars(this.records, this.record) 
+                : this.allRecords;
             return this.allRecords;
         }
 
         public List<Rollup__mdt> getRollups() {
-            // Combine the multiple Rollup__mdt variables into a single List<Rollup__mdt>
-            // Note: @InvocableVariables do not allow getter/setters, so lazy-load pattern employed here
-            if (this.allRollups == null) {
-                this.allRollups = (this.rollups != null) ? this.rollups : new List<Rollup__mdt>(); 
-                if (this.rollup != null) {
-                    this.allRollups.add(this.rollup); 
-                }
-            }
+            this.allRollups = (this.allRollups == null) 
+                ? (List<Rollup__mdt>) this.combineRecordVars(this.rollups, this.rollup)
+                : this.allRollups;
             return this.allRollups; 
+        }
+
+        private List<SObject> combineRecordVars(List<SObject> recordList, SObject record) {
+            Set<SObject> recordSet = (recordList != null) ? new Set<SObject>(recordList) : new Set<SObject>();
+            recordSet.add(record);
+            recordSet.remove(null);
+            return new List<SObject>(recordSet);
         }
     }
 }
