@@ -1,4 +1,4 @@
-public inherited sharing abstract class InvocableRollup implements System.Queueable {
+public inherited sharing abstract class InvocableRollup {
     /**
      *  This class provides a flexible, metadata-driven way to execute Rollups from flow
      *  It has a number of features:
@@ -8,20 +8,17 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
     **/
     @InvocableMethod(category='Rollup' configurationEditor='c-cpe-rollup' label='Rollup')
     public static void invoke(List<Input> inputs) {
-        // Group all inputs by their RollupContext, SObjectType, and Timing. Like inputs can all be run together
-        // Note: It's best practice to design your flows so that as few of these will run at once - else, may hit limits
-        Map<SObjectType, Container> containers = new Map<SObjectType, Container>();
+        // Group like flow Inputs together by timing, context, and SObjectType
+        // This is necessary because of the way flow boxcars inputs from different invocations,
+        // and to reduce the impact of limits on larger transactions
+        TimingGroup asyncJobs = new TimingGroup(Timing.ASYNCHRONOUS); 
+        TimingGroup syncJobs = new TimingGroup(Timing.SYNCHRONOUS); 
         for (Input input : inputs) {
-            SObjectType objectType = input?.getSObjectType();
-            Container container = containers?.containsKey(objectType) 
-                ? containers?.get(objectType) 
-                : new Container(objectType);
-            containers?.put(objectType, container?.addInput(input));
+            TimingGroup matching = (input.getTiming() == Timing.ASYNCHRONOUS) ? asyncJobs : syncJobs; 
+            matching.addInput(input); 
         }
-        // Run all valid rollups from each container
-        for (Container container : containers?.values()) {
-            container?.run(); 
-        }
+        asyncJobs.run();
+        syncJobs.run();
     }
 
     // **** MEMBER **** // 
@@ -35,19 +32,6 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
     protected abstract SObjectField getMatchingField(); 
 
     protected virtual void run() {
-        if (this.isValidInstanceOf(InvocableRollup.Timing.ASYNCHRONOUS)) {
-            System.enqueueJob(this);
-        } else if (this.isValidInstanceOf(InvocableRollup.Timing.SYNCHRONOUS)) {
-            this.runSynchronously(); 
-        }
-    }
-
-    public void execute(System.QueueableContext context) {
-        // Runs the Rollup logic asynchronously
-        this.runSynchronously();
-    }
-
-    protected void runSynchronously() {
         List<SObject> rollupResults = this.calculateRollups(); 
         DatabaseLayer.Dml.doUpdate(rollupResults); 
     }
@@ -88,11 +72,6 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
                 throw new InvalidInputException(rollup);
             }
         }
-    }
-
-    protected Boolean isValidInstanceOf(Timing expectedTiming) {
-        // Returns true if the current Timing value matches, and the object has records
-        return this.timing == expectedTiming && this.records?.isEmpty() == false;
     }
 
     // **** INNER **** // 
@@ -213,42 +192,70 @@ public inherited sharing abstract class InvocableRollup implements System.Queuea
         }
     }
 
-    private class Container {
-        // Used to group alike flow Inputs together. This class is necessary 
-        // because of the way that flow boxcars invocable inputs into one transaction
-        Map<InvocableRollup.RollupContext, Map<InvocableRollup.Timing, InvocableRollup>> matchingRollups = 
-            new Map<InvocableRollup.RollupContext, Map<InvocableRollup.Timing, InvocableRollup>>();
+    private class TimingGroup implements System.Queueable {
+        Timing timing;
+        ContextGroup childJobs = new ContextGroup(RollupContext.CHILD, this.timing); 
+        ContextGroup parentJobs = new ContextGroup(RollupContext.PARENT, this.timing);
 
-        public Container(SObjectType objectType) {
-            this.matchingRollups.put(InvocableRollup.RollupContext.CHILD, new Map<InvocableRollup.Timing, InvocableRollup>{ 
-                InvocableRollup.Timing.ASYNCHRONOUS => new ChildRollup(objectType, InvocableRollup.Timing.ASYNCHRONOUS),
-                InvocableRollup.Timing.SYNCHRONOUS => new ChildRollup(objectType, InvocableRollup.Timing.SYNCHRONOUS)
-            });
-            this.matchingRollups.put(InvocableRollup.RollupContext.PARENT, new Map<InvocableRollup.Timing, InvocableRollup>{ 
-                InvocableRollup.Timing.ASYNCHRONOUS => new ParentRollup(objectType, InvocableRollup.Timing.ASYNCHRONOUS),
-                InvocableRollup.Timing.SYNCHRONOUS => new ParentRollup(objectType, InvocableRollup.Timing.SYNCHRONOUS)
-            });
+        public TimingGroup(Timing timing) {
+            this.timing = timing; 
         }
 
-        public Container addInput(Input input) {
-            RollupContext context = input?.getContext(); 
-            Timing timing = input?.getTiming(); 
-            this.matchingRollups?.get(context)?.get(timing)?.addInput(input); 
-            return this;  
+        public void addInput(Input input) {
+            ContextGroup matching = (input?.getContext() == RollupContext.CHILD) 
+                ? this.childJobs 
+                : this.parentJobs;
+            matching.addInput(input); 
         }
 
         public void run() {
-            for (InvocableRollup job : this.getJobs()) {
-                job?.run();
+            if (this.timing == InvocableRollup.TIMING.ASYNCHRONOUS) {
+                System.enqueueJob(this);
+            } else {
+                this.runSynchronously(); 
             }
         }
 
-        private List<InvocableRollup>  getJobs() {
-            List<InvocableRollup> jobs = new List<InvocableRollup>();
-            for (Map<InvocableRollup.Timing, InvocableRollup> jobMap : this.matchingRollups?.values()) {
-                jobs.addAll(jobMap?.values());
+        public void execute(System.QueueableContext context) {
+            this.runSynchronously();
+        }
+
+        private void runSynchronously() {
+            this.childJobs.run();
+            this.parentJobs.run(); 
+        }
+    }
+
+    private class ContextGroup {
+        RollupContext context; 
+        Timing timing; 
+        Map<SObjectType, InvocableRollup> jobs = new Map<SObjectType, InvocableRollup>();
+
+        public ContextGroup(RollupContext context, Timing timing) {
+            this.context = context;
+            this.timing = timing; 
+        }
+
+        public void addInput(Input input) {
+            SObjectType objectType = input?.getSObjectType(); 
+            InvocableRollup matching;
+            if (this.jobs?.containsKey(objectType)) {
+                // Add the input to the rollup and put it in the map
+                matching = this.jobs?.get(objectType);
+            } else {
+                // Construct a new rollup, add the input to it, and put it in the map
+                matching = (this.context == RollupContext.CHILD) 
+                    ? (InvocableRollup) new ChildRollup(objectType, this.timing) 
+                    : (InvocableRollup) new ParentRollup(objectType, this.timing); 
             }
-            return jobs; 
+            matching.addInput(input); 
+            this.jobs.put(objectType, matching); 
+        }
+
+        public void run() {
+            for (InvocableRollup job : this.jobs?.values()) {
+                job.run(); 
+            }
         }
     }
 
