@@ -1,30 +1,30 @@
 <template>
-    <div>
-        <lightning-card>
-            <div slot="title">
-                <lightning-icon icon-name="standard:record_signature_task" size="medium"></lightning-icon>
-                <span class="slds-text-heading_medium slds-var-m-left_small">Post to Log</span>
-            </div>
-            <div class="slds-var-p-horizontal_small">
-                <c-cpe-combobox
-                    input-variables={inputVariables}
-                    invocable-variable={levelVariable}
-                    label="Log Level"
-                    name={levelVariable}
-                    onchange={handleChange}
-                    options={levelOptions}
-                    required
-                ></c-cpe-combobox>
-                <lightning-textarea
-                    label="Log Message"
-                    field-level-help={messageTooltip}
-                    max-length={maxLength}
-                    name={messageVariable}
-                    onchange={handleChange}
-                    value={messageValue}
-                    required
-                ></lightning-textarea>
-            </div>
-        </lightning-card>
-    </div>
+	<div>
+		<lightning-card>
+			<div slot="title">
+				<lightning-icon icon-name="standard:record_signature_task" size="medium"></lightning-icon>
+				<span class="slds-text-heading_medium slds-var-m-left_small">Post to Log</span>
+			</div>
+			<div class="slds-var-p-horizontal_small">
+				<c-cpe-combobox
+					input-variables={inputVariables}
+					invocable-variable={levelVariable}
+					label="Log Level"
+					name={levelVariable}
+					onchange={handleChange}
+					options={levelOptions}
+					required
+				></c-cpe-combobox>
+				<lightning-textarea
+					label="Log Message"
+					field-level-help={messageTooltip}
+					max-length={maxLength}
+					name={messageVariable}
+					onchange={handleChange}
+					value={messageValue}
+					required
+				></lightning-textarea>
+			</div>
+		</lightning-card>
+	</div>
 </template>
