@@ -81,6 +81,7 @@ public class FieldRef implements Mappable {
     }
 
     public Integer hashCode() {
-        return System.hashCode(this.getFullName()); 
+        String fullName = this.getFullName();
+        return (fullName != null) ? System.hashCode(fullName) : System.hashCode('null'); 
     }
 }

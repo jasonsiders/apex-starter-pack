@@ -44,6 +44,7 @@ public class SObjectRef implements Mappable {
     }
 
     public Integer hashCode() {
-        return System.hashCode(this.objectType);
+        // Note: Cannot return a null value, and System.hashCode() does not accept a null input
+        return (this.objectType != null) ? System.hashCode(this.objectType) : System.hashCode('null');
     }
 }
