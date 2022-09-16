@@ -55,11 +55,11 @@ public abstract class TypeUtils {
 					value = JSON.deserialize(stringValue, typeCheck);
 					break;
 				} catch (System.JSONException error) {
-					Logger.log(LoggingLevel.FINEST, value + ' is not a ' + typeCheck);
+					Logger.finest(TypeUtils.class, value + ' is not a ' + typeCheck);
 				}
 			}
 		}
-		Logger.log(LoggingLevel.FINEST, stringValue + ' is a ' + TypeUtils.getTypeName(value));
+		Logger.finest(TypeUtils.class, stringValue + ' is a ' + TypeUtils.getTypeName(value));
 		return value;
 	}
 

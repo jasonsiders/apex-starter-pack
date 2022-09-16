@@ -15,7 +15,7 @@ public without sharing class GarbageCollectorSoql extends GarbageCollector {
 			return Database.getQueryLocator(soql);
 		} catch (System.QueryException queryError) {
 			String message = queryError + '\nQuery:\n' + this.soql; 
-			Logger.error(message); 
+			Logger.error(GarbageCollectorSoql.class, message); 
 			Logger.publish();
 			throw queryError;
 		}

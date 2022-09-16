@@ -42,7 +42,7 @@ public virtual class DmlResult {
 	// Specialized methods to process data
 	public void logError() {
 		if (this.isSuccess == false) {
-			Logger.log(LoggingLevel.ERROR, JSON.serializePretty(this.errors));
+			Logger.error(DmlResult.class, JSON.serializePretty(this.errors));
 		}
 	}
 

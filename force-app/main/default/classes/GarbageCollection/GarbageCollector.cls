@@ -48,7 +48,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 				context?.getJobId(), 
 				String.valueOf(caughtError)
 			});
-			Logger.error(message);
+			Logger.error(GarbageCollector.class, message);
 			Logger.publish();
 			throw caughtError;
 		}
@@ -72,7 +72,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 			template,
 			new List<String>{ context.getJobId(), String.valueOf(numCompletedBatches), String.valueOf(numTotalBatches) }
 		);
-		Logger.info(message);
+		Logger.info(GarbageCollector.class, message);
 		Logger.publish();
 	}
 
@@ -117,7 +117,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 					new List<String>{ JSON.serializePretty(ValidApexClasses), JSON.serializePretty(job) }
 				)
 			);
-			Logger.error(this.getMessage());
+			Logger.error(GarbageCollector.class, this.getMessage());
 			Logger.publish();
 		}
 	}

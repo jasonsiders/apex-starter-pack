@@ -25,7 +25,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 		} else {
 			// If the job can't be done via queueable, try to process the requests synchronously
 			final String message = 'Queueable limits reached. Processing {0} DML operations synchronously.';
-			Logger.warn(message);
+			Logger.warn(AsyncDml.class, message);
 			Logger.publish();
 			this.execute(null);
 		}

@@ -35,7 +35,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
 			'/n' +
 			'Job Id: ' +
 			batchId;
-		Logger.log(LoggingLevel.INFO, message);
+		Logger.info(GarbageScheduler.class, message);
 	}
 
 	private void logSkippedJobs() {
@@ -48,7 +48,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
 				template,
 				new List<String>{ String.valueOf(this.skippedJobs?.size()), JSON.serializePretty(this.skippedJobs) }
 			);
-			Logger.log(LoggingLevel.ERROR, message);
+			Logger.error(GarbageScheduler.class, message);
 		}
 	}
 

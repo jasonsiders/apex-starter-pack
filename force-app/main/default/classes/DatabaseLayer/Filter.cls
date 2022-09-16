@@ -195,7 +195,7 @@ public virtual class Filter {
 	private void validate() {
 		if (this.fieldName == null || this.operator == null) {
 			Exception error = new FilterException('Missing required fields: ' + JSON.serialize(this));
-			Logger.error(error);
+			Logger.error(Filter.class, error);
 			throw error;
 		}
 	}
@@ -255,7 +255,7 @@ public virtual class Filter {
 				// Unfortunately, Apex's type system seems to be "broken": https://salesforce.stackexchange.com/questions/106068/apex-string-instanceof-object
 				// ...but it still works for lists! If a non-list collection is provided, throw an error
 				Exception error = new FilterException('IN_COLLECTION operations must use a List type');
-				Logger.error(error);
+				Logger.error(Filter.class, error);
 				throw error;
 			}
 			return (valueList != null) ? valueList.contains(value) : false;
