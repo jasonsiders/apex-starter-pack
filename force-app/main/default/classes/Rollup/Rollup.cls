@@ -106,25 +106,29 @@ public without sharing class Rollup {
 	public class Request {
 		public FieldRef targetField { get; private set; }
 		public Calculator calculator { get; private set; }
-		public List<Filter> filters { get; private set; }
+		public FilterLogic logic { get; private set; }
 
-		public Request(SObjectField targetField, Calculator calculator, List<Filter> filters) {
+		public Request(SObjectField targetField, Calculator calculator, FilterLogic logic) {
 			this.targetField = new FieldRef(targetField);
 			this.calculator = calculator;
-			this.filters = filters;
+			this.logic = logic;
+		}
+
+		public Request(SObjectField targetField, Calculator calculator, Filter filter) {
+			this(targetField, calculator, new FilterLogic.AndLogic().addFilters(filter));
 		}
 
 		public Request(SObjectField targetField, Calculator calculator) {
-			this(targetField, calculator, new List<Filter>());
+			this(targetField, calculator, new FilterLogic.AndLogic());
 		}
 
 		public Request addFilters(List<Filter> queryFilters) {
-			this.filters.addAll(queryFilters);
+			this.logic.addFilters(queryFilters);
 			return this;
 		}
 
 		public Request addFilters(Filter filter) {
-			return this.addFilters(new List<Filter>{ filter });
+			return this.addFilters(new List<Filter>{filter});
 		}
 
 		public void calculate(SObject targetRecord, List<SObject> childRecords) {
@@ -140,7 +144,7 @@ public without sharing class Rollup {
 			if (calcField != null) {
 				fieldNames.add(String.valueOf(calcField));
 			}
-			for (Filter filter : this.filters) {
+			for (Filter filter : this.logic?.getFilters()) {
 				fieldNames?.add(filter?.getFieldName());
 			}
 			return fieldNames;
@@ -157,7 +161,7 @@ public without sharing class Rollup {
 		}
 
 		private Boolean meetsFilterCriteria(SObject record) {
-			for (Filter filter : this.filters) {
+			for (Filter filter : this.logic?.getFilters()) {
 				if (filter.meetsCriteria(record) == false) {
 					return false;
 				}

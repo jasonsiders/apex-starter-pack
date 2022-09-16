@@ -98,8 +98,8 @@ The `Rollup.Request` represents a single rollup calculation. Here's an example o
 A `Rollup.Request` can be constructed with the following parameters:
 
 -   `targetField`: A `SObjectField` on the target SObject that determines where the calculation results will be posted.
--   `calculator`: A `Rollup.Calculator` which defines the rollup operation. See [\*\*The `Rollup.Calculator` Class](#the-rollupcalculator-class) for more.
--   `filter`/`filters`: (optional) A `Filter` or `List<Filter>` that can be used to exclude certain records from the Rollup calculation. Read more about the `Filter` class [here](../DatabaseLayer/README.md/#the-filter-class).
+-   `calculator`: A `Rollup.Calculator` which defines the rollup operation. See [The `Rollup.Calculator` Class](#the-rollupcalculator-class) for more.
+-   `filter`/`filters`: (optional) A `Filter` or `FilterLogic` object that can be used to exclude certain records from the Rollup calculation. Read more about these classes [here](../DatabaseLayer/README.md/#the-filter-class) and [here](../DatabaseLayer/README.md/#the-filterlogic-class).
 
 This example `Rollup.Request` will calculate the MAX of `Opportunity.CloseDate` from all Opprotunities where `Opportunity.IsWon = true`. Results will be posted on the `Account.First_Sale__c` field.
 
@@ -113,13 +113,15 @@ Rollup.Request firstSale = new Rollup.Request(
 
 The `Rollup.Request` has just one public method:
 
--   `Rollup.Request addFilters(Filter filter/List<Filter> filters)`: Adds the `Filter` object(s) to the `Request`. Returns the current instance.
+-   `Rollup.Request addFilters(Filter filter/List<Filter> filters)`: Adds the `Filter` object(s) to the request's `FilterLogic` object. Returns the current instance.
 
 ```
 request = request.addFilters(
-    new Filter(Opportunity.Amount, Filter.GREATER, 1000)
+    new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000)
 );
 ```
+
+> **Note:** By default, the filters use `AND` logic, meaning that all filters must return true for a target. To specify some other logic, pass the correct `FilterLogic` object to the `Rollup.Request` constructor.
 
 ### **The `Rollup.Calculator` Class**
 

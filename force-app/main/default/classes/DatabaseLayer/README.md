@@ -394,7 +394,7 @@ public class 2of3Logic extends FilterLogic {
 ```
 
 ```
-Filter filter1 = new Filter(Acount.AnnualRevenue, Filter.GREATER, 1000);
+Filter filter1 = new Filter(Acount.AnnualRevenue, Filter.GREATER_THAN, 1000);
 Filter filter2 = new Filter(Account.Custom__c, Filter.EQUALS, null);
 Filter filter3 = new Filter(Account.Name, Filter.CONTAINS, 'Test');
 FilterLogic logic = new 2of3Logic(filter1, filter2, filter3);

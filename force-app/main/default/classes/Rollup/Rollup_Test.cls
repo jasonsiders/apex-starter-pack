@@ -97,6 +97,17 @@ private class Rollup_Test {
 		System.assertEquals(2, relationship.requests?.size(), 'Wrong # of requests');
 	}
 
+	@IsTest 
+	static void shouldConstructRequestWithFilter() {
+		Filter filter = new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000);
+		Rollup.Request request = new Rollup.Request(
+			Account.AnnualRevenue, 
+			new CountCalculator(), 
+			filter
+		);
+		System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters added'); 
+	}
+
 	// **** HELPER **** //
 	@TestSetup
 	static void setup() {

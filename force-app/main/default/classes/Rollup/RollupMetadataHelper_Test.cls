@@ -24,7 +24,7 @@ private class RollupMetadataHelper_Test {
 		Rollup.Request request = relationship?.requests?.values()[0];
 		System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
 		System.assertEquals(true, request?.calculator instanceof CountCalculator, 'Wrong Calculator type');
-		System.assertEquals(0, request?.filters?.size(), 'Wrong # of filters');
+		System.assertEquals(0, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
 	}
 
 	@IsTest
@@ -198,9 +198,9 @@ private class RollupMetadataHelper_Test {
 		Rollup.Request request = relationship?.requests?.values()[0];
 		System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
 		System.assertEquals(true, request?.calculator instanceof CountCalculator, 'Wrong Calculator type');
-		System.assertEquals(1, request?.filters?.size(), 'Wrong # of filters');
-		Filter filterObj = request?.filters[0];
-		System.assertEquals('StageName = \'Closed Won\'', request?.filters[0]?.toString(), 'Wrong filter');
+		System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
+		Filter filterObj = request?.logic?.getFilters()[0];
+		System.assertEquals('StageName = \'Closed Won\'', filterObj.toString(), 'Wrong filter');
 	}
 
 	@IsTest
@@ -266,7 +266,7 @@ private class RollupMetadataHelper_Test {
 		System.assertEquals(1, rollups[0].relationships?.values()[0]?.requests?.size(), 'Wrong # of requests');
 		System.assertEquals(
 			rollupFilterMdts?.size() - 1,
-			rollups[0].relationships?.values()[0].requests?.values()[0].filters?.size(),
+			rollups[0].relationships?.values()[0].requests?.values()[0].logic?.getFilters()?.size(),
 			'Wrong # of filters'
 		);
 	}
@@ -376,8 +376,8 @@ private class RollupMetadataHelper_Test {
 		);
 		System.assertEquals(2, relationship?.requests?.values()?.size(), 'Wrong # of requests');
 		for (Rollup.Request request : relationship?.requests?.values()) {
-			System.assertEquals(1, request?.filters?.size(), 'Wrong # of filters');
-			System.assertEquals('IsClosed = true', request?.filters[0]?.toString(), 'Wrong filter');
+			System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
+			System.assertEquals('IsClosed = true', request?.logic?.getFilters()[0]?.toString(), 'Wrong filter');
 			if (request?.targetField?.toSchemaType() == Account.AnnualRevenue) {
 				System.assertEquals(
 					true,
