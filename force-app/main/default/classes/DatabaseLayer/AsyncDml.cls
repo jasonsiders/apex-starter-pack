@@ -100,7 +100,13 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 		}
 
 		public List<DmlResult> process() {
-			return (this.skipTriggers) ? this.doDmlWithoutTriggers() : this.doDml();
+			try {
+				return (this.skipTriggers) ? this.doDmlWithoutTriggers() : this.doDml();
+			} catch (Exception error) {
+				Logger.error(AsyncDml.class, 'Async operation failed: ' + error);
+				Logger.publish();
+				return null;
+			}
 		}
 
 		private List<DmlResult> doDmlWithoutTriggers() {

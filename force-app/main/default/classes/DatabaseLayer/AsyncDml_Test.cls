@@ -119,6 +119,28 @@ private class AsyncDml_Test {
 		System.assertNotEquals(null, account.Id, 'DML was not processed');
 	}
 
+	@IsTest 
+	static void shouldLogErrors() {
+		insert new Log_Setting__c(
+			Enabled__c = true, 
+			Level__c = LoggingLevel.FINEST.name(),
+			SetupOwnerId = UserInfo.getOrganizationId()	
+		);
+		Account account = new Account(Name = 'Test Account');
+		AsyncDml.Request req = new AsyncDml.Request(Dml.Operation.DO_UPDATE, account, true); 
+		// Can't update an Account with no Id - this will return a System.DmlException
+		AsyncDml instance = AsyncDml.getInstance().addRequest(req);
+
+		Test.startTest();
+		Id jobId = instance.runJob();
+		Test.stopTest();
+
+		System.assertNotEquals(null, jobId, 'Job did not run'); 
+		System.assertEquals(null, account.Id, 'Invalid Account was inserted');
+		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of Logs Published');
+		System.assertEquals(LoggingLevel.ERROR.name(), Logger.PublishedLogs[0].Level__c, 'Wrong Level');
+	}
+
 	// **** HELPER **** //
 	public class LimitsMock extends LimitUtils {
 		public override Boolean checkIfQueueableIsSafe() {
