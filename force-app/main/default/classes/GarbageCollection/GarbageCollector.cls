@@ -40,16 +40,14 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 	// **** BATCHABLE **** //
 	public virtual void execute(Database.BatchableContext context, List<SObject> scope) {
 		try {
-			List<DmlResult> results = Databaselayer.Dml.doDelete(scope, false);
+			List<DmlResult> results = DatabaseLayer.Dml.doDelete(scope, false);
 			DmlResult.logErrors(results);
 		} catch (Exception caughtError) {
-			final String message =
-				'Unexpected error (Job: ' +
-				context?.getJobId() +
-				')\n' +
-				'"' +
-				caughtError.getMessage() +
-				'"';
+			final String template = 'Unexpected error (Job: {0})\n{1}';
+			final String message = String.format(template, new List<String>{
+				context?.getJobId(), 
+				String.valueOf(caughtError)
+			});
 			Logger.error(message);
 			Logger.publish();
 			throw caughtError;
@@ -60,7 +58,11 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 		Soql query = Databaselayer.Soql.newQuery(AsyncApexJob.SObjectType)
 			.selectFields(AsyncApexJob.JobItemsProcessed)
 			.selectFields(AsyncApexJob.TotalJobItems)
-			.whereFilters(new Filter(AsyncApexJob.Id, Filter.EQUALS, context.getJobId()));
+			.whereFilters(new Filter(
+				AsyncApexJob.Id, 
+				Filter.EQUALS, 
+				context.getJobId()
+			));
 		List<AsyncApexJob> jobDetails = (List<AsyncApexJob>) query.run();
 		AsyncApexJob currentJob = (AsyncApexJob) CollectionUtils.getIndexOf(jobDetails, 0);
 		Integer numCompletedBatches = currentJob?.JobItemsProcessed;
@@ -104,7 +106,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 		final String template =
 			'Invalid Garbage Collection Job criteria. ' +
 			'Either a SOQL Filter, or the name of an Apex Class ' +
-			'that implements IGarbageCollectorScope must be provided.\n' +
+			'that implements IGarbageCollector must be provided.\n' +
 			'Valid Apex Classes: {0}\n' +
 			'Garbage Collection Job: {1}';
 

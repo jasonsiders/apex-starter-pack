@@ -5,6 +5,7 @@ public abstract class TriggerHandler {
 	public Map<Id, SObject> triggerOldMap { get; protected set; }
 	@TestVisible
 	System.TriggerOperation operation = Trigger.operationType;
+
 	static Boolean IsEnabled = true;
 	static Set<Type> BypassedHandlers = new Set<Type>();
 
@@ -15,7 +16,7 @@ public abstract class TriggerHandler {
 	// Required for bypass purposes. This method should always return the current type (ex., AccountTriggerHandler.class)
 	protected abstract Type getHandlerType();
 
-	public virtual void run() {
+	public void run() {
 		if (this.isEnabled()) {
 			switch on this.operation {
 				when BEFORE_INSERT {
@@ -91,14 +92,14 @@ public abstract class TriggerHandler {
 	public virtual void afterUndelete() {
 	}
 
-	protected virtual void setTriggerCollections() {
+	protected void setTriggerCollections() {
 		this.triggerNew = (Trigger.isExecuting) ? Trigger.new : new List<SObject>();
 		this.triggerOld = (Trigger.isExecuting) ? Trigger.old : new List<SObject>();
 		this.triggerNewMap = (Trigger.isExecuting) ? Trigger.newMap : new Map<Id, SObject>();
 		this.triggerOldMap = (Trigger.isExecuting) ? Trigger.oldMap : new Map<Id, SObject>();
 	}
 
-	protected virtual Boolean isEnabled() {
+	protected Boolean isEnabled() {
 		// For the handler to run, the TriggerHandler must be enabled,
 		// and the specific handler must not be bypassed
 		return (TriggerHandler.IsEnabled && TriggerHandler.BypassedHandlers?.contains(this.getHandlerType()) == false);

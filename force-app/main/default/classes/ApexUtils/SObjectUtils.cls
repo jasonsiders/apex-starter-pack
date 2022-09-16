@@ -19,10 +19,17 @@ public abstract class SObjectUtils {
 		return (SObject) JSON.deserialize(JSON.serializePretty(targetMap), SObject.class);
 	}
 
-	public static SObject setReadOnlyField(SObject target, SObjectField field, Object value) {
+	public static SObject setReadOnlyFields(SObject target, Map<SObjectField, Object> values) {
 		Map<String, Object> targetMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(target));
-		targetMap.put(String.valueOf(field), value);
+		for (SObjectField field : values.keySet()) {
+			Object value = values.get(field);
+			targetMap.put(String.valueOf(field), value);
+		}
 		return (SObject) JSON.deserialize(JSON.serializePretty(targetMap), SObject.class);
+	}
+
+	public static SObject setReadOnlyField(SObject target, SObjectField field, Object value) {
+		return SObjectUtils.setReadOnlyFields(target, new Map<SObjectField, Object>{ field => value });
 	}
 
 	// Note: These classes mock the QueryResult object(s), which is visible in SOQL via JSON.serialize()

@@ -48,7 +48,7 @@ private class AsyncDml_Test {
 		AsyncDml.Request request = new AsyncDml.Request(
 			Dml.Operation.DO_INSERT,
 			new Case(),
-			new FieldRef(Case.CaseNumber)
+			Case.CaseNumber
 		);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
@@ -72,7 +72,7 @@ private class AsyncDml_Test {
 		AsyncDml.Request request = new AsyncDml.Request(
 			Dml.Operation.DO_INSERT,
 			new Case(),
-			new FieldRef(Case.CaseNumber),
+			Case.CaseNumber,
 			false
 		);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');

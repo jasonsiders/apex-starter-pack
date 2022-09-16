@@ -31,12 +31,7 @@ private class SchemaUtils_Test {
 			System.assertEquals(expected, SchemaUtils.describeSObject(Account.SObjectType), 'Describe does not match');
 		}
 		Decimal total = Limits.getCpuTime() - start;
-		System.debug(
-			LoggingLevel.FINEST,
-			'Completed 200 getSObjectDescribe(Account.SObjectType) calls in ' +
-			total +
-			'ms'
-		);
+		System.debug(LoggingLevel.FINEST, 'Completed 200 SObjectDescribe calls in ' + total + 'ms');
 		// Null objectType should return null
 		System.assertEquals(null, SchemaUtils.describeSObject(null), 'Unexpected describe results');
 	}

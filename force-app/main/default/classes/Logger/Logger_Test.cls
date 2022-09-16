@@ -73,6 +73,7 @@ private class Logger_Test {
 		RestRequest request = new RestRequest();
 		request.requestBody = Blob.valueOf(JSON.serialize(inputs));
 		RestContext.request = request;
+		RestContext.response = new RestResponse(); 
 
 		Test.startTest();
 		Logger.logFromApi();
@@ -80,6 +81,20 @@ private class Logger_Test {
 
 		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of pending logs');
 		System.assertEquals(input.logMessage, Logger.PublishedLogs[0].Message__c, 'Wrong message');
+	}
+
+	@IsTest 
+	static void shouldHandleApiErrors() {
+		RestRequest request = new RestRequest(); 
+		request.requestBody = null; // This will cause an error!
+		RestContext.request = request;
+		RestContext.response = new RestResponse(); 
+
+		Test.startTest();
+		Logger.logFromApi();
+		Test.stopTest();
+
+		System.assertEquals(500, RestContext.response?.statusCode, 'Wrong Status Code'); 
 	}
 
 	@IsTest
@@ -110,6 +125,18 @@ private class Logger_Test {
 
 		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of pending logs');
 		System.assertEquals(input.logMessage, Logger.PublishedLogs[0].Message__c, 'Wrong message');
+	}
+
+	@IsTest 
+	static void shouldDefaultToFinest() {
+		Logger.Settings = getActiveSettings(LoggingLevel.FINEST); 
+
+		Test.startTest();
+		Logger.log('Hello world!');
+		Test.stopTest();
+
+		System.assertEquals(1, Logger.PendingLogs?.size(), 'Wrong # of Pending Logs');
+		System.assertEquals(LoggingLevel.FINEST.name(), Logger.PendingLogs[0].Level__c, 'Wrong Level');
 	}
 
 	@IsTest

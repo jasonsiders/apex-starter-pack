@@ -49,7 +49,7 @@ public abstract class TypeUtils {
 		// Convert any string to an object of a specific type
 		Object value = ((Map<String, Object>) JSON.deserializeUntyped('{"value":' + stringValue + '}')).values()[0];
 		if (TypeUtils.getType(value) == String.class) {
-			// Date/DateTimesare deserialized as Strings - must check for these manually
+			// Date/DateTimes are deserialized as Strings - must check for these manually
 			for (Type typeCheck : new List<Type>{ Date.class, DateTime.class }) {
 				try {
 					value = JSON.deserialize(stringValue, typeCheck);

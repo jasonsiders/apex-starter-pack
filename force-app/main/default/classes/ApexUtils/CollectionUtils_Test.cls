@@ -53,8 +53,7 @@ private class CollectionUtils_Test {
 			System.assertEquals(
 				true,
 				account.AnnualRevenue != 1000,
-				'Filter was not applied correctly: ' +
-				myFilter.toString()
+				'Filter was not applied correctly: ' + myFilter.toString()
 			);
 		}
 	}

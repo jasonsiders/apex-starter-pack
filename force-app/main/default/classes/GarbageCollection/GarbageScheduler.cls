@@ -40,16 +40,14 @@ public without sharing class GarbageScheduler implements System.Schedulable {
 
 	private void logSkippedJobs() {
 		if (this.skippedJobs?.isEmpty() == false) {
-			final String message =
-				'Could not execute ' +
-				this.skippedJobs?.size() +
-				' GarbageCollection jobs, ' +
-				'because number of jobs in the Apex Flex Queue (' +
-				FLEX_QUEUE_LIMIT +
-				').\n' +
-				'Please retry these jobs manually, or wait until the next scheduled run.\n' +
-				'Skipped Jobs: ' +
-				JSON.serializePretty(this.skippedJobs);
+			final String template =
+				'Skipped {0} GarbageCollection jobs, because the Apex Flex Queue is full.\n' +
+				'Please retry these jobs manually, or wait until the next scheduled run\n' +
+				'Skipped jobs: {1}';
+			final String message = String.format(
+				template,
+				new List<String>{ String.valueOf(this.skippedJobs?.size()), JSON.serializePretty(this.skippedJobs) }
+			);
 			Logger.log(LoggingLevel.ERROR, message);
 		}
 	}
@@ -62,7 +60,8 @@ public without sharing class GarbageScheduler implements System.Schedulable {
 					Garbage_Collection_Job__mdt.Apex_Class_Name__c,
 					Garbage_Collection_Job__mdt.Batch_Size__c,
 					Garbage_Collection_Job__mdt.DeveloperName,
-					Garbage_Collection_Job__mdt.SOQL_Filter__c
+					Garbage_Collection_Job__mdt.SOQL_Filter__c,
+					Garbage_Collection_Job__mdt.SObjectType__c
 				}
 			)
 			.whereFilters(new Filter(Garbage_Collection_Job__mdt.Active__c, Filter.EQUALS, true))

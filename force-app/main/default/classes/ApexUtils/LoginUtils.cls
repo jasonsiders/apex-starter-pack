@@ -10,7 +10,7 @@ public abstract class LoginUtils {
 		.orderBy(new SoqlSort(AuthSession.CreatedDate, SoqlSort.Order.ASCENDING));
 
 	static Map<Id, List<AuthSession>> ActiveSessions {
-		// { UserId => List<AuthSession> }
+		// Map of UserId => List<AuthSession>
 		get {
 			ActiveSessions = (ActiveSessions != null) ? ActiveSessions : LoginUtils.getAllActiveSessions();
 			return ActiveSessions;
@@ -24,7 +24,7 @@ public abstract class LoginUtils {
 			// Note: Can't easily filter active sessions in SOQL; must calculate manually
 			Long currentVal = DateTime.now().getTime();
 			Long expiresVal = session?.LastModifiedDate?.addSeconds(session?.NumSecondsValid)?.getTime();
-			Long remainingSecs = (expiresVal - currentVal) / 1000;
+			Long remainingSecs = (expiresVal != null && currentVal != null) ? (expiresVal - currentVal) / 1000 : 0;
 			if (remainingSecs > 0) {
 				Id userId = session?.UsersId;
 				List<AuthSession> matching = (activeSessions?.containsKey(userId))

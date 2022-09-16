@@ -57,7 +57,7 @@ private class Dml_Test {
 	@IsTest
 	static void shouldDoUpsertOnExternalId() {
 		Lead testLead = new Lead(Company = 'Test', Email = 'test@test.com.invalid', LastName = 'Test');
-		Databaselayer.Dml.doUpsert(testLead, Lead.Id);
+		Databaselayer.Dml.doUpsert(new List<Lead>{ testLead }, Lead.Id);
 		System.assertNotEquals(null, lead.Id, 'Lead was not inserted');
 		final String newName = 'Some other name';
 		testLead.LastName = newName;

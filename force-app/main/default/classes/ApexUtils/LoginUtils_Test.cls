@@ -8,6 +8,34 @@ private class LoginUtils_Test {
 	}
 
 	@IsTest
+	static void shouldHandleMultipleSessionsForUser() {
+		List<AuthSession> existingSessions = new List<AuthSession>();
+		for (Integer i = 0; i < 2; i++) {
+			AuthSession session = (AuthSession) SObjectUtils.setReadOnlyFields(
+				new AuthSession(),
+				new Map<SObjectField, Object>{
+					AuthSession.UsersId => UserInfo.getUserId(),
+					AuthSession.NumSecondsValid => 99999,
+					AuthSession.LastModifiedDate => DateTime.now().addSeconds(-10)
+				}
+			);
+			existingSessions.add(session);
+		}
+		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+		LoginUtils.ActiveSessionQuery.toMock()?.setMockResults(existingSessions);
+
+		Test.startTest();
+		Map<Id, List<AuthSession>> allSessions = LoginUtils.getAllActiveSessions();
+		Test.stopTest();
+
+		System.assertEquals(
+			existingSessions?.size(),
+			allSessions?.get(UserInfo.getUserId())?.size(),
+			'Wrong # of Sessions'
+		);
+	}
+
+	@IsTest
 	static void shouldRetrieveActiveAuthSessionsForAUser() {
 		User me = new User(Id = UserInfo.getUserId());
 		List<AuthSession> mySessions = LoginUtils.getActiveSessions(me);

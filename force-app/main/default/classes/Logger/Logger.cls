@@ -29,9 +29,19 @@ global without sharing abstract class Logger {
 	@HttpPost
 	global static void logFromApi() {
 		// Exposes the logger to external solutions
-		String requestBody = RestContext.request?.requestBody?.toString();
-		List<LogInput> logInputs = (List<LogInput>) JSON.deserialize(requestBody, List<LogInput>.class);
-		Logger.logFromExternalSource(logInputs);
+		try {
+			String requestBody = RestContext.request?.requestBody?.toString();
+			List<LogInput> logInputs = (List<LogInput>) JSON.deserialize(requestBody, List<LogInput>.class);
+			Logger.logFromExternalSource(logInputs);
+			RestContext.response.statusCode = 200;
+		} catch (Exception error) {
+			RestContext.response.statusCode = 500;
+			RestContext.response.responseBody = Blob.valueOf(
+				JSON.serialize(new Map<String, String>{
+					 'message' => String.valueOf(error) 
+				})
+			);
+		}
 	}
 
 	@InvocableMethod(category='Logging' configurationEditor='c-cpe-logger' label='Post to Log')
@@ -76,6 +86,11 @@ global without sharing abstract class Logger {
 
 	public static void log(LoggingLevel level, Object message) {
 		Logger.log(level, null, message);
+	}
+
+	public static void log(Object message) {
+		// Defaults to FINEST
+		Logger.finest(message);
 	}
 
 	public static void error(Type apexClass, Object message) {
