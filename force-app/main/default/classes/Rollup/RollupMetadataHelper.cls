@@ -42,7 +42,7 @@ public class RollupMetadataHelper {
 				new Rollup.Relationship(childRelationship)
 					.addRequest(
 						new Rollup.Request(
-							new FieldRef(targetField),
+							targetField,
 							this.getCalculator(rollupMdt),
 							this.getFilters(rollupMdt?.Rollup_Filters__r)
 						)

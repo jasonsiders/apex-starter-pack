@@ -68,8 +68,8 @@ public without sharing class Rollup {
 			this.requests = new Map<FieldRef, Request>();
 		}
 
-		public Relationship(FieldRef lookupField) {
-			this(SchemaUtils.getChildRelationship(lookupField?.toSchemaType()));
+		public Relationship(SObjectField lookupField) {
+			this(SchemaUtils.getChildRelationship(lookupField));
 		}
 
 		public Relationship addRequest(Request request) {
@@ -108,13 +108,13 @@ public without sharing class Rollup {
 		public Calculator calculator { get; private set; }
 		public List<Filter> filters { get; private set; }
 
-		public Request(FieldRef targetField, Calculator calculator, List<Filter> filters) {
-			this.targetField = targetField;
+		public Request(SObjectField targetField, Calculator calculator, List<Filter> filters) {
+			this.targetField = new FieldRef(targetField);
 			this.calculator = calculator;
 			this.filters = filters;
 		}
 
-		public Request(FieldRef targetField, Calculator calculator) {
+		public Request(SObjectField targetField, Calculator calculator) {
 			this(targetField, calculator, new List<Filter>());
 		}
 
@@ -171,6 +171,14 @@ public without sharing class Rollup {
 
 		public FieldRef getCalcField() {
 			return this.calcField;
+		}
+
+		// Note: Callers can specify a calcField via an SObjectField on the target record itself,
+		// or a FieldRef which can be used to reference a parent field for calculations.
+		// Only the FieldRef version of the method can be overridden; contains the logic for both methods
+		public Calculator setCalcField(SObjectField calcField) {
+			FieldRef calcFieldRef = new FieldRef(calcField); 
+			return this.setCalcField(calcFieldRef);
 		}
 
 		public virtual Calculator setCalcField(FieldRef calcField) {

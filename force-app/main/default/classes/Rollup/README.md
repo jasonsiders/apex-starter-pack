@@ -134,7 +134,7 @@ Rollup.Calculator calculator = new SumCalculator();
 The `Rollup.Calculator` has three public methods:
 
 -   `FieldRef getCalcField()`: returns the current `calcField`.
--   `Calculator setCalcField(SObjectField field)`: Sets the current `calcField`, and returns the current instance.
+-   `Calculator setCalcField(SObjectField field/FieldRef fieldReference)`: Sets the current `calcField`, and returns the current instance. Callers can provide an `SObjectField` for simple field references, or a `FieldRef` object to refer to parent or grandparent fields on the target record.
 -   `Object calculate(List<SObject> records)`: Run the calculation against a group of records, and returns the calculated value.
 
 #### **Custom Calculators**
