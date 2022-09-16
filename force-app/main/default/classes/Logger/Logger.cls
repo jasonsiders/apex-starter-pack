@@ -33,6 +33,7 @@ global without sharing abstract class Logger {
 			String requestBody = RestContext.request?.requestBody?.toString();
 			List<LogInput> logInputs = (List<LogInput>) JSON.deserialize(requestBody, List<LogInput>.class);
 			Logger.logFromExternalSource(logInputs);
+			Logger.publish();
 			RestContext.response.statusCode = 200;
 		} catch (Exception error) {
 			RestContext.response.statusCode = 500;
@@ -47,6 +48,9 @@ global without sharing abstract class Logger {
 	@InvocableMethod(category='Logging' configurationEditor='c-cpe-logger' label='Post to Log')
 	global static void logFromFlow(List<LogInput> logInputs) {
 		// Exposes the logger to Flows
+		// Note: This flow action does not publish logs
+		// To do this, flow developers must call the `LogPublisher.invoke()` action separately
+		// This is done to give flow developers the same flexibility as in Apex
 		Logger.logFromExternalSource(logInputs);
 	}
 
@@ -54,6 +58,7 @@ global without sharing abstract class Logger {
 	global static void logFromLightning(List<LogInput> logInputs) {
 		// Exposes the logger to Aura Components & LWCs
 		Logger.logFromExternalSource(logInputs);
+		Logger.publish();
 	}
 
 	// **** PUBLIC **** //
@@ -172,7 +177,6 @@ global without sharing abstract class Logger {
 		for (LogInput logInput : logInputs) {
 			logInput.log();
 		}
-		Logger.publish();
 	}
 
 	static Boolean isEnabled(LoggingLevel currentLevel) {

@@ -98,7 +98,13 @@ Developers can use the `Post to Log` action to post log messages from within Flo
 
 <img src="../../../../../media/logger_Example2.png" width="50%">
 
-> **Note:** Each _invocation_ of the flow action will incur one `EventBus.publish()` call. Salesforce's Flow Engine groups `@InvocableMethod` method inputs into a single call per transaction.
+Log messages created through this flow action are pending, and must be published via the `Publish Logs` Flow Action:
+<img src="../../../../../media/logger_Example5.png" width="50%">
+
+This allows flow developers to generate as many log messages as necessary in the flow without burning through `EventBus.publish()` calls.
+
+For example, developers can log within a loop, and then publish at the end of the loop:
+<img src="../../../../../media/logger_Example6.png" width="50%">
 
 ### **In External Services**
 

@@ -79,7 +79,7 @@ private class Logger_Test {
 		Logger.logFromApi();
 		Test.stopTest();
 
-		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of pending logs');
+		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of published logs');
 		System.assertEquals(input.logMessage, Logger.PublishedLogs[0].Message__c, 'Wrong message');
 	}
 
@@ -108,8 +108,8 @@ private class Logger_Test {
 		Logger.logFromFlow(new List<Logger.LogInput>{ input });
 		Test.stopTest();
 
-		System.assertEquals(1, Logger.PublishedLogs?.size(), 'Wrong # of pending logs');
-		System.assertEquals(input.logMessage, Logger.PublishedLogs[0].Message__c, 'Wrong message');
+		System.assertEquals(1, Logger.PendingLogs?.size(), 'Wrong # of pending logs');
+		System.assertEquals(input.logMessage, Logger.PendingLogs[0].Message__c, 'Wrong message');
 	}
 
 	@IsTest
