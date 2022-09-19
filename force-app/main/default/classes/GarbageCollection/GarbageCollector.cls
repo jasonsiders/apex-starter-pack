@@ -5,14 +5,14 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 	@TestVisible
 	static Soql InterfaceQuery = Databaselayer.Soql.newQuery(ApexTypeImplementor.SObjectType)
 		.selectFields(ApexTypeImplementor.ClassName)
-		.whereFilters(
+		.whereCriteria(
 			new Filter(
 				ApexTypeImplementor.InterfaceName,
 				Filter.EQUALS,
 				String.valueOf(GarbageCollector.IGarbageCollector.class)
 			)
 		)
-		.whereFilters(new Filter(ApexTypeImplementor.IsConcrete, Filter.EQUALS, true));
+		.whereCriteria(new Filter(ApexTypeImplementor.IsConcrete, Filter.EQUALS, true));
 
 	static Set<String> ValidApexClasses {
 		get {
@@ -58,7 +58,7 @@ public abstract inherited sharing class GarbageCollector implements Database.Bat
 		Soql query = Databaselayer.Soql.newQuery(AsyncApexJob.SObjectType)
 			.selectFields(AsyncApexJob.JobItemsProcessed)
 			.selectFields(AsyncApexJob.TotalJobItems)
-			.whereFilters(new Filter(
+			.whereCriteria(new Filter(
 				AsyncApexJob.Id, 
 				Filter.EQUALS, 
 				context.getJobId()

@@ -1,4 +1,4 @@
-public virtual class Filter {
+public virtual class Filter implements ICriteria {
 	// Note: Normally, I'd use an enum instead, but each item here has special logic behind it
 	public static final Type EQUALS = EqualsOperator.class;
 	public static final Type NOT_EQUALS = NotEqualsOperator.class;
@@ -66,19 +66,9 @@ public virtual class Filter {
 	public Filter(Filter__mdt filterRecord) {
 		this(
 			filterRecord?.SObjectField__c,
-			Filter.getOperationByItsAbbreviation(filterRecord?.Operator__c),
+			Filter.getOperationByAbbreviation(filterRecord?.Operator__c),
 			TypeUtils.parseStringValue(filterRecord?.Value__c)
 		);
-	}
-
-	public override String toString() {
-		return this.getFieldName() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
-	}
-
-	public String getFieldName() {
-		List<String> fieldParts = this.relationships?.clone();
-		fieldParts?.add(this.fieldName);
-		return String.join(fieldParts, '.');
 	}
 
 	public Boolean meetsCriteria(SObject record) {
@@ -97,6 +87,20 @@ public virtual class Filter {
 		Map<String, Object> deserialized = (Map<String, Object>) JSON.deserializeUntyped(serialized);
 		Object value = deserialized.get(this.fieldName);
 		return this.operator.meetsCriteria(value, this.value);
+	}
+
+	public override String toString() {
+		return this.getFieldName() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
+	}
+
+	public Set<String> getFieldNames() {
+		return new Set<String>{this.getFieldName()};
+	}
+
+	private String getFieldName() {
+		List<String> fieldParts = this.relationships?.clone();
+		fieldParts?.add(this.fieldName);
+		return String.join(fieldParts, '.');
 	}
 
 	private String formatValue() {
@@ -201,7 +205,7 @@ public virtual class Filter {
 	}
 
 	// **** STATIC **** //
-	static Type getOperationByItsAbbreviation(String abbreviation) {
+	static Type getOperationByAbbreviation(String abbreviation) {
 		return Filter.OPERATOR_ABBREVIATIONS?.get(abbreviation);
 	}
 

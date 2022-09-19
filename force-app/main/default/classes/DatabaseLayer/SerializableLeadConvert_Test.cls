@@ -117,7 +117,7 @@ private class SerializableLeadConvert_Test {
 		Databaselayer.Dml.doInsert(testLead);
 		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
-			.whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
 		String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
 		Database.LeadConvert leadConvertObj = new Database.LeadConvert();
@@ -133,7 +133,7 @@ private class SerializableLeadConvert_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
-			.whereFilters(new Filter(Lead.IsConverted, Filter.EQUALS, true));
+			.whereCriteria(new Filter(Lead.IsConverted, Filter.EQUALS, true));
 		Map<Id, Lead> convertedLeads = new Map<Id, Lead>((List<Lead>) query.run());
 		System.assertEquals(true, convertedLeads.containsKey(testLead.Id), 'Lead was not converted');
 	}
@@ -150,7 +150,7 @@ private class SerializableLeadConvert_Test {
 		Databaselayer.Dml.doInsert(testLead);
 		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
-			.whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
 		String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
 		Database.LeadConvert leadConvertObj = new Database.LeadConvert();

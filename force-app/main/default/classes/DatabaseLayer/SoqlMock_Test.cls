@@ -12,7 +12,7 @@ private class SoqlMock_Test {
 		Databaselayer.Dml.doInsert(accounts);
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
 			.selectFields(new List<SObjectField>{ Account.Name, Account.AnnualRevenue })
-			.whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
+			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
 		query?.toMock()?.setMockResults(accounts);
 
 		Test.startTest();

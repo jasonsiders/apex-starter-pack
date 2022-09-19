@@ -4,9 +4,9 @@ public inherited sharing virtual class Soql {
 	protected SObjectRef fromSObject;
 	protected Scope scope;
 	protected SoqlWithClause withExpression;
-	protected FilterLogic whereFilters = new FilterLogic.AndLogic();
+	protected FilterLogic whereCriteria = new FilterLogic.AndLogic();
 	protected List<String> groupByClauses = new List<String>();
-	protected FilterLogic havingFilters = new FilterLogic.AndLogic();
+	protected FilterLogic havingCriteria = new FilterLogic.AndLogic();
 	protected SoqlSort orderByClause;
 	protected Integer rowLimit;
 	protected Integer rowOffset;
@@ -120,18 +120,18 @@ public inherited sharing virtual class Soql {
 		return this;
 	}
 
-	public Soql whereFilters(List<Filter> filters) {
-		this.whereFilters?.addFilters(filters);
+	public Soql whereCriteria(List<ICriteria> filters) {
+		this.whereCriteria?.addCriteria(filters);
 		return this;
 	}
 
-	public Soql whereFilters(Filter filter) {
-		return this.whereFilters(new List<Filter>{ filter });
+	public Soql whereCriteria(ICriteria filter) {
+		return this.whereCriteria(new List<ICriteria>{ filter });
 	}
 
 	public Soql setWhereLogic(Type newLogicType) {
-		List<Filter> filters = this.whereFilters?.getFilters();
-		this.whereFilters = ((FilterLogic) newLogicType.newInstance())?.setFilters(filters);
+		List<ICriteria> filters = this.whereCriteria?.getCriteria();
+		this.whereCriteria = ((FilterLogic) newLogicType.newInstance())?.setCriteria(filters);
 		return this;
 	}
 
@@ -166,18 +166,14 @@ public inherited sharing virtual class Soql {
 		return this.groupBy(new List<String>{ fieldName });
 	}
 
-	public Soql havingFilters(List<SoqlAggregation.AggregateFilter> filters) {
-		this.havingFilters?.addFilters(filters);
-		return this;
-	}
-
-	public Soql havingFilters(SoqlAggregation.AggregateFilter filter) {
-		return this.havingFilters(new List<SoqlAggregation.AggregateFilter>{ filter });
+	public Soql havingCriteria(SoqlAggregation.AggregateFilter aggregateCriteria) {
+		this.havingCriteria?.addCriteria(aggregateCriteria);
+		return this; 
 	}
 
 	public Soql setHavingLogic(Type newLogicType) {
-		List<Filter> filters = this.havingFilters?.getFilters();
-		this.havingFilters = ((FilterLogic) newLogicType.newInstance())?.setFilters(filters);
+		List<ICriteria> filters = this.havingCriteria?.getCriteria();
+		this.havingCriteria = ((FilterLogic) newLogicType.newInstance())?.setCriteria(filters);
 		return this;
 	}
 
@@ -206,10 +202,10 @@ public inherited sharing virtual class Soql {
 		List<String> optionalArgs = (List<String>) CollectionUtils.filterCollection(
 			new List<String>{
 				this.getUsingScope(),
-				this.getFilter('WHERE', this.whereFilters),
+				this.getFilter('WHERE', this.whereCriteria),
 				this.getWith(),
 				this.getGroupBy(),
-				this.getFilter('HAVING', this.havingFilters),
+				this.getFilter('HAVING', this.havingCriteria),
 				this.getOrderBy(),
 				this.getLimit('LIMIT', this.rowLimit),
 				this.getLimit('OFFSET', this.rowOffset),
@@ -233,7 +229,7 @@ public inherited sharing virtual class Soql {
 	}
 
 	protected virtual String getFilter(String token, FilterLogic logic) {
-		return (logic?.getFilters()?.isEmpty() == false) ? token + ' ' + logic?.toString() : null;
+		return (logic?.getCriteria()?.isEmpty() == false) ? token + ' ' + logic?.toString() : null;
 	}
 
 	protected virtual String getWith() {

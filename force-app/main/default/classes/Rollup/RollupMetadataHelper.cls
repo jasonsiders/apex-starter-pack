@@ -37,8 +37,8 @@ public class RollupMetadataHelper {
 		);
 		SObjectField targetField = SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c);
 		ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
-		List<Filter> filters = this.getFilters(rollupMdt?.Rollup_Filters__r);
-		FilterLogic logic = new FilterLogic.AndLogic(filters);
+		List<ICriteria> filters = this.getCriteria(rollupMdt?.Rollup_Filters__r);
+		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
 		Rollup.Request req = new Rollup.Request(targetField, this.getCalculator(rollupMdt), logic);
 		rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(req));
 	}
@@ -52,7 +52,7 @@ public class RollupMetadataHelper {
 		return ((Rollup.Calculator) calcType?.newInstance())?.setCalcField(new FieldRef(calcField));
 	}
 
-	private List<Filter> getFilters(List<Rollup_Filter__mdt> rollupFilters) {
+	private List<Filter> getCriteria(List<Rollup_Filter__mdt> rollupFilters) {
 		List<Filter> results = new List<Filter>();
 		for (Rollup_Filter__mdt rollupFilter : rollupFilters) {
 			if (rollupFilter.Active__c) {
@@ -83,7 +83,7 @@ public class RollupMetadataHelper {
 		return Databaselayer.Soql.newQuery(Rollup__mdt.SObjectType)
 			.selectAll()
 			.selectSubQuery(filtersQuery)
-			.whereFilters(activeFilter)
-			.whereFilters(activeFilter);
+			.whereCriteria(activeFilter)
+			.whereCriteria(activeFilter);
 	}
 }

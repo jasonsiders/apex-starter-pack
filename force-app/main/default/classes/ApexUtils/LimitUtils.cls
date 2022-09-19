@@ -30,8 +30,8 @@ public virtual class LimitUtils {
 				.selectAggregation(
 					new SoqlAggregation(SoqlAggregation.Function.SUM, AsyncApexJob.JobItemsProcessed, 'NumBatches')
 				)
-				.whereFilters(new Filter(AsyncApexJob.CreatedDate, Filter.GREATER_THAN, DateTime.now().addDays(-1)))
-				.whereFilters(
+				.whereCriteria(new Filter(AsyncApexJob.CreatedDate, Filter.GREATER_THAN, DateTime.now().addDays(-1)))
+				.whereCriteria(
 					new Filter(
 						AsyncApexJob.JobType,
 						Filter.IN_COLLECTION,

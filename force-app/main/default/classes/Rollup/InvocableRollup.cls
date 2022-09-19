@@ -39,7 +39,7 @@ public inherited sharing abstract class InvocableRollup {
 	protected List<Rollup__mdt> getAllMatchingRollups() {
 		// Retrieve all Rollups where the SObjectType matches the records' SObjectType
 		SObjectField matchingField = this.getMatchingField();
-		Soql mdtQuery = RollupMetadataHelper.BaseQuery.whereFilters(
+		Soql mdtQuery = RollupMetadataHelper.BaseQuery.whereCriteria(
 			new Filter(matchingField, Filter.EQUALS, String.valueOf(this.objectType))
 		);
 		List<Rollup__mdt> results = (List<Rollup__mdt>) mdtQuery.run();

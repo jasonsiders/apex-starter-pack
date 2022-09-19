@@ -44,7 +44,7 @@ private class DataCategoryFilter_Test {
 			new DataCategoryFilter('Category1', DataCategoryFilter.ABOVE, 'Category2'),
 			new DataCategoryFilter('Category3', DataCategoryFilter.BELOW, 'Category4')
 		};
-		FilterLogic logic = new DataCategoryFilter.AndLogic(filters);
+		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
 		System.assertEquals(
 			'Category1 ABOVE Category2 AND Category3 BELOW Category4',
 			logic.toString(),
@@ -58,24 +58,9 @@ private class DataCategoryFilter_Test {
 			new DataCategoryFilter('Category1', DataCategoryFilter.ABOVE, 'Category2'),
 			new DataCategoryFilter('Category3', DataCategoryFilter.BELOW, 'Category4')
 		};
-		FilterLogic logic = new DataCategoryFilter.OrLogic(filters);
+		FilterLogic logic = new FilterLogic.OrLogic().addCriteria(filters);
 		System.assertEquals(
 			'Category1 ABOVE Category2 OR Category3 BELOW Category4',
-			logic.toString(),
-			'Unexpected output'
-		);
-	}
-
-	@IsTest
-	static void shouldGenerateCustomLogic() {
-		List<DataCategoryFilter> filters = new List<DataCategoryFilter>{
-			new DataCategoryFilter('Category1', DataCategoryFilter.ABOVE, 'Category2'),
-			new DataCategoryFilter('Category3', DataCategoryFilter.BELOW, 'Category4'),
-			new DataCategoryFilter('Category5', DataCategoryFilter.AT, 'Category6')
-		};
-		FilterLogic logic = new CustomLogic(filters);
-		System.assertEquals(
-			'(Category1 ABOVE Category2 AND Category3 BELOW Category4) OR Category5 AT Category6',
 			logic.toString(),
 			'Unexpected output'
 		);
@@ -86,23 +71,5 @@ private class DataCategoryFilter_Test {
 		// Note: All DataCategoryOperator types' meetsCriteria() method always returns FALSE
 		DataCategoryFilter.Operator operator = new DataCategoryFilter.AboveOperator();
 		System.assertEquals(false, operator.meetsCriteria(1, 1), 'Did not return false');
-	}
-
-	// **** HELPER **** //
-	public class CustomLogic extends FilterLogic implements DataCategoryFilter.Logic {
-		public CustomLogic(List<DataCategoryFilter> filters) {
-			this.filters = filters;
-		}
-
-		public override Boolean meetsCriteria(Object obj) {
-			return null; // We don't care about this method for now
-		}
-
-		public override String toString() {
-			return String.format(
-				'({0} AND {1}) OR {2}',
-				new List<String>{ this.filters[0].toString(), this.filters[1].toString(), this.filters[2].toString() }
-			);
-		}
 	}
 }

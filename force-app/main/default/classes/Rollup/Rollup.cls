@@ -24,7 +24,7 @@ public without sharing class Rollup {
 
 	public List<SObject> run(Set<Id> targetRecordIds) {
 		Rollup.RollupQuery = Rollup.RollupQuery.fromSObject(this.targetObject?.toSchemaType())
-			.whereFilters(new Filter('Id', Filter.IN_COLLECTION, targetRecordIds));
+			.whereCriteria(new Filter('Id', Filter.IN_COLLECTION, targetRecordIds));
 		for (Relationship relationship : this.relationships.values()) {
 			SubQuery subQuery = relationship?.getSubQuery();
 			Rollup.RollupQuery.selectSubQuery(subQuery);
@@ -86,7 +86,8 @@ public without sharing class Rollup {
 		private SubQuery getSubQuery() {
 			SubQuery subQuery = new SubQuery(this.childRelationship?.toSchemaType());
 			for (Request request : this.requests?.values()) {
-				subQuery.selectFields(request.getFieldNames());
+				Set<String> fieldNames = request?.getFieldNames();
+				subQuery.selectFields(new List<String>(fieldNames));
 			}
 			return subQuery;
 		}
@@ -115,20 +116,16 @@ public without sharing class Rollup {
 		}
 
 		public Request(SObjectField targetField, Calculator calculator, Filter filter) {
-			this(targetField, calculator, new FilterLogic.AndLogic().addFilters(filter));
+			this(targetField, calculator, new FilterLogic.AndLogic().addCriteria(filter));
 		}
 
 		public Request(SObjectField targetField, Calculator calculator) {
 			this(targetField, calculator, new FilterLogic.AndLogic());
 		}
 
-		public Request addFilters(List<Filter> queryFilters) {
-			this.logic.addFilters(queryFilters);
+		public Request addCriteria(ICriteria criteria) {
+			this.logic.addCriteria(criteria);
 			return this;
-		}
-
-		public Request addFilters(Filter filter) {
-			return this.addFilters(new List<Filter>{filter});
 		}
 
 		public void calculate(SObject targetRecord, List<SObject> childRecords) {
@@ -138,14 +135,11 @@ public without sharing class Rollup {
 			targetRecord.put(field, value);
 		}
 
-		private List<String> getFieldNames() {
-			List<String> fieldNames = new List<String>();
+		private Set<String> getFieldNames() {
+			Set<String> fieldNames = this.logic?.getFieldNames();
 			SObjectField calcField = this.calculator.getCalcField()?.toSchemaType();
 			if (calcField != null) {
 				fieldNames.add(String.valueOf(calcField));
-			}
-			for (Filter filter : this.logic?.getFilters()) {
-				fieldNames?.add(filter?.getFieldName());
 			}
 			return fieldNames;
 		}
@@ -161,8 +155,8 @@ public without sharing class Rollup {
 		}
 
 		private Boolean meetsFilterCriteria(SObject record) {
-			for (Filter filter : this.logic?.getFilters()) {
-				if (filter.meetsCriteria(record) == false) {
+			for (ICriteria criteria : this.logic?.getCriteria()) {
+				if (criteria.meetsCriteria(record) == false) {
 					return false;
 				}
 			}

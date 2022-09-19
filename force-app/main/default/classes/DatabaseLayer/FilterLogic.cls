@@ -1,79 +1,84 @@
-public abstract class FilterLogic {
-	protected List<Filter> filters = new List<Filter>();
+public abstract class FilterLogic implements ICriteria {
+	protected List<ICriteria> criterion = new List<ICriteria>();
+	protected String token;
 
+	// **** INTERFACE **** //
 	public abstract Boolean meetsCriteria(Object item);
-	public abstract override String toString();
 
-	public virtual List<Filter> getFilters() {
-		return this.filters;
+	public Boolean meetsCriteria(SObject record) {
+		// For this method, the logic for both overrides is the same
+		Object obj = record;
+		return this.meetsCriteria(obj);
 	}
 
-	public virtual FilterLogic addFilters(List<Filter> filters) {
-		this.filters.addAll(filters);
+	public Set<String> getFieldNames() {
+		Set<String> fieldNames = new Set<String>();
+		for (ICriteria criteria : this.criterion) {
+			fieldNames.addAll(criteria.getFieldNames());
+		}
+		return fieldNames;
+	}
+
+	public override String toString() {
+		String delimiter = ' ' + this.token + ' ';
+		List<String> criteriaStrings = new List<String>(); 
+		for (ICriteria criteria : this.criterion) {
+			// Wrap inner FilterLogic objects in parentheses
+			String criteriaString = (criteria instanceOf FilterLogic) 
+				? '(' + criteria?.toString() + ')' 
+				: criteria?.toString();
+			criteriaStrings.add(criteriaString); 
+		}
+		return String.join(criteriaStrings, delimiter);
+	}
+
+	// **** PUBLIC **** // 
+	public virtual FilterLogic addCriteria(List<ICriteria> criterion) {
+		this.criterion.addAll(criterion); 
 		return this;
 	}
-
-	public virtual FilterLogic addFilters(Filter filter) {
-		return this.addFilters(new List<Filter>{ filter });
+	
+	public virtual FilterLogic addCriteria(ICriteria criteria) {
+		return this.addCriteria(new List<ICriteria>{ criteria });
 	}
 
-	public virtual FilterLogic setFilters(List<Filter> filters) {
-		this.filters = filters;
+	public virtual List<ICriteria> getCriteria() {
+		return this.criterion;
+	}
+
+	public virtual FilterLogic setCriteria(List<ICriteria> criterion) {
+		this.criterion = criterion;
 		return this;
-	}
-
-	public virtual FilterLogic setFilters(Filter filter) {
-		return this.setFilters(new List<Filter>{ filter });
 	}
 
 	// **** IMPLEMENTATIONS **** //
 	public virtual class AndLogic extends FilterLogic {
-		public AndLogic(List<Filter> filters) {
-			this.filters = filters;
-		}
-
 		public AndLogic() {
-			// Default constructor available to allow callers to use the setFilters() methods instead
+			this.token = 'AND';
 		}
 
 		public override Boolean meetsCriteria(Object item) {
-			for (Filter filter : this.filters) {
-				if (filter.meetsCriteria(item) == false) {
+			for (ICriteria criteria : this.criterion) {
+				if (criteria.meetsCriteria(item) == false) {
 					return false;
 				}
 			}
 			return true;
 		}
-
-		public override String toString() {
-			// Should return a list of filter.toString() delimited by "AND"
-			// ex., Field1__c = 'value' AND Field2__c > 1234
-			return ObjectUtils.joinValues(this.filters, ' AND ');
-		}
 	}
 
 	public virtual class OrLogic extends FilterLogic {
-		public OrLogic(List<Filter> filters) {
-			this.filters = filters;
-		}
-
 		public OrLogic() {
-			// Default constructor available to allow callers to use the setFilters() methods instead
+			this.token = 'OR';
 		}
 
 		public override Boolean meetsCriteria(Object item) {
-			for (Filter filter : this.filters) {
-				if (filter.meetsCriteria(item) == true) {
+			for (ICriteria criteria : this.criterion) {
+				if (criteria.meetsCriteria(item) == true) {
 					return true;
 				}
 			}
 			return false;
-		}
-
-		public override String toString() {
-			// Should return a list of filter.toString() delimited by "OR"
-			// ex., Field1__c = 'value' OR Field2__c > 1234
-			return ObjectUtils.joinValues(this.filters, ' OR ');
 		}
 	}
 }

@@ -21,7 +21,7 @@ private class SoqlWithClause_Test {
 	@IsTest
 	static void shouldGenerateDataCategoryClause() {
 		DataCategoryFilter filter = new DataCategoryFilter('CategoryA__c', DataCategoryFilter.ABOVE, 'CategoryB__c');
-		DataCategoryFilter.AndLogic logic = new DataCategoryFilter.AndLogic(new List<DataCategoryFilter>{ filter });
+		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(new List<DataCategoryFilter>{ filter });
 		SoqlWithClause withClause = new SoqlWithClause.DataCategoryExpression(logic);
 		System.assertEquals('WITH CategoryA__c ABOVE CategoryB__c', withClause.toString(), 'Unexpected output');
 	}

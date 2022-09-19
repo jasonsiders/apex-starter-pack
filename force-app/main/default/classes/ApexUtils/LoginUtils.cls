@@ -5,8 +5,8 @@ public abstract class LoginUtils {
 		.selectFields(
 			new List<SObjectField>{ AuthSession.UsersId, AuthSession.LastModifiedDate, AuthSession.NumSecondsValid }
 		)
-		.whereFilters(new Filter(AuthSession.LastModifiedDate, Filter.EQUALS, 'LAST_N_DAYS:1'))
-		.whereFilters(new Filter(AuthSession.ParentId, Filter.Equals, null))
+		.whereCriteria(new Filter(AuthSession.LastModifiedDate, Filter.EQUALS, 'LAST_N_DAYS:1'))
+		.whereCriteria(new Filter(AuthSession.ParentId, Filter.Equals, null))
 		.orderBy(new SoqlSort(AuthSession.CreatedDate, SoqlSort.Order.ASCENDING));
 
 	static Map<Id, List<AuthSession>> ActiveSessions {

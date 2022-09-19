@@ -347,7 +347,7 @@ private class Filter_Test {
 		Databaselayer.Dml.doInsert(testOpp);
 		testOpp = (Opportunity) Databaselayer.Soql.newQuery(Opportunity.SObjectType)
 			.selectFields(new FieldRef(new List<SObjectField>{ Opportunity.AccountId, Account.Name }))
-			.whereFilters(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
+			.whereCriteria(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
 			.run()[0];
 
 		Test.startTest();
@@ -1019,7 +1019,7 @@ private class Filter_Test {
 		Soql innerQuery = Databaselayer.Soql.newQuery(User.SObjectType)
 			.deselectId()
 			.selectFields(User.ProfileId)
-			.whereFilters(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
+			.whereCriteria(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
 
 		Test.startTest();
 		Filter myFilter = new Filter(Profile.Id, Filter.IN_COLLECTION, innerQuery);

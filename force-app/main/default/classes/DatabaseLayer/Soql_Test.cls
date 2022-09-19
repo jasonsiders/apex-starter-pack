@@ -97,7 +97,7 @@ private class Soql_Test {
 			.selectFields(Lead.LeadSource)
 			.selectAggregation(aggregation)
 			.groupBy(Lead.LeadSource)
-			.havingFilters(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100));
+			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100));
 		Soql_Test.checkQueryString(
 			'SELECT LeadSource, COUNT(Name) FROM Lead GROUP BY LeadSource HAVING COUNT(Name) > 100',
 			query
@@ -112,8 +112,8 @@ private class Soql_Test {
 			.selectFields(Lead.LeadSource)
 			.selectAggregation(aggregation)
 			.groupBy(Lead.LeadSource)
-			.havingFilters(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100))
-			.havingFilters(new SoqlAggregation.AggregateFilter(aggregation, Filter.LESS_THAN, 1000));
+			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100))
+			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.LESS_THAN, 1000));
 		// By default, the HAVING filter logic is always AND
 		Soql_Test.checkQueryString(
 			'SELECT LeadSource, COUNT(Name) FROM Lead GROUP BY LeadSource HAVING COUNT(Name) > 100 AND COUNT(Name) < 1000',
@@ -129,8 +129,8 @@ private class Soql_Test {
 			.selectFields(Lead.LeadSource)
 			.selectAggregation(aggregation)
 			.groupBy(Lead.LeadSource)
-			.havingFilters(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100))
-			.havingFilters(new SoqlAggregation.AggregateFilter(aggregation, Filter.LESS_THAN, 1000))
+			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100))
+			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.LESS_THAN, 1000))
 			.setHavingLogic(FilterLogic.OrLogic.class);
 		Soql_Test.checkQueryString(
 			'SELECT LeadSource, COUNT(Name) FROM Lead GROUP BY LeadSource HAVING COUNT(Name) > 100 OR COUNT(Name) < 1000',
@@ -163,7 +163,7 @@ private class Soql_Test {
 			// But knowledge must be enabled in order to test this properly
 			.withExpression(
 				new SoqlWithClause.DataCategoryExpression(
-					new DataCategoryFilter.OrLogic(
+					new FilterLogic.OrLogic().addCriteria(
 						new List<DataCategoryFilter>{
 							new DataCategoryFilter('CategoryA__c', DataCategoryFilter.ABOVE, 'CategoryB__c'),
 							new DataCategoryFilter(
@@ -185,7 +185,7 @@ private class Soql_Test {
 	@IsTest
 	static void shouldGenerateQueryWithOneWhereClause() {
 		Soql query = new Soql(Account.SObjectType)
-			.whereFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000));
+			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000));
 		Soql_Test.checkQueryString('SELECT Id FROM Account WHERE AnnualRevenue > 1000', query);
 		Soql_Test.runTestQuery(query);
 	}
@@ -193,8 +193,8 @@ private class Soql_Test {
 	@IsTest
 	static void shouldGenerateQueryWithMultipleWhereClauses() {
 		Soql query = new Soql(Account.SObjectType)
-			.whereFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
-			.whereFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()));
+			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()));
 		Soql_Test.checkQueryString(
 			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 AND OwnerId = \'' +
 			UserInfo.getUserId() +
@@ -204,26 +204,53 @@ private class Soql_Test {
 		Soql_Test.runTestQuery(query);
 	}
 
-	@IsTest
-	static void shouldGenerateQueryWithFilterLogic() {
+	@IsTest 
+	static void shouldGenerateQueryWithAndFilterLogic() {
 		Soql query = new Soql(Account.SObjectType)
-			.whereFilters(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
-			.whereFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
-			.whereFilters(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
-			.setWhereLogic(CustomLogic.class);
+			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+			.whereCriteria(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)));
 		Soql_Test.checkQueryString(
-			'SELECT Id FROM Account WHERE (AnnualRevenue > 1000 AND (OwnerId = \'' +
-			UserInfo.getUserId() +
-			'\' OR CreatedDate < 2022-01-01T00:00:00Z))',
+			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 AND OwnerId = \'' + UserInfo.getUserId() + '\' AND CreatedDate < 2022-01-01T00:00:00Z',
 			query
 		);
 		Soql_Test.runTestQuery(query);
 	}
 
+	@IsTest 
+	static void shouldGenerateQueryWithOrFilterLogic() {
+		Soql query = new Soql(Account.SObjectType)
+			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+			.whereCriteria(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
+			.setWhereLogic(FilterLogic.OrLogic.class);
+		Soql_Test.checkQueryString(
+			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 OR OwnerId = \'' + UserInfo.getUserId() + '\' OR CreatedDate < 2022-01-01T00:00:00Z',
+			query
+		);
+		Soql_Test.runTestQuery(query);
+	}
+
+	@IsTest 
+	static void shouldGenerateQueryWithNestedFilterLogic() {
+		Soql query = new Soql(Account.SObjectType)
+			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+			.whereCriteria(
+				new FilterLogic.AndLogic()
+					.addCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+					.addCriteria(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
+			).setWhereLogic(FilterLogic.OrLogic.class);
+		Soql_Test.checkQueryString(
+			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 OR (OwnerId = \'' + UserInfo.getUserId() + '\' AND CreatedDate < 2022-01-01T00:00:00Z)',
+			query
+		);
+		Soql_Test.runTestQuery(query); 
+	}
+
 	@IsTest
 	static void shouldGenerateQueryWithParentFieldFilters() {
 		Soql query = new Soql(Opportunity.SObjectType)
-			.whereFilters(new Filter('Account.AnnualRevenue', Filter.GREATER_THAN, 1000));
+			.whereCriteria(new Filter('Account.AnnualRevenue', Filter.GREATER_THAN, 1000));
 		Soql_Test.checkQueryString('SELECT Id FROM Opportunity WHERE Account.AnnualRevenue > 1000', query);
 		Soql_Test.runTestQuery(query);
 	}
@@ -234,9 +261,9 @@ private class Soql_Test {
 		Soql innerQuery = new Soql(User.SObjectType)
 			.deselectId()
 			.selectFields(User.ProfileId)
-			.whereFilters(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
+			.whereCriteria(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));
 		Soql query = new Soql(Profile.SObjectType)
-			.whereFilters(new Filter(Profile.Id, Filter.IN_COLLECTION, innerQuery));
+			.whereCriteria(new Filter(Profile.Id, Filter.IN_COLLECTION, innerQuery));
 		Soql_Test.checkQueryString(
 			'SELECT Id FROM Profile WHERE Id IN (SELECT ProfileId FROM User WHERE Id = \'' +
 			UserInfo.getUserId() +
@@ -303,20 +330,20 @@ private class Soql_Test {
 	@IsTest
 	static void shouldHandleRelativeDateQuery() {
 		Soql query = new Soql(Account.SObjectType)
-			.whereFilters(new Filter(Account.CreatedDate, Filter.EQUALS, 'LAST_N_DAYS:10'));
+			.whereCriteria(new Filter(Account.CreatedDate, Filter.EQUALS, 'LAST_N_DAYS:10'));
 		Soql_Test.checkQueryString('SELECT Id FROM Account WHERE CreatedDate = LAST_N_DAYS:10', query);
 		Soql_Test.runTestQuery(query);
 	}
 
 	@IsTest
-	static void shouldHandleComplextQuery() {
+	static void shouldHandleComplexQuery() {
 		Soql query = new Soql(Account.SObjectType)
 			.selectFields(new List<SObjectField>{ Account.Id, Account.CreatedDate, Account.Name })
 			.selectFields(new FieldRef(new List<SObjectField>{ Account.OwnerId, User.ProfileId }))
-			.whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
-			.whereFilters(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
-			.whereFilters(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
-			.setWhereLogic(CustomLogic.class)
+			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+			.whereCriteria(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
+			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+			.setWhereLogic(FilterLogic.OrLogic.class)
 			.orderBy(new SoqlSort(new List<String>{ 'CreatedDate', 'AnnualRevenue' }, SoqlSort.Order.DESCENDING))
 			.setRowLimit(200)
 			.withExpression(new SoqlWithClause.ContextExpression(SoqlWithClause.Context.SECURITY_ENFORCED))
@@ -325,12 +352,11 @@ private class Soql_Test {
 		final String expected =
 			'SELECT Id, CreatedDate, Name, Owner.ProfileId FROM Account ' +
 			'USING SCOPE everything ' +
-			'WHERE (Name LIKE \'Test Account%\' AND (' +
+			'WHERE Name LIKE \'Test Account%\' OR ' +
 			'CreatedDate > 2022-01-01T00:00:00Z OR ' +
 			'OwnerId = \'' +
 			UserInfo.getUserId() +
-			'\'' +
-			')) ' +
+			'\' ' +
 			'WITH SECURITY_ENFORCED ' +
 			'ORDER BY CreatedDate, AnnualRevenue DESC ' +
 			'LIMIT 200 ALL ROWS';
@@ -347,7 +373,7 @@ private class Soql_Test {
 		Databaselayer.Dml.doInsert(accounts);
 		Soql query = new Soql(Account.SObjectType)
 			.selectFields(new List<SObjectField>{ Account.Id, Account.CreatedDate, Account.Name })
-			.whereFilters(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
+			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
 			.orderBy(new SoqlSort(Account.CreatedDate, SoqlSort.Order.DESCENDING))
 			.setRowLimit(200);
 		Test.startTest();
@@ -439,28 +465,5 @@ private class Soql_Test {
 	public class SampleWrapper {
 		Integer numAccs;
 		String billingCountry;
-	}
-
-	public class CustomLogic extends FilterLogic {
-		// this is for this test only; always has 3 filters
-		Filter filter1;
-		Filter filter2;
-		Filter filter3;
-
-		public override Boolean meetsCriteria(Object item) {
-			this.constructFromSuper();
-			return filter1.meetsCriteria(item) && (filter2.meetsCriteria(item) || filter3.meetsCriteria(item));
-		}
-
-		public override String toString() {
-			this.constructFromSuper();
-			return '(' + filter1 + ' AND (' + filter2 + ' OR ' + filter3 + '))';
-		}
-
-		private void constructFromSuper() {
-			this.filter1 = super.filters[0];
-			this.filter2 = super.filters[1];
-			this.filter3 = super.filters[2];
-		}
 	}
 }

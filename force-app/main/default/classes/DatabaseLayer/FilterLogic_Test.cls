@@ -2,7 +2,7 @@
 private class FilterLogic_Test {
 	@IsTest
 	static void shouldDetermineAllMeetCriteria() {
-		FilterLogic.AndLogic logic = new FilterLogic.AndLogic(testFilters);
+		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(testFilters);
 		// If all are true, will return true
 		Account testAccount = new Account(AnnualRevenue = 9999, BillingCountry = 'USA', OwnerId = UserInfo.getUserId());
 		System.assertEquals(
@@ -30,7 +30,7 @@ private class FilterLogic_Test {
 
 	@IsTest
 	static void shouldDetermineAnyMeetCriteria() {
-		FilterLogic.OrLogic logic = new FilterLogic.OrLogic(testFilters);
+		FilterLogic logic = new FilterLogic.OrLogic().addCriteria(testFilters);
 		// If all fails, will return false
 		Account testAccount = new Account(
 			AnnualRevenue = 1,
@@ -61,67 +61,18 @@ private class FilterLogic_Test {
 	}
 
 	@IsTest
-	static void shouldDetermineCustomCriteriaMet() {
-		FilterLogic logic = new CustomLogic();
-		// If 2/3 meets criteria, will return true
-		Account testAccount = new Account(
-			AnnualRevenue = 9999,
-			BillingCountry = 'USA',
-			OwnerId = DmlMock.generateFakeId(User.SObjectType)
-		);
-		System.assertEquals(
-			true,
-			logic.meetsCriteria(testAccount),
-			'Unexpected FilterLogic.meetsCriteria() result. Logic: ' +
-			logic +
-			'. Item: ' +
-			JSON.serialize(testAccount)
-		);
-		// If 1/3 (or less) meets criteria, will return false
-		testAccount.BillingCountry = 'UK';
-		System.assertEquals(
-			false,
-			logic.meetsCriteria(testAccount),
-			'Unexpected FilterLogic.meetsCriteria() result. Logic: ' +
-			logic +
-			'. Item: ' +
-			JSON.serialize(testAccount)
-		);
-		// Should output some complex logic
-		String expected =
-			'(' +
-			'(' +
-			testFilters[0] +
-			' AND ' +
-			testFilters[1] +
-			') OR ' +
-			'(' +
-			testFilters[0] +
-			' AND ' +
-			testFilters[2] +
-			') OR ' +
-			'(' +
-			testFilters[1] +
-			' AND ' +
-			testFilters[2] +
-			')' +
-			')';
-		System.assertEquals(expected, logic.toString(), 'Wrong logic output');
-	}
-
-	@IsTest
 	static void shouldGetSetFilters() {
 		FilterLogic logic = new FilterLogic.AndLogic();
 		Filter myFilter = new Filter(Account.Name, Filter.EQUALS, 'Test');
-		System.assertEquals(0, logic.getFilters()?.size(), 'Wrong # of filters');
-		// addFilters() adds a new filter(s) to the list
-		logic.addFilters(myFilter);
-		System.assertEquals(1, logic.getFilters()?.size(), 'Wrong # of filters');
-		logic.addFilters(myFilter);
-		System.assertEquals(2, logic.getFilters()?.size(), 'Wrong # of filters');
-		// setFilters() relaces the exising list
-		logic.setFilters(myFilter);
-		System.assertEquals(1, logic.getFilters()?.size(), 'Wrong # of filters');
+		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
+		// addCriteria() adds a new filter(s) to the list
+		logic.addCriteria(myFilter);
+		System.assertEquals(1, logic.getCriteria()?.size(), 'Wrong # of filters');
+		logic.addCriteria(myFilter);
+		System.assertEquals(2, logic.getCriteria()?.size(), 'Wrong # of filters');
+		// setCriteria() relaces the exising list
+		logic.setCriteria(new List<Filter>{myFilter});
+		System.assertEquals(1, logic.getCriteria()?.size(), 'Wrong # of filters');
 	}
 
 	@IsTest
@@ -129,9 +80,9 @@ private class FilterLogic_Test {
 		// Optionally, callers can generate a new instance of AndLogic/OrLogic without filters defined at the start
 		// This allows them to add them later on
 		FilterLogic logic = new FilterLogic.AndLogic();
-		System.assertEquals(0, logic.getFilters()?.size(), 'Wrong # of filters');
+		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
 		logic = new FilterLogic.OrLogic();
-		System.assertEquals(0, logic.getFilters()?.size(), 'Wrong # of filters');
+		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
 	}
 
 	@IsTest
@@ -148,7 +99,7 @@ private class FilterLogic_Test {
 			new Filter(Account.Name, Filter.NOT_IN_COLLECTION, testNames)
 		};
 
-		FilterLogic logic = new FilterLogic.AndLogic(filters);
+		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
 		String template = 'Id IN ({1}, {2}) {0} Name NOT IN ({3}, {4})';
 		List<String> args = new List<String>{
 			'AND',
@@ -166,9 +117,41 @@ private class FilterLogic_Test {
 			'\''
 		};
 		System.assertEquals(String.format(template, args), logic.toString(), 'Unexpected AND logic output');
-		logic = new FilterLogic.OrLogic(filters);
+		logic = new FilterLogic.OrLogic().addCriteria(filters);
 		args[0] = 'OR';
 		System.assertEquals(String.format(template, args), logic.toString(), 'Unexpected OR logic output');
+	}
+
+	@IsTest 
+	static void shouldBeNestable() {
+		// Callers can nest multiple FilterLogic instances to create the exact logical conditions they're looking for
+		// 1 AND (2 OR (3 AND 4))
+		FilterLogic innerAndLogic = new FilterLogic.AndLogic()
+			.addCriteria(new Filter(Account.BillingCountry, Filter.EQUALS, 'US'))
+			.addCriteria(new Filter(Account.NumberOfEmployees, Filter.GREATER_THAN, 100));
+		FilterLogic innerOrLogic = new FilterLogic.OrLogic()
+			.addCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
+			.addCriteria(innerAndLogic);
+		FilterLogic outerLogic = new FilterLogic.AndLogic()
+			.addCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
+			.addCriteria(innerOrLogic);
+
+		String expected = 'OwnerId = \'' + UserInfo.getUserId() + '\' AND (AnnualRevenue > 1000 OR (BillingCountry = \'US\' AND NumberOfEmployees > 100))';
+		System.assertEquals(expected, outerLogic.toString(), 'Unexpected nested logic output');
+
+		Account testAcc = new Account(
+			AnnualRevenue = 1001,
+			BillingCountry = 'US',
+			NumberOfEmployees = 101,
+			OwnerId = UserInfo.getUserId()
+		);
+		System.assertEquals(true, outerLogic.meetsCriteria(testAcc), 'Valid account does not meet criteria');
+		// Change one of the optional conditions to be false
+		testAcc.AnnualRevenue = 999;
+		System.assertEquals(true, outerLogic.meetsCriteria(testAcc), 'Valid account does not meet criteria');
+		// Change one of the required conditions to be false
+		testAcc.OwnerId = DmlMock.generateFakeId(User.SObjectType);
+		System.assertEquals(false, outerLogic.meetsCriteria(testAcc), 'Invalid account meets criteria');
 	}
 
 	// **** HELPER **** //
@@ -177,27 +160,4 @@ private class FilterLogic_Test {
 		new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000),
 		new Filter(Account.BillingCountry, Filter.EQUALS, 'USA')
 	};
-
-	public class CustomLogic extends FilterLogic {
-		Filter ownedByMe = testFilters[0];
-		Filter highValue = testFilters[1];
-		Filter inUSA = testFilters[2];
-
-		public override Boolean meetsCriteria(Object item) {
-			// If 2/3 meets criteria, will return true
-			Integer numValid = 0;
-			for (Filter filter : new List<Filter>{ ownedByMe, highValue, inUSA }) {
-				numValid += (filter.meetsCriteria(item)) ? 1 : 0;
-			}
-			return numValid >= 2;
-		}
-
-		public override String toString() {
-			// Basically have to list out every combination...
-			return String.format(
-				'(({0} AND {1}) OR ({0} AND {2}) OR ({1} AND {2}))',
-				new List<String>{ ownedByMe.toString(), highValue.toString(), inUSA.toString() }
-			);
-		}
-	}
 }

@@ -238,8 +238,8 @@ Enter the `Soql` class. **Soql** is an object-oriented query builder in Apex. It
 Soql query = DatabaseQuery.Soql.newQuery(Account.SObjectType)
     .selectFields(Account.My_Field__c)
     .selectFields(Account.My_Other_Field__c)
-    .whereFilters(new Filter(Account.My_Field__c, Filter.EQUALS, 'foo'))
-    .whereFilters(new Filter(Account.My_Other_Field__c, Filter.EQUALS, 'bar'))
+    .whereCriteria(new Filter(Account.My_Field__c, Filter.EQUALS, 'foo'))
+    .whereCriteria(new Filter(Account.My_Other_Field__c, Filter.EQUALS, 'bar'))
     .orderBy(new SoqlSort(Account.CreatedDate, SoqlSort.Order.DESCENDING))
     .setRowLimit(100);
 List<Account> accounts = (List<Account>) query.run();
@@ -258,10 +258,10 @@ The `Soql` class has methods which replicate every [SOQL function](https://devel
 -   `fromSObject()`: Define the SObjectType/table that the query will be run against. This is also defined in the constructor.
 -   `usingScope()`: Adds a `USING SCOPE` clause. See [**The `Soql.Scope` Enum**](#the-soql-scope-enum)for more.
 -   `withExpression()`: Adds a `WITH` clause. Read more about `WITH` [here](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_enforce_usermode.htm) and [here](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm).
--   `whereFilters()`: Add filter(s) to the `WHERE` clause. See the [**`Filter`**](#the-filter-class) and [**`FilterLogic`**](#the-filter-logic-classs) Classes for more.
+-   `whereCriteria()`: Add Criteria object(s) to the `WHERE` clause. See the [**`ICriteria`**](#the-icriteria-interface) for more.
 -   `setWhereLogic()`: Defines a `FilterLogic` class to be used to process the various filters in the `WHERE` clause.
 -   `groupBy()`: Add field(s) to the `GROUP BY` clause.
--   `havingFilters()`: Used in aggregate queries. Adds `SoqlAggregation.AggregateFilter` object(s) to the `HAVING` clause.
+-   `havingCriteria()`: Used in aggregate queries. Adds `SoqlAggregation.AggregateFilter` object(s) to the `HAVING` clause.
 -   `setHavingLogic()`: Used in aggregate queries. Defines the `FilterLogic` class to be used to process the various filters in the `HAVING` clause.
 -   `orderBy()`: Set the `ORDER BY` field(s) and direction.
 -   `setRowLimit()`: Set the `LIMIT` clause.
@@ -270,13 +270,26 @@ The `Soql` class has methods which replicate every [SOQL function](https://devel
 
 ### **Related Classes**
 
-#### **The `Filter` Class**
+#### **The `ICriteria` Interface**
 
-The `Filter` class is used to produce an element of a SOQL `WHERE` clause.
+The `ICriteria` interface is used to compose logic which can filter SObject records or other objects based on certain conditions.
+
+Developers can add `ICriteria` objects to a `Soql` query via the `whereCriteria()` method:
+
+```
+Filter filter = new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000);
+Soql query = DatabaseLayer.Soql.newQuery(Account).whereCriteria(filter);
+System.debug(query);
+// > "SELECT Id FROM Account WHERE AnnualRevenue > 1000"
+```
+
+`ICriteria` has two primary implementations: `Filter` and `FilterLogic`.
+
+**The `Filter` class** is used to produce a single element of a SOQL `WHERE` clause.
 
 Developers can construct a `Filter` object with the following parameters:
 
--   `field`/`fieldName` (`SObjectField`, `FieldRef`, `String`): The left-hand side of the `WHERE` statement.
+-   `field` (`SObjectField`, `FieldRef`, `String`): The left-hand side of the `WHERE` statement.
 -   `operator` (`Type`): The type of `Filter.Operator` to use as the operand. You can find a map of operator values and their corresponding symbols below.
 -   `value` (`Object`): The expected result
 
@@ -285,17 +298,6 @@ Filter filter = new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000);
 System.debug(filter);
 // > "AnnualRevenue > 1000"
 ```
-
-These filters can be added to a parent `Soql` query via the `whereFilters()` method:
-
-```
-Filter filter = new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000);
-Soql query = DatabaseLayer.Soql.newQuery(Account).whereFilters(filter);
-System.debug(query);
-// > "SELECT Id FROM Account WHERE AnnualRevenue > 1000"
-```
-
-> **Note:** By default, multiple filters will be joined with "AND" statements. To define custom logic, pass a custom `FilterLogic` class to the query via the `setFilterLogic()` method.
 
 The full list of `Filter.Operator` types and their corresponding symbols is as follows:
 
@@ -314,21 +316,21 @@ The full list of `Filter.Operator` types and their corresponding symbols is as f
 -   **CONTAINS**: `LIKE '%...%'`
 -   **NOT_CONTAINS**: `NOT LIKE '%...%'`
 
-Outside of the `Soql` class, the `Filter` class can be used to evaluate logical conditions via the `meetsCriteria()` method:
-
-```
-Account acc = new Account(AnnualRevenue = 999);
-Filter filter = new Filter(
-    Account.AnnualRevenue,
-    Filter.LESS_THAN,
-    1000
-);
-System.assert(true, filter.meetsCriteria(acc));
-```
-
 #### **The `FilterLogic` Class**
 
-The `FilterLogic` abstract class wraps one or more `Filter` objects, and can be used to produce a complete SOQL `WHERE` clause.
+The `FilterLogic` abstract class wraps one or more `ICriteria` objects to create a "block" of criteria. This concept should be familiar to developers who have experience with Salesforce's formula engine:
+
+```
+AND(
+    NOT(ISBLANK(AccountId)),
+    AnnualRevenue > 1000,
+    OR(
+        BillingCountry = 'US',
+        OwnerId = $User.Id
+    )
+)
+
+```
 
 The class has two inner implementations: `FilterLogic.AndLogic` and `FilterLogic.OrLogic`.
 
@@ -336,11 +338,11 @@ The class has two inner implementations: `FilterLogic.AndLogic` and `FilterLogic
 
 ```
 FilterLogic logic = new FilterLogic.AndLogic()
-    .addFilters(new Filter(
+    .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,
         1000
-    )).addFilters(new Filter(
+    )).addCriteria(new Filter(
         Account.Name,
         Filter.CONTAINS,
         'Test'
@@ -353,11 +355,11 @@ System.debug(logic);
 
 ```
 FilterLogic logic = new FilterLogic.OrLogic()
-    .addFilters(new Filter(
+    .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,
         1000
-    )).addFilters(new Filter(
+    )).addCriteria(new Filter(
         Account.Name,
         Filter.CONTAINS,
         'Test'
@@ -366,56 +368,53 @@ System.debug(logic);
 // > "AnnualRevenue >= 1000 OR Name LIKE '%Test%'"
 ```
 
-If more complex conditional logic is required, developers can create their own `FilterLogic` implementation:
+`FilterLogic`'s `addCriteria()` method can be used to add criteria, whether they be additional `Filter` objects, or even nested `FilterLogic` objects. This can be used to compose complex `AND`/`OR` logic:
 
 ```
-public class 2of3Logic extends FilterLogic {
-    Filter filter1;
-    Filter filter2;
-    Filter filter3;
-
-    public 2of3Logic(Filter filter1, Filter filter2, Filter filter3) {
-        this.filter1 = filter1;
-        this.filter2 = filter2;
-        this.filter3 = filter3;
-    }
-
-    public override String toString() {
-        // Any 2 conditions must be true
-        return String.format(
-            '(({0} AND {1}) OR ({0} AND {2}) OR ({1} AND {2}))',
-            new List<String>{
-                ownedByMe.toString(),
-                highValue.toString(),
-                inUSA.toString()
-        });
-    }
-}
-```
-
-```
-Filter filter1 = new Filter(Acount.AnnualRevenue, Filter.GREATER_THAN, 1000);
-Filter filter2 = new Filter(Account.Custom__c, Filter.EQUALS, null);
-Filter filter3 = new Filter(Account.Name, Filter.CONTAINS, 'Test');
-FilterLogic logic = new 2of3Logic(filter1, filter2, filter3);
+Filter innerFilter = new Filter(
+    Account.BillingCountry,
+    Filter.EQUALS,
+    'US'
+);
+FilterLogic innerLogic = new FilterLogic.OrLogic()
+    .addCriteria(new Filter(
+        Account.AnnualRevenue,
+        Filter.GREATER_THAN,
+        1000
+    )).addCriteria(new Filter(
+        Account.NumberOfEmployees,
+        Filter.GREATER_THAN,
+        100
+    ));
+FilterLogic logic = new FilterLogic.AndLogic()
+    .addCriteria(innerFilter)
+    .addCriteria(innerLogic);
 System.debug(logic);
-/*
-    "(AnnualRevenue > 1000 AND Custom__c = null) OR
-    (AnnualRevenue > 100 AND Name LIKE '%Test%') OR
-    (Custom__c = null AND Name LIKE '%Test%')"
-*/
+// > "BillingCountry = 'US' AND (AnnualRevenue > 1000 OR NumberOfEmployees > 100)
 ```
 
-Outside of the `Soql` class, the `FilterLogic` class can be used to evaluate multiple logical conditions via the `meetsCriteria()` method:
+Outside of the `Soql` class, the `ICriteria` objects can be used to evaluate logical conditions via the `meetsCriteria()` method:
 
 ```
+// Evaluate a simple Filter object
+Account acc = new Account(AnnualRevenue = 999);
+Filter filter = new Filter(
+    Account.AnnualRevenue,
+    Filter.LESS_THAN,
+    1000
+);
+System.assert(true, filter.meetsCriteria(acc));
+```
+
+```
+// Evaluate a complex FilterLogic object
 Account acc = new Account(AnnualRevenue = 1000, Name = 'Test Acc');
 FilterLogic logic = new FilterLogic.AndLogic()
-    .addFilters(new Filter(
+    .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,
         1000
-    )).addFilters(new Filter(
+    )).addCriteria(new Filter(
         Account.Name,
         Filter.CONTAINS,
         'Test'

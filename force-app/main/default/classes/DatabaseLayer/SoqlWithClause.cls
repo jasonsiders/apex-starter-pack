@@ -27,9 +27,9 @@ public abstract class SoqlWithClause {
 	}
 
 	public class DataCategoryExpression extends SoqlWithClause {
-		DataCategoryFilter.Logic logic;
+		FilterLogic logic;
 
-		public DataCategoryExpression(DataCategoryFilter.Logic logic) {
+		public DataCategoryExpression(FilterLogic logic) {
 			this.logic = logic;
 		}
 

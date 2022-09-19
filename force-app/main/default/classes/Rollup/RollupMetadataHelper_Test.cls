@@ -24,7 +24,7 @@ private class RollupMetadataHelper_Test {
 		Rollup.Request request = relationship?.requests?.values()[0];
 		System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
 		System.assertEquals(true, request?.calculator instanceof CountCalculator, 'Wrong Calculator type');
-		System.assertEquals(0, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
+		System.assertEquals(0, request?.logic?.getCriteria()?.size(), 'Wrong # of filters');
 	}
 
 	@IsTest
@@ -198,8 +198,8 @@ private class RollupMetadataHelper_Test {
 		Rollup.Request request = relationship?.requests?.values()[0];
 		System.assertEquals(Account.AnnualRevenue, request?.targetField?.toSchemaType(), 'Wrong targetField');
 		System.assertEquals(true, request?.calculator instanceof CountCalculator, 'Wrong Calculator type');
-		System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
-		Filter filterObj = request?.logic?.getFilters()[0];
+		System.assertEquals(1, request?.logic?.getCriteria()?.size(), 'Wrong # of filters');
+		ICriteria filterObj = request?.logic?.getCriteria()[0];
 		System.assertEquals('StageName = \'Closed Won\'', filterObj.toString(), 'Wrong filter');
 	}
 
@@ -266,7 +266,7 @@ private class RollupMetadataHelper_Test {
 		System.assertEquals(1, rollups[0].relationships?.values()[0]?.requests?.size(), 'Wrong # of requests');
 		System.assertEquals(
 			rollupFilterMdts?.size() - 1,
-			rollups[0].relationships?.values()[0].requests?.values()[0].logic?.getFilters()?.size(),
+			rollups[0].relationships?.values()[0].requests?.values()[0].logic?.getCriteria()?.size(),
 			'Wrong # of filters'
 		);
 	}
@@ -357,7 +357,7 @@ private class RollupMetadataHelper_Test {
 		RollupMetadataHelper.BaseQuery?.toMock()?.setMockResults(rollupRecords);
 
 		Test.startTest();
-		Soql mdtQuery = RollupMetadataHelper.BaseQuery.whereFilters(
+		Soql mdtQuery = RollupMetadataHelper.BaseQuery.whereCriteria(
 			new Filter(Rollup__mdt.Child_SObjectType__c, Filter.EQUALS, String.valueOf(Opportunity.SObjectType))
 		);
 		List<Rollup__mdt> queryResults = (List<Rollup__mdt>) mdtQuery.run();
@@ -376,8 +376,8 @@ private class RollupMetadataHelper_Test {
 		);
 		System.assertEquals(2, relationship?.requests?.values()?.size(), 'Wrong # of requests');
 		for (Rollup.Request request : relationship?.requests?.values()) {
-			System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters');
-			System.assertEquals('IsClosed = true', request?.logic?.getFilters()[0]?.toString(), 'Wrong filter');
+			System.assertEquals(1, request?.logic?.getCriteria()?.size(), 'Wrong # of filters');
+			System.assertEquals('IsClosed = true', request?.logic?.getCriteria()[0]?.toString(), 'Wrong filter');
 			if (request?.targetField?.toSchemaType() == Account.AnnualRevenue) {
 				System.assertEquals(
 					true,

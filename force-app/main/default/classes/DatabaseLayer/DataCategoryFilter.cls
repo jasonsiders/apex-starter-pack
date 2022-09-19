@@ -13,22 +13,6 @@ public class DataCategoryFilter extends Filter {
 	}
 
 	// **** INNER **** //
-	public interface Logic {
-		// Marker interface indicates the FilterLogic belongs to this type
-	}
-
-	public class AndLogic extends FilterLogic.AndLogic implements Logic {
-		public AndLogic(List<DataCategoryFilter> filters) {
-			super(filters);
-		}
-	}
-
-	public class OrLogic extends FilterLogic.OrLogic implements Logic {
-		public OrLogic(List<DataCategoryFilter> filters) {
-			super(filters);
-		}
-	}
-
 	public abstract class Operator extends Filter.Operator {
 		public override String processStringValue(String value) {
 			return value;

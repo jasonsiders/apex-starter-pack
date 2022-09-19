@@ -27,7 +27,7 @@ private class AsyncDml_Test {
 		Databaselayer.Dml.doInsert(testLead);
 		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
-			.whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
 		String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
 		Database.LeadConvert leadConvertObj = new Database.LeadConvert();
@@ -39,7 +39,7 @@ private class AsyncDml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
-			.whereFilters(new Filter(Lead.IsConverted, Filter.EQUALS, true));
+			.whereCriteria(new Filter(Lead.IsConverted, Filter.EQUALS, true));
 		System.assertEquals(1, query.run().size(), 'Wrong # of converted leads');
 	}
 

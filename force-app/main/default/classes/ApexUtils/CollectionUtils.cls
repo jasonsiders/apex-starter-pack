@@ -1,17 +1,12 @@
 public abstract class CollectionUtils {
-	public static Object filterCollection(List<Object> items, FilterLogic logic, Type outputType) {
+	public static Object filterCollection(List<Object> items, ICriteria filter, Type outputType) {
 		Set<Object> validItems = new Set<Object>(items);
 		for (Object item : validItems) {
-			if (logic.meetsCriteria(item) == false) {
+			if (filter.meetsCriteria(item) == false) {
 				validItems.remove(item);
 			}
 		}
 		return JSON.deserialize(JSON.serialize(validItems), outputType);
-	}
-
-	public static Object filterCollection(List<Object> items, Filter filter, Type outputType) {
-		List<Filter> filters = new List<Filter>{ filter };
-		return CollectionUtils.filterCollection(items, new FilterLogic.AndLogic(filters), outputType);
 	}
 
 	public static Object mapByUniqueKey(List<Object> items, String key, Type outputType) {

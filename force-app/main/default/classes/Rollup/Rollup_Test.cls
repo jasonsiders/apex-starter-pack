@@ -49,7 +49,7 @@ private class Rollup_Test {
 								Account.AnnualRevenue,
 								new SumCalculator()?.setCalcField(new FieldRef(Opportunity.Amount))
 							)
-							.addFilters(new Filter(Opportunity.Amount, Filter.GREATER_THAN, 0))
+							.addCriteria(new Filter(Opportunity.Amount, Filter.GREATER_THAN, 0))
 					)
 			);
 		List<Account> results = (List<Account>) rollup.run(accountIds);
@@ -105,7 +105,7 @@ private class Rollup_Test {
 			new CountCalculator(), 
 			filter
 		);
-		System.assertEquals(1, request?.logic?.getFilters()?.size(), 'Wrong # of filters added'); 
+		System.assertEquals(1, request?.logic?.getCriteria()?.size(), 'Wrong # of filters added'); 
 	}
 
 	// **** HELPER **** //

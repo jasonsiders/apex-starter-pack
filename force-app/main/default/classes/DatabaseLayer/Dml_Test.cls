@@ -77,7 +77,7 @@ private class Dml_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doUndelete(testAccount);
 		Test.stopTest();
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(false, accounts?.isEmpty(), 'Account was not undeleted');
 		System.assertEquals(true, Dml.Undeleted.containsRecord(testAccount), 'Account was not added to History list');
@@ -93,7 +93,7 @@ private class Dml_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doDelete(testAccount);
 		Test.stopTest();
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(true, accounts?.isEmpty(), 'Account was not deleted');
 		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount), 'Account was not added to History list');
@@ -110,7 +110,7 @@ private class Dml_Test {
 		Test.stopTest();
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
 			.selectFields(Account.IsDeleted)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id))
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id))
 			.forUsage(Soql.Usage.ALL_ROWS);
 		testAccount = (Account) query.run()[0];
 		System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard Deleted');
@@ -150,7 +150,7 @@ private class Dml_Test {
 		Databaselayer.Dml.doInsert(testLead);
 		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
-			.whereFilters(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
+			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
 		String status = ((LeadStatus) statusQuery.run()[0]).MasterLabel;
 		Database.LeadConvert leadConvertObj = new Database.LeadConvert();
@@ -445,7 +445,7 @@ private class Dml_Test {
 
 		System.assertNotEquals(null, testAccount.Id, 'Account was not inserted');
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'No Accounts exist');
 	}
 
@@ -462,7 +462,7 @@ private class Dml_Test {
 
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
 			.selectFields(Account.Name)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		testAccount = (Account) query.run()[0];
 		System.assertEquals(newAccName, testAccount?.Name, 'Account was not updated');
 	}
@@ -476,7 +476,7 @@ private class Dml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Account was not upserted');
 	}
 
@@ -490,7 +490,7 @@ private class Dml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Record still exists');
 		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
 	}
@@ -506,7 +506,7 @@ private class Dml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Account was not undeleted');
 		System.assertEquals(
 			true,
@@ -526,7 +526,7 @@ private class Dml_Test {
 
 		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.whereFilters(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Account was not deleted');
 		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
 	}
@@ -543,7 +543,7 @@ private class Dml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
-			.whereFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+			.whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
 	}
 
@@ -573,7 +573,7 @@ private class Dml_Test {
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
-			.whereFilters(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+			.whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
 	}
 
