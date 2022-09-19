@@ -12,14 +12,14 @@ private class GarbageCollector_Test {
 		Apex_Class_Name__c = 'GarbageCollector_Test.TestExtension',
 		Batch_Size__c = 200,
 		SObjectType__c = 'Account'
-	);
+	); 
 
 	@IsTest
 	static void shouldGenerateScopeUsingSoql() {
 		Garbage_Collection_Job__mdt jobMdt = testSoqlJob;
 
 		Test.startTest();
-		GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt);
+		GarbageCollector batchJob = GarbageCollector.createFromMetadata(jobMdt);
 		Test.stopTest();
 
 		System.assertEquals(true, (batchJob instanceof GarbageCollectorSoql), 'Wrong extending type');
@@ -34,30 +34,14 @@ private class GarbageCollector_Test {
 
 	@IsTest
 	static void shouldGenerateScopeUsingApex() {
-		// Note: Salesforce does not allow Database.Batchable to be applied to inner types
-		// When this happens, an error is thrown during batch execution:
-		// `System.UnexpectedException - Error Processing Messages (System Code)`
-		// For test purposes, we just need to see that the correct type is generated from the MDT,
-		// And that the right records are returned via its start() method
 		Garbage_Collection_Job__mdt jobMdt = testApexJob;
-		// Note: Known issues for ApexTypeImplementor sometimes lead to incorrect query results when running all tests
-		// To avoid this, stub out the query for the known type
-		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
-		ApexTypeImplementor mockImplementor = (ApexTypeImplementor) SObjectUtils.setReadOnlyField(
-			new ApexTypeImplementor(),
-			ApexTypeImplementor.ClassName,
-			String.valueOf(GarbageCollector_Test.TestExtension.class)
-		);
-		GarbageCollector.InterfaceQuery?.toMock().setMockResults(new List<ApexTypeImplementor>{ mockImplementor });
 
 		Test.startTest();
-		GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt);
+		GarbageCollector batchJob = GarbageCollector.createFromMetadata(jobMdt);
 		Test.stopTest();
 
 		System.assertEquals(true, (batchJob instanceof GarbageCollector_Test.TestExtension), 'Wrong extending type');
 		GarbageCollector_Test.TestExtension scopedJob = (GarbageCollector_Test.TestExtension) batchJob;
-		// Use real SOQL to run the job
-		DatabaseLayer.setQueryEngine(new Soql.Factory());
 		System.assertEquals(200, scopedJob.start(null)?.size(), 'Wrong # of records returned');
 	}
 
@@ -66,7 +50,7 @@ private class GarbageCollector_Test {
 		Garbage_Collection_Job__mdt jobMdt = testSoqlJob;
 
 		Test.startTest();
-		GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt).runBatch();
+		GarbageCollector batchJob = GarbageCollector.createFromMetadata(jobMdt).runBatch();
 		Test.stopTest();
 
 		System.assertNotEquals(null, batchJob?.jobId, 'A job was not created');
@@ -82,8 +66,8 @@ private class GarbageCollector_Test {
 		Test.startTest();
 		Exception error;
 		try {
-			GarbageCollector.getInstance(jobMdt);
-		} catch (GarbageCollector.InvalidCriteriaException caughtError) {
+			GarbageCollector.createFromMetadata(jobMdt);
+		} catch (GarbageCollector.MetadataException caughtError) {
 			error = caughtError;
 		}
 		Test.stopTest();
@@ -99,8 +83,8 @@ private class GarbageCollector_Test {
 		Test.startTest();
 		Exception error;
 		try {
-			GarbageCollector.getInstance(jobMdt);
-		} catch (GarbageCollector.InvalidCriteriaException caughtError) {
+			GarbageCollector.createFromMetadata(jobMdt);
+		} catch (GarbageCollector.MetadataException caughtError) {
 			error = caughtError;
 		}
 		Test.stopTest();
@@ -112,7 +96,7 @@ private class GarbageCollector_Test {
 	static void shouldNotRunIfInvalidQuery() {
 		Garbage_Collection_Job__mdt jobMdt = testSoqlJob;
 		jobMdt.SOQL_Filter__c = 'THIS SHOULD NOT RUN'; // Leads to an invalid query
-		GarbageCollector instance = GarbageCollector.getInstance(jobMdt);
+		GarbageCollector instance = GarbageCollector.createFromMetadata(jobMdt);
 
 		Exception error;
 		try {

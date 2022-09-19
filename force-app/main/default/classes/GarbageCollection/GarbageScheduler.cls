@@ -14,7 +14,7 @@ public without sharing class GarbageScheduler implements System.Schedulable {
 	public void execute(System.SchedulableContext context) {
 		for (Garbage_Collection_Job__mdt jobMdt : this.activeJobs) {
 			if (FLEX_QUEUE_LIMIT > flexQueueSize) {
-				GarbageCollector batchJob = GarbageCollector.getInstance(jobMdt).runBatch();
+				GarbageCollector batchJob = GarbageCollector.createFromMetadata(jobMdt).runBatch();
 				this.logNewBatch(jobMdt, batchJob.jobId);
 				processedJobs.add(jobMdt);
 				flexQueueSize++;

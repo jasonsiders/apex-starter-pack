@@ -3,7 +3,7 @@
     <fullName>FilterMechanismRequired</fullName>
     <active>true</active>
     <description>Users must specify a mechanism to filter records to be deleted.
-Either the name of an apex class which implements the IGarbageCollector interface, or a SOQL Filter must be provided.</description>
+Either the name of an apex class which extends the GarbageCollector abstract class, or a SOQL Filter must be provided.</description>
     <errorConditionFormula>AND(
     ISBLANK(Apex_Class_Name__c),
     ISBLANK(SOQL_Filter__c)
