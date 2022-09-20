@@ -44,7 +44,7 @@ private class DataCategoryFilter_Test {
 			new DataCategoryFilter('Category1', DataCategoryFilter.ABOVE, 'Category2'),
 			new DataCategoryFilter('Category3', DataCategoryFilter.BELOW, 'Category4')
 		};
-		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
+		FilterLogic logic = new AndLogic().addCriteria(filters);
 		System.assertEquals(
 			'Category1 ABOVE Category2 AND Category3 BELOW Category4',
 			logic.toString(),
@@ -58,7 +58,7 @@ private class DataCategoryFilter_Test {
 			new DataCategoryFilter('Category1', DataCategoryFilter.ABOVE, 'Category2'),
 			new DataCategoryFilter('Category3', DataCategoryFilter.BELOW, 'Category4')
 		};
-		FilterLogic logic = new FilterLogic.OrLogic().addCriteria(filters);
+		FilterLogic logic = new OrLogic().addCriteria(filters);
 		System.assertEquals(
 			'Category1 ABOVE Category2 OR Category3 BELOW Category4',
 			logic.toString(),

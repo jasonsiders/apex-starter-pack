@@ -2,7 +2,7 @@
 private class FilterLogic_Test {
 	@IsTest
 	static void shouldDetermineAllMeetCriteria() {
-		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(testFilters);
+		FilterLogic logic = new AndLogic().addCriteria(testFilters);
 		// If all are true, will return true
 		Account testAccount = new Account(AnnualRevenue = 9999, BillingCountry = 'USA', OwnerId = UserInfo.getUserId());
 		System.assertEquals(
@@ -30,7 +30,7 @@ private class FilterLogic_Test {
 
 	@IsTest
 	static void shouldDetermineAnyMeetCriteria() {
-		FilterLogic logic = new FilterLogic.OrLogic().addCriteria(testFilters);
+		FilterLogic logic = new OrLogic().addCriteria(testFilters);
 		// If all fails, will return false
 		Account testAccount = new Account(
 			AnnualRevenue = 1,
@@ -62,7 +62,7 @@ private class FilterLogic_Test {
 
 	@IsTest
 	static void shouldGetSetFilters() {
-		FilterLogic logic = new FilterLogic.AndLogic();
+		FilterLogic logic = new AndLogic();
 		Filter myFilter = new Filter(Account.Name, Filter.EQUALS, 'Test');
 		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
 		// addCriteria() adds a new filter(s) to the list
@@ -79,9 +79,9 @@ private class FilterLogic_Test {
 	static void shouldConstructWithoutFilters() {
 		// Optionally, callers can generate a new instance of AndLogic/OrLogic without filters defined at the start
 		// This allows them to add them later on
-		FilterLogic logic = new FilterLogic.AndLogic();
+		FilterLogic logic = new AndLogic();
 		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
-		logic = new FilterLogic.OrLogic();
+		logic = new OrLogic();
 		System.assertEquals(0, logic.getCriteria()?.size(), 'Wrong # of filters');
 	}
 
@@ -99,7 +99,7 @@ private class FilterLogic_Test {
 			new Filter(Account.Name, Filter.NOT_IN_COLLECTION, testNames)
 		};
 
-		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
+		FilterLogic logic = new AndLogic().addCriteria(filters);
 		String template = 'Id IN ({1}, {2}) {0} Name NOT IN ({3}, {4})';
 		List<String> args = new List<String>{
 			'AND',
@@ -117,7 +117,7 @@ private class FilterLogic_Test {
 			'\''
 		};
 		System.assertEquals(String.format(template, args), logic.toString(), 'Unexpected AND logic output');
-		logic = new FilterLogic.OrLogic().addCriteria(filters);
+		logic = new OrLogic().addCriteria(filters);
 		args[0] = 'OR';
 		System.assertEquals(String.format(template, args), logic.toString(), 'Unexpected OR logic output');
 	}
@@ -126,13 +126,13 @@ private class FilterLogic_Test {
 	static void shouldBeNestable() {
 		// Callers can nest multiple FilterLogic instances to create the exact logical conditions they're looking for
 		// 1 AND (2 OR (3 AND 4))
-		FilterLogic innerAndLogic = new FilterLogic.AndLogic()
+		FilterLogic innerAndLogic = new AndLogic()
 			.addCriteria(new Filter(Account.BillingCountry, Filter.EQUALS, 'US'))
 			.addCriteria(new Filter(Account.NumberOfEmployees, Filter.GREATER_THAN, 100));
-		FilterLogic innerOrLogic = new FilterLogic.OrLogic()
+		FilterLogic innerOrLogic = new OrLogic()
 			.addCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
 			.addCriteria(innerAndLogic);
-		FilterLogic outerLogic = new FilterLogic.AndLogic()
+		FilterLogic outerLogic = new AndLogic()
 			.addCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
 			.addCriteria(innerOrLogic);
 

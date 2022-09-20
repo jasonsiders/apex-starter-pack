@@ -131,7 +131,7 @@ private class Soql_Test {
 			.groupBy(Lead.LeadSource)
 			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.GREATER_THAN, 100))
 			.havingCriteria(new SoqlAggregation.AggregateFilter(aggregation, Filter.LESS_THAN, 1000))
-			.setHavingLogic(FilterLogic.OrLogic.class);
+			.setHavingLogic(OrLogic.class);
 		Soql_Test.checkQueryString(
 			'SELECT LeadSource, COUNT(Name) FROM Lead GROUP BY LeadSource HAVING COUNT(Name) > 100 OR COUNT(Name) < 1000',
 			query
@@ -163,7 +163,7 @@ private class Soql_Test {
 			// But knowledge must be enabled in order to test this properly
 			.withExpression(
 				new SoqlWithClause.DataCategoryExpression(
-					new FilterLogic.OrLogic().addCriteria(
+					new OrLogic().addCriteria(
 						new List<DataCategoryFilter>{
 							new DataCategoryFilter('CategoryA__c', DataCategoryFilter.ABOVE, 'CategoryB__c'),
 							new DataCategoryFilter(
@@ -223,7 +223,7 @@ private class Soql_Test {
 			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
 			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
 			.whereCriteria(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
-			.setWhereLogic(FilterLogic.OrLogic.class);
+			.setWhereLogic(OrLogic.class);
 		Soql_Test.checkQueryString(
 			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 OR OwnerId = \'' + UserInfo.getUserId() + '\' OR CreatedDate < 2022-01-01T00:00:00Z',
 			query
@@ -236,10 +236,10 @@ private class Soql_Test {
 		Soql query = new Soql(Account.SObjectType)
 			.whereCriteria(new Filter(Account.AnnualRevenue, Filter.GREATER_THAN, 1000))
 			.whereCriteria(
-				new FilterLogic.AndLogic()
+				new AndLogic()
 					.addCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
 					.addCriteria(new Filter(Account.CreatedDate, Filter.LESS_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
-			).setWhereLogic(FilterLogic.OrLogic.class);
+			).setWhereLogic(OrLogic.class);
 		Soql_Test.checkQueryString(
 			'SELECT Id FROM Account WHERE AnnualRevenue > 1000 OR (OwnerId = \'' + UserInfo.getUserId() + '\' AND CreatedDate < 2022-01-01T00:00:00Z)',
 			query
@@ -343,7 +343,7 @@ private class Soql_Test {
 			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
 			.whereCriteria(new Filter(Account.CreatedDate, Filter.GREATER_THAN, DateTime.newInstanceGmt(2022, 1, 1)))
 			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()))
-			.setWhereLogic(FilterLogic.OrLogic.class)
+			.setWhereLogic(OrLogic.class)
 			.orderBy(new SoqlSort(new List<String>{ 'CreatedDate', 'AnnualRevenue' }, SoqlSort.Order.DESCENDING))
 			.setRowLimit(200)
 			.withExpression(new SoqlWithClause.ContextExpression(SoqlWithClause.Context.SECURITY_ENFORCED))

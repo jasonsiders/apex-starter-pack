@@ -1,4 +1,4 @@
-public class FieldRef implements Mappable {
+public class FieldRef implements Mappable, IProperty {
 	public String soqlReference { get; private set; }
 	public SObjectRef rootSObjectType { get; private set; }
 	public List<FieldRef> relationshipFields = new List<FieldRef>();
@@ -46,6 +46,11 @@ public class FieldRef implements Mappable {
 			record = relationshipField?.getLookupValue(record);
 		}
 		return record?.get(this.destinationField);
+	}
+
+	public Object getValue(Object obj) {
+		SObject record = (SObject) obj;
+		return this.getValue(record); 
 	}
 
 	public SObject getLookupValue(SObject record) {

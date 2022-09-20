@@ -50,35 +50,4 @@ public abstract class FilterLogic implements ICriteria {
 		this.criterion = criterion;
 		return this;
 	}
-
-	// **** IMPLEMENTATIONS **** //
-	public virtual class AndLogic extends FilterLogic {
-		public AndLogic() {
-			this.token = 'AND';
-		}
-
-		public override Boolean meetsCriteria(Object item) {
-			for (ICriteria criteria : this.criterion) {
-				if (criteria.meetsCriteria(item) == false) {
-					return false;
-				}
-			}
-			return true;
-		}
-	}
-
-	public virtual class OrLogic extends FilterLogic {
-		public OrLogic() {
-			this.token = 'OR';
-		}
-
-		public override Boolean meetsCriteria(Object item) {
-			for (ICriteria criteria : this.criterion) {
-				if (criteria.meetsCriteria(item) == true) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
 }

@@ -38,7 +38,7 @@ public class RollupMetadataHelper {
 		SObjectField targetField = SchemaUtils.getSObjectField(parentSObjectType, rollupMdt?.Target_Field__c);
 		ChildRelationship childRelationship = SchemaUtils.getChildRelationship(relationshipField);
 		List<ICriteria> filters = this.getCriteria(rollupMdt?.Rollup_Filters__r);
-		FilterLogic logic = new FilterLogic.AndLogic().addCriteria(filters);
+		FilterLogic logic = new AndLogic().addCriteria(filters);
 		Rollup.Request req = new Rollup.Request(targetField, this.getCalculator(rollupMdt), logic);
 		rollup?.addRelationship(new Rollup.Relationship(childRelationship).addRequest(req));
 	}

@@ -34,33 +34,24 @@ public virtual class Filter implements ICriteria {
 	};
 
 	@TestVisible
-	protected final String fieldName { get; private set; }
-	@TestVisible
-	protected final List<String> relationships { get; private set; }
+	protected final IProperty property { get; private set; }
 	@TestVisible
 	protected final Operator operator { get; private set; }
 	@TestVisible
 	protected final Object value { get; private set; }
 
-	public Filter(String fieldName, Type operatorType, Object value) {
-		List<String> fieldParts = fieldName?.split('\\.');
-		if (fieldParts != null) {
-			Integer fieldNameIndex = fieldParts?.size() - 1;
-			this.fieldName = fieldParts[fieldNameIndex];
-			fieldParts.remove(fieldNameIndex);
-			this.relationships = fieldParts;
-		}
+	public Filter(IProperty reference, Type operatorType, Object value) {
+		this.property = reference;
 		this.operator = (Operator) operatorType?.newInstance();
 		this.value = value;
-		this.validate();
 	}
-
-	public Filter(FieldRef fieldReference, Type operatorType, Object value) {
-		this(fieldReference?.toString(), operatorType, value);
+	
+	public Filter(String propertyName, Type operatorType, Object value) {
+		this(new PropertyRef(propertyName), operatorType, value);
 	}
 
 	public Filter(SObjectField field, Type operatorType, Object value) {
-		this(String.valueOf(field), operatorType, value);
+		this(new FieldRef(field), operatorType, value);
 	}
 
 	public Filter(Filter__mdt filterRecord) {
@@ -73,34 +64,22 @@ public virtual class Filter implements ICriteria {
 
 	public Boolean meetsCriteria(SObject record) {
 		// Returns TRUE if the given record meets the Filter's criteria
-		SObject target = record;
-		for (String relationship : this.relationships) {
-			target = target.getSObject(relationship);
-		}
-		Object recordValue = target.get(this.fieldName);
+		Object recordValue = this.property.getValue(record); 
 		return this.operator.meetsCriteria(recordValue, this.value);
 	}
 
 	public virtual Boolean meetsCriteria(Object item) {
 		// Returns TRUE if the given object meets the Filter's criteria
-		String serialized = JSON.serialize(item);
-		Map<String, Object> deserialized = (Map<String, Object>) JSON.deserializeUntyped(serialized);
-		Object value = deserialized.get(this.fieldName);
+		Object value = this.property?.getValue(item); 
 		return this.operator.meetsCriteria(value, this.value);
 	}
 
 	public override String toString() {
-		return this.getFieldName() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
+		return this.property?.toString() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
 	}
 
 	public Set<String> getFieldNames() {
-		return new Set<String>{this.getFieldName()};
-	}
-
-	private String getFieldName() {
-		List<String> fieldParts = this.relationships?.clone();
-		fieldParts?.add(this.fieldName);
-		return String.join(fieldParts, '.');
+		return new Set<String>{this.property?.toString()};
 	}
 
 	private String formatValue() {
@@ -194,14 +173,6 @@ public virtual class Filter implements ICriteria {
 			results.add(this.processDateTime(item));
 		}
 		return '(' + String.join(results, ', ') + ')';
-	}
-
-	private void validate() {
-		if (this.fieldName == null || this.operator == null) {
-			Exception error = new FilterException('Missing required fields: ' + JSON.serialize(this));
-			Logger.error(Filter.class, error);
-			throw error;
-		}
 	}
 
 	// **** STATIC **** //
@@ -417,7 +388,7 @@ public virtual class Filter implements ICriteria {
 
 	public class PrimitiveFilter extends Filter {
 		// Used to compare Primitive types (Integer, String, etc)
-		// Since they do not have a fieldName, will always compare the item itself
+		// Since they do not have a property, will always compare the item itself
 		public PrimitiveFilter(Type operatorType, Object value) {
 			super('', operatorType, value);
 		}

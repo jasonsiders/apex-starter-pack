@@ -467,7 +467,7 @@ private class Filter_Test {
 		Opportunity testOpp = new Opportunity(Name = 'Test Opportunity');
 		Filter testFilter = new Filter(Opportunity.Name, Filter.GREATER_THAN, 'Some text');
 		System.assertEquals(false, testFilter?.meetsCriteria(testOpp), testOpp.Name + ' > "Some text"');
-	}
+	} 
 
 	@IsTest
 	static void shouldEvaluateLessThanNumber() {
@@ -772,15 +772,13 @@ private class Filter_Test {
 			Value__c = null
 		);
 		Filter filter = new Filter(filterMdt);
-		System.assertEquals(String.valueOf(Opportunity.IsClosed), filter.fieldName, 'Wrong field name');
-		System.assertEquals(0, filter?.relationships?.size(), 'Wrong # of relationships');
+		System.assertEquals(String.valueOf(Opportunity.IsClosed), filter.property?.toString(), 'Wrong property name');
 		System.assertEquals('=', filter?.operator?.getToken(), 'Wrong operator');
 		System.assertEquals(null, filter?.value, 'Wrong value');
 		// Should allow for multi-level filtering
 		filterMdt.SObjectField__c = 'Owner.Profile.Name';
 		filter = new Filter(filterMdt);
-		System.assertEquals('Name', filter?.fieldName, 'Wrong field name');
-		System.assertEquals(new List<String>{ 'Owner', 'Profile' }, filter?.relationships, 'Wrong relationships');
+		System.assertEquals(filterMdt.SObjectField__c, filter?.property?.toString(), 'Wrong property name');
 	}
 
 	@IsTest
@@ -865,27 +863,6 @@ private class Filter_Test {
 		);
 		Filter filter = new Filter(filterMdt);
 		System.assertEquals(UserInfo.getUserId(), filter?.value, 'Wrong value');
-	}
-
-	@IsTest
-	static void shouldThrowErrorIfInvalidArgsProvided() {
-		// Null field
-		Exception caughtError;
-		try {
-			String fieldName;
-			Filter filter = new Filter(fieldName, Filter.EQUALS, 1);
-		} catch (Filter.FilterException thrownError) {
-			caughtError = thrownError;
-		}
-		System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
-		// Null operator
-		caughtError = null;
-		try {
-			Filter filter = new Filter('OwnerId', null, 1);
-		} catch (Filter.FilterException thrownError) {
-			caughtError = thrownError;
-		}
-		System.assertNotEquals(null, caughtError, 'An error was not thrown/caught');
 	}
 
 	@IsTest

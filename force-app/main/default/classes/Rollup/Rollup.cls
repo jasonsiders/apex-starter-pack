@@ -116,11 +116,11 @@ public without sharing class Rollup {
 		}
 
 		public Request(SObjectField targetField, Calculator calculator, Filter filter) {
-			this(targetField, calculator, new FilterLogic.AndLogic().addCriteria(filter));
+			this(targetField, calculator, new AndLogic().addCriteria(filter));
 		}
 
 		public Request(SObjectField targetField, Calculator calculator) {
-			this(targetField, calculator, new FilterLogic.AndLogic());
+			this(targetField, calculator, new AndLogic());
 		}
 
 		public Request addCriteria(ICriteria criteria) {

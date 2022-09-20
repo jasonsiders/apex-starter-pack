@@ -283,13 +283,13 @@ System.debug(query);
 // > "SELECT Id FROM Account WHERE AnnualRevenue > 1000"
 ```
 
-`ICriteria` has two primary implementations: `Filter` and `FilterLogic`.
+`ICriteria` has two implementations: `Filter` and `FilterLogic`.
 
 **The `Filter` class** is used to produce a single element of a SOQL `WHERE` clause.
 
 Developers can construct a `Filter` object with the following parameters:
 
--   `field` (`SObjectField`, `FieldRef`, `String`): The left-hand side of the `WHERE` statement.
+-   `property` (`SObjectField`, `IProperty`, `String`): The left-hand side of the `WHERE` statement.
 -   `operator` (`Type`): The type of `Filter.Operator` to use as the operand. You can find a map of operator values and their corresponding symbols below.
 -   `value` (`Object`): The expected result
 
@@ -332,12 +332,12 @@ AND(
 
 ```
 
-The class has two inner implementations: `FilterLogic.AndLogic` and `FilterLogic.OrLogic`.
+The class has two inner implementations: `AndLogic` and `OrLogic`.
 
 `AndLogic` is used to create a where clause where all conditions must be true:
 
 ```
-FilterLogic logic = new FilterLogic.AndLogic()
+FilterLogic logic = new AndLogic()
     .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,
@@ -354,7 +354,7 @@ System.debug(logic);
 `OrLogic` is used to create a `WHERE` clause where only one condition must be true:
 
 ```
-FilterLogic logic = new FilterLogic.OrLogic()
+FilterLogic logic = new OrLogic()
     .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,
@@ -376,7 +376,7 @@ Filter innerFilter = new Filter(
     Filter.EQUALS,
     'US'
 );
-FilterLogic innerLogic = new FilterLogic.OrLogic()
+FilterLogic innerLogic = new OrLogic()
     .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_THAN,
@@ -386,7 +386,7 @@ FilterLogic innerLogic = new FilterLogic.OrLogic()
         Filter.GREATER_THAN,
         100
     ));
-FilterLogic logic = new FilterLogic.AndLogic()
+FilterLogic logic = new AndLogic()
     .addCriteria(innerFilter)
     .addCriteria(innerLogic);
 System.debug(logic);
@@ -409,7 +409,7 @@ System.assert(true, filter.meetsCriteria(acc));
 ```
 // Evaluate a complex FilterLogic object
 Account acc = new Account(AnnualRevenue = 1000, Name = 'Test Acc');
-FilterLogic logic = new FilterLogic.AndLogic()
+FilterLogic logic = new AndLogic()
     .addCriteria(new Filter(
         Account.AnnualRevenue,
         Filter.GREATER_OR_EQUAL,

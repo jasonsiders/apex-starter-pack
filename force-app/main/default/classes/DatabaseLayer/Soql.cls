@@ -4,9 +4,9 @@ public inherited sharing virtual class Soql {
 	protected SObjectRef fromSObject;
 	protected Scope scope;
 	protected SoqlWithClause withExpression;
-	protected FilterLogic whereCriteria = new FilterLogic.AndLogic();
+	protected FilterLogic whereCriteria = new AndLogic();
 	protected List<String> groupByClauses = new List<String>();
-	protected FilterLogic havingCriteria = new FilterLogic.AndLogic();
+	protected FilterLogic havingCriteria = new AndLogic();
 	protected SoqlSort orderByClause;
 	protected Integer rowLimit;
 	protected Integer rowOffset;
