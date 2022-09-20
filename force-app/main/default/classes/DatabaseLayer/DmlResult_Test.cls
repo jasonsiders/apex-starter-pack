@@ -122,8 +122,8 @@ private class DmlResult_Test {
 		DmlResult.logErrors(new List<DmlResult>{ mockResult });
 		Test.stopTest();
 
-		System.assertEquals(1, Dml.Published.getAll()?.size(), 'Wrong # of published events');
-		Log_Event__e logEvent = (Log_Event__e) Dml.Published.getAll()[0];
+		System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Wrong # of published events');
+		Log_Event__e logEvent = (Log_Event__e) Dml.Published?.getAll()[0];
 		System.assertEquals(JSON.serializePretty(mockErrors), logEvent.Message__c, 'Wrong log message');
 	}
 

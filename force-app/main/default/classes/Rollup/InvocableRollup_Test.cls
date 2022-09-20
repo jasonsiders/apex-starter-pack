@@ -21,7 +21,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 	}
 
@@ -48,7 +48,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 		System.assertEquals(
 			Decimal.valueOf(numOpps) - 1,
@@ -81,7 +81,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 		System.assertEquals(
 			Decimal.valueOf(numOpps) - 1,
@@ -111,7 +111,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 	}
 
@@ -138,7 +138,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 		System.assertEquals(
 			Decimal.valueOf(numOpps) - 1,
@@ -171,7 +171,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 		System.assertEquals(
 			Decimal.valueOf(numOpps) - 1,
@@ -202,7 +202,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ input });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not updated');
 		System.assertEquals(Decimal.valueOf(numOpps), account.AnnualRevenue, 'Wrong COUNT of Opportunities');
 	}
 
@@ -232,7 +232,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(inputs);
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(testAccount), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(testAccount), 'Account was not updated');
 		System.assertEquals(
 			Decimal.valueOf(numOpps),
 			testAccount.AnnualRevenue,
@@ -272,7 +272,7 @@ private class InvocableRollup_Test {
 		InvocableRollup.invoke(new List<InvocableRollup.Input>{ childInput, parentInput });
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Updated.containsRecord(testAccount), 'Account was not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(testAccount), 'Account was not updated');
 		System.assertEquals(
 			Decimal.valueOf(numOpps),
 			testAccount.AnnualRevenue,

@@ -17,7 +17,7 @@ private class Dml_Test {
 		Test.startTest();
 		DmlResult dmlResult = Databaselayer.Dml.doInsert(account);
 		Test.stopTest();
-		System.assertEquals(true, Dml.Inserted.containsRecord(account), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Inserted?.containsRecord(account), 'Account was not added to History list');
 		System.assertNotEquals(null, account?.Id, 'Account was not inserted');
 		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
@@ -32,7 +32,7 @@ private class Dml_Test {
 		Test.startTest();
 		DmlResult dmlResult = Databaselayer.Dml.doUpdate(account);
 		Test.stopTest();
-		System.assertEquals(true, Dml.Updated.containsRecord(account), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not added to History list');
 		System.assertEquals(newName, account.Name, 'Account was not updated');
 		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
@@ -47,7 +47,7 @@ private class Dml_Test {
 		final String newName = 'Some other name';
 		account.Name = newName;
 		DmlResult dmlResult = Databaselayer.Dml.doUpsert(account);
-		System.assertEquals(true, Dml.Upserted.containsRecord(account), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Upserted?.containsRecord(account), 'Account was not added to History list');
 		System.assertEquals(newName, account.Name, 'Account was not updated');
 		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
@@ -61,7 +61,7 @@ private class Dml_Test {
 		System.assertNotEquals(null, lead.Id, 'Lead was not inserted');
 		final String newName = 'Some other name';
 		testLead.LastName = newName;
-		System.assertEquals(true, Dml.Upserted.containsRecord(testLead), 'Lead was not added to History list');
+		System.assertEquals(true, Dml.Upserted?.containsRecord(testLead), 'Lead was not added to History list');
 		DmlResult dmlResult = Databaselayer.Dml.doUpsert(testLead, Lead.Id);
 		System.assertEquals(newName, testLead.LastName, 'Lead was not updated');
 		System.assertEquals(testLead?.Id, dmlResult.recordId, 'Invalid DML Result');
@@ -80,7 +80,7 @@ private class Dml_Test {
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(false, accounts?.isEmpty(), 'Account was not undeleted');
-		System.assertEquals(true, Dml.Undeleted.containsRecord(testAccount), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Undeleted?.containsRecord(testAccount), 'Account was not added to History list');
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
@@ -96,7 +96,7 @@ private class Dml_Test {
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(true, accounts?.isEmpty(), 'Account was not deleted');
-		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount), 'Account was not added to History list');
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
@@ -114,7 +114,7 @@ private class Dml_Test {
 			.forUsage(Soql.Usage.ALL_ROWS);
 		testAccount = (Account) query.run()[0];
 		System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard Deleted');
-		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount), 'Account was not added to History list');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount), 'Account was not added to History list');
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
@@ -134,7 +134,7 @@ private class Dml_Test {
 		Test.getEventBus().deliver();
 		// Unlike "normal" DML, platform events are not given an ID after insert/publish
 		System.assertEquals(null, event.ReplayId, 'Event was not inserted');
-		System.assertEquals(true, Dml.Published.containsRecord(event), 'Event was not added to History list');
+		System.assertEquals(true, Dml.Published?.containsRecord(event), 'Event was not added to History list');
 		System.assertEquals(true, result.isSuccess, 'Event did not publish. Errors: ' + result.errors);
 	}
 
@@ -417,7 +417,7 @@ private class Dml_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doPublish(event);
 
 		Test.startTest();
-		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
+		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published?.getAll();
 		Test.stopTest();
 
 		System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');
@@ -432,7 +432,7 @@ private class Dml_Test {
 		Databaselayer.Dml.doDml(Dml.Operation.DO_PUBLISH, platformEvent);
 		Test.stopTest();
 
-		System.assertEquals(1, Dml.Published.getAll()?.size(), 'Event was not Published');
+		System.assertEquals(1, Dml.Published?.getAll()?.size(), 'Event was not Published');
 	}
 
 	@IsTest
@@ -492,7 +492,7 @@ private class Dml_Test {
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Record still exists');
-		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
 	}
 
 	@IsTest
@@ -510,7 +510,7 @@ private class Dml_Test {
 		System.assertEquals(false, query.run().isEmpty(), 'Account was not undeleted');
 		System.assertEquals(
 			true,
-			Dml.Undeleted.containsRecord(testAccount.Id),
+			Dml.Undeleted?.containsRecord(testAccount.Id),
 			'Account was not added to Dml.Undeleted'
 		);
 	}
@@ -528,7 +528,7 @@ private class Dml_Test {
 		Soql query = Databaselayer.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Account was not deleted');
-		System.assertEquals(true, Dml.Deleted.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
 	}
 
 	@IsTest
@@ -618,11 +618,11 @@ private class Dml_Test {
 		Databaselayer.Dml.doInsert(accounts);
 		Test.stopTest();
 
-		System.assertEquals(accounts, Dml.Inserted.getRecords(Account.SObjectType), 'Accounts were not Inserted');
-		System.assertEquals(null, Dml.Updated.getRecords(Account.SObjectType), 'Accounts were Updated');
-		System.assertEquals(null, Dml.Upserted.getRecords(Account.SObjectType), 'Accounts were Upserted');
-		System.assertEquals(null, Dml.Deleted.getRecords(Account.SObjectType), 'Accounts were Deleted');
-		System.assertEquals(null, Dml.Undeleted.getRecords(Account.SObjectType), 'Accounts were Undeleted');
+		System.assertEquals(accounts, Dml.Inserted?.getRecords(Account.SObjectType), 'Accounts were not Inserted');
+		System.assertEquals(null, Dml.Updated?.getRecords(Account.SObjectType), 'Accounts were Updated');
+		System.assertEquals(null, Dml.Upserted?.getRecords(Account.SObjectType), 'Accounts were Upserted');
+		System.assertEquals(null, Dml.Deleted?.getRecords(Account.SObjectType), 'Accounts were Deleted');
+		System.assertEquals(null, Dml.Undeleted?.getRecords(Account.SObjectType), 'Accounts were Undeleted');
 		System.assertEquals(null, Dml.Published?.getRecords(Account.SObjectType), 'Accounts were Published');
 	}
 
@@ -634,7 +634,7 @@ private class Dml_Test {
 		Databaselayer.Dml.doInsert(contact);
 
 		Test.startTest();
-		List<SObject> insertedRecords = Dml.Inserted.getAll();
+		List<SObject> insertedRecords = Dml.Inserted?.getAll();
 		Test.stopTest();
 
 		System.assertEquals(2, insertedRecords?.size(), 'Wrong # of Inserted records');

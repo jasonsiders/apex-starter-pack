@@ -1,12 +1,12 @@
 public virtual inherited sharing class Dml {
-	public static History Inserted = new History();
-	public static History Updated = new History();
-	public static History Upserted = new History();
-	public static History Deleted = new History();
-	public static History Undeleted = new History();
-	public static History Published = new History().setAlternateIdField('ReplayId');
-	public static History Converted = new History();
-
+	@TestVisible static History Inserted = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Updated = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Upserted = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Deleted = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Undeleted = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Converted = Test.isRunningTest() ? new History() : null; 
+	@TestVisible static History Published = Test.isRunningTest() ? new History()?.setAlternateIdField('ReplayId') : null; 
+	
 	// Operation-based methods
 	public List<DmlResult> doDml(
 		Operation operation,
@@ -71,7 +71,7 @@ public virtual inherited sharing class Dml {
 
 	// Publish Methods
 	public virtual List<DmlResult> doPublish(List<SObject> events) {
-		Dml.Published.add(events);
+		Dml.Published?.add(events);
 		List<Database.SaveResult> results = EventBus.publish(events);
 		return DmlResult.wrap(results);
 	}
@@ -83,7 +83,7 @@ public virtual inherited sharing class Dml {
 	// Insert Methods
 	public virtual List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
 		List<Database.SaveResult> results = Database.insert(records, allOrNone);
-		Dml.Inserted.add(records);
+		Dml.Inserted?.add(records);
 		return DmlResult.wrap(results);
 	}
 
@@ -101,7 +101,7 @@ public virtual inherited sharing class Dml {
 
 	// Update Methods
 	public virtual List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
-		Dml.Updated.add(records);
+		Dml.Updated?.add(records);
 		List<Database.SaveResult> results = Database.update(records, allOrNone);
 		return DmlResult.wrap(results);
 	}
@@ -125,7 +125,7 @@ public virtual inherited sharing class Dml {
 		List<Database.UpsertResult> results = (externalIdField != null)
 			? Database.upsert(records, externalIdField, allOrNone)
 			: Database.upsert(records, allOrNone);
-		Dml.Upserted.add(records);
+		Dml.Upserted?.add(records);
 		return DmlResult.wrap(results);
 	}
 
@@ -159,7 +159,7 @@ public virtual inherited sharing class Dml {
 
 	// Delete Methods
 	public virtual List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
-		Dml.Deleted.add(records);
+		Dml.Deleted?.add(records);
 		List<Database.DeleteResult> results = Database.delete(records, allOrNone);
 		return DmlResult.wrap(results);
 	}
@@ -178,7 +178,7 @@ public virtual inherited sharing class Dml {
 
 	// Hard Delete Methods
 	public virtual List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
-		Dml.Deleted.add(records);
+		Dml.Deleted?.add(records);
 		List<Database.DeleteResult> results = Database.delete(records, allOrNone);
 		Database.emptyRecycleBin(records);
 		return DmlResult.wrap(results);
@@ -198,7 +198,7 @@ public virtual inherited sharing class Dml {
 
 	// Undelete Methods
 	public virtual List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
-		Dml.Undeleted.add(records);
+		Dml.Undeleted?.add(records);
 		List<Database.UndeleteResult> results = Database.undelete(records, allOrNone);
 		return DmlResult.wrap(results);
 	}
@@ -223,7 +223,7 @@ public virtual inherited sharing class Dml {
 			results.add(result);
 			if (result?.isSuccess == true) {
 				Lead lead = new Lead(Id = result.getLeadId());
-				Dml.Converted.add(new List<Lead>{ lead });
+				Dml.Converted?.add(new List<Lead>{ lead });
 			}
 		}
 		return results;
@@ -244,7 +244,8 @@ public virtual inherited sharing class Dml {
 		DO_HARD_DELETE
 	}
 
-	public class History {
+	@TestVisible
+	private class History {
 		// A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
 		private Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
 		private Map<Id, SObject> recordsById = new Map<Id, SObject>();

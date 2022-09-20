@@ -27,7 +27,7 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertNotEquals(null, account.Id, 'Id was not added');
-		System.assertEquals(true, Dml.Inserted.containsRecord(account.Id), 'Not inserted');
+		System.assertEquals(true, Dml.Inserted?.containsRecord(account.Id), 'Not inserted');
 		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
 		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -47,10 +47,10 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertEquals(newName, testAccount.Name, 'Wrong name value');
-		System.assertEquals(true, Dml.Updated.containsRecord(testAccount.Id), 'Not updated');
+		System.assertEquals(true, Dml.Updated?.containsRecord(testAccount.Id), 'Not updated');
 		System.assertEquals(
 			newName,
-			Dml.Updated.getRecord(testAccount).get(Account.Name),
+			Dml.Updated?.getRecord(testAccount).get(Account.Name),
 			'Name was not updated in the "updated" list'
 		);
 		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
@@ -65,7 +65,7 @@ private class DmlMock_Test {
 		DmlMock dmlMock = (DmlMock) DatabaseLayer.setDmlEngine(new DmlMock());
 		Databaselayer.Dml.doUpsert(testAccount);
 		System.assertNotEquals(null, testAccount.Id, 'Id was not added');
-		System.assertEquals(true, Dml.Upserted.containsRecord(testAccount.Id), 'Not upserted');
+		System.assertEquals(true, Dml.Upserted?.containsRecord(testAccount.Id), 'Not upserted');
 		final String newName = 'Some other name';
 		testAccount.Name = newName;
 
@@ -76,7 +76,7 @@ private class DmlMock_Test {
 		System.assertEquals(newName, testAccount.Name, 'Wrong name value');
 		System.assertEquals(
 			newName,
-			Dml.Upserted.getRecord(testAccount)?.get(Account.Name),
+			Dml.Upserted?.getRecord(testAccount)?.get(Account.Name),
 			'Name was not updated in the "upserted" list'
 		);
 		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
@@ -92,7 +92,7 @@ private class DmlMock_Test {
 		Account testAccount = new Account(Name = 'Test Account');
 		Databaselayer.Dml.doUpsert(testAccount, Account.Name);
 		System.assertNotEquals(null, testAccount.Id, 'Id was not added');
-		System.assertEquals(true, Dml.Upserted.containsRecord(testAccount.Id), 'Not upserted');
+		System.assertEquals(true, Dml.Upserted?.containsRecord(testAccount.Id), 'Not upserted');
 		final String newName = 'Some other name';
 		testAccount.Name = newName;
 
@@ -103,7 +103,7 @@ private class DmlMock_Test {
 		System.assertEquals(newName, testAccount.Name, 'Wrong name value');
 		System.assertEquals(
 			newName,
-			Dml.Upserted.getRecord(testAccount).get(Account.Name),
+			Dml.Upserted?.getRecord(testAccount).get(Account.Name),
 			'Name was not updated in the "upserted" list'
 		);
 		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
@@ -123,7 +123,7 @@ private class DmlMock_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doUndelete(account);
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Undeleted.containsRecord(account.Id), 'Account was not undeleted');
+		System.assertEquals(true, Dml.Undeleted?.containsRecord(account.Id), 'Account was not undeleted');
 		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
 		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -140,7 +140,7 @@ private class DmlMock_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doDelete(account);
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Deleted.containsRecord(account.Id), 'Account was not deleted');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(account.Id), 'Account was not deleted');
 		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
 		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -157,7 +157,7 @@ private class DmlMock_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doHardDelete(account);
 		Test.stopTest();
 
-		System.assertEquals(true, Dml.Deleted.containsRecord(account.Id), 'Account was not deleted');
+		System.assertEquals(true, Dml.Deleted?.containsRecord(account.Id), 'Account was not deleted');
 		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
 		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
@@ -173,7 +173,7 @@ private class DmlMock_Test {
 		DmlResult dmlResult = Databaselayer.Dml.doPublish(event);
 		Test.stopTest();
 
-		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getRecords(Log_Event__e.SObjectType);
+		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published?.getRecords(Log_Event__e.SObjectType);
 		System.assertEquals(1, logEvents?.size(), 'Wrong # of published events');
 		System.assertEquals(null, logEvents[0].Id, 'Platform Event was assigned an Id, but should not have');
 		System.assertEquals(event.Message__c, logEvents[0].Message__c, 'Wrong message');
@@ -266,7 +266,7 @@ private class DmlMock_Test {
 		Databaselayer.Dml.doPublish(event);
 
 		Test.startTest();
-		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published.getAll();
+		List<Log_Event__e> logEvents = (List<Log_Event__e>) Dml.Published?.getAll();
 		Test.stopTest();
 
 		System.assertEquals(1, logEvents?.size(), 'Wrong # of publishedEvents');
@@ -284,7 +284,7 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertNotEquals(null, testAccount.Id, 'Account was not mock inserted');
-		System.assertEquals(true, Dml.Inserted.containsRecord(testAccount), 'Account was not added to Inserted');
+		System.assertEquals(true, Dml.Inserted?.containsRecord(testAccount), 'Account was not added to Inserted');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML Statements');
 	}
 

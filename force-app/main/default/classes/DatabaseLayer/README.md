@@ -133,7 +133,7 @@ System.debug(acc.Id);
 
 ### The `Dml.History` Class
 
-Both `Dml` and `DmlMock` utilize a series of public `Dml.History` objects to record SObjects that are submitted for DML Operations during a transaction:
+In `@IsTest` context, both `Dml` and `DmlMock` utilize a series of public `Dml.History` objects to record SObjects that are submitted for DML Operations during a transaction:
 
 -   `Inserted`: Stores records that were updated.
 -   `Updated`: Stores records that were updated.
@@ -150,7 +150,7 @@ Both `Dml` and `DmlMock` utilize a series of public `Dml.History` objects to rec
 -   `getAll()`: Returns all records stored in the history object.
 -   `clear()`: Reset the history object.
 
-> **Note:** In `@IsTest` context, you can clear all history objects via the `DmlMock.resetHistory()` static method.
+> **Note:** You can clear all history objects via the `DmlMock.resetHistory()` static method.
 
 These `Dml.History` objects can be especially helpful for testing methods which insert or transform other objects not currently in memory:
 
@@ -166,7 +166,7 @@ static void shouldInsertOpportunities() {
     AccountDomain.createNewOpportunity(acc);
     Test.stopTest();
 
-    List<Opportunity> newOpps = DatabaseLayer.Dml.Inserted.getRecords(Opportunity.SObjectType);
+    List<Opportunity> newOpps = DatabaseLayer.Dml.Inserted?.getRecords(Opportunity.SObjectType);
     System.assertEquals(1, newOpps?.size(), 'Wrong # of Opps');
     System.assertEquals(acc.Id, newOpps[0].AccountId, 'Wrong AccountId');
 }
