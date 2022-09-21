@@ -8,7 +8,8 @@ private class AsyncDml_Test {
 		}
 
 		Test.startTest();
-		AsyncDml.getInstance().addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, testAccounts)).runJob();
+		AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, testAccounts));
+		AsyncDml.runJob();
 		Test.stopTest();
 
 		List<Account> inserted = (List<Account>) Databaselayer.Soql.newQuery(Account.SObjectType).run();
@@ -35,7 +36,8 @@ private class AsyncDml_Test {
 		leadConvertObj.setConvertedStatus(status);
 
 		Test.startTest();
-		AsyncDml.getInstance().addRequest(new AsyncDml.Conversion(leadConvertObj)).runJob();
+		AsyncDml.addRequest(new AsyncDml.Conversion(leadConvertObj));
+		AsyncDml.runJob();
 		Test.stopTest();
 
 		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
@@ -98,7 +100,8 @@ private class AsyncDml_Test {
 		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, acc).skipTriggers();
 
 		Test.startTest();
-		AsyncDml.getInstance().addRequest(request).runJob();
+		AsyncDml.addRequest(request);
+		AsyncDml.runJob();
 		Test.stopTest();
 
 		// Note: We can't actually assert that the triggers were skipped, without having a trigger on a specific object
@@ -108,11 +111,11 @@ private class AsyncDml_Test {
 	@IsTest
 	static void shouldInsertSynchronouslyIfLimitsReached() {
 		Account account = new Account(Name = 'Test Account');
-		AsyncDml.getInstance().addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, account));
+		AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, account));
 		LimitUtils.instance = new LimitsMock();
 
 		Test.startTest();
-		Id jobId = AsyncDml.getInstance().runJob();
+		Id jobId = AsyncDml.runJob();
 		Test.stopTest();
 
 		System.assertEquals(null, jobId, 'Job was processed asynchronously');
@@ -129,10 +132,10 @@ private class AsyncDml_Test {
 		Account account = new Account(Name = 'Test Account');
 		AsyncDml.Request req = new AsyncDml.Request(Dml.Operation.DO_UPDATE, account, true); 
 		// Can't update an Account with no Id - this will return a System.DmlException
-		AsyncDml instance = AsyncDml.getInstance().addRequest(req);
+		AsyncDml.addRequest(req);
 
 		Test.startTest();
-		Id jobId = instance.runJob();
+		Id jobId = AsyncDml.runJob();
 		Test.stopTest();
 
 		System.assertNotEquals(null, jobId, 'Job did not run'); 

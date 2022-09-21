@@ -110,6 +110,20 @@ Each DML operation is represented by an object, `AsyncDml.Request`. The Request 
 -   `externalIdField` (`SObjectField`): Field which acts as a key for upsert operations.
 -   `allOrNone` (`Boolean`): Determines whether the operation allows partial success. If you specify `false` for this parameter and a record fails, the remainder of the DML operation can still succeed.
 
+You can add `AsyncDml.Request` object(s) for processing via the static `addRequest()` method:
+
+```
+AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT), accounts);
+AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_UPDATE, contacts, false));
+AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_UPSERT, leads, Lead.Email));
+```
+
+Once requests have been loaded, call the `runJob()` static method to launch a Queueable that will process them:
+
+```
+Id jobId = AsyncDml.runJob();
+```
+
 ### **Mocking DML**
 
 The `DmlMock` class is responsible for mocking DML operations. It is only visible in the `@IsTest` context.

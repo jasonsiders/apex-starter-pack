@@ -1,43 +1,39 @@
 public virtual inherited sharing class AsyncDml implements System.Queueable {
+	static AsyncDml Instance = new AsyncDml();
 	List<Request> requests = new List<Request>();
-	static AsyncDml instance;
 
 	@TestVisible
 	private AsyncDml() {
 		// Note: Singleton employed here to bulkify async requests as much as possible
 	}
 
-	public static AsyncDml getInstance() {
-		instance = (instance != null) ? instance : new AsyncDml();
-		return instance;
+	public static void addRequest(Request request) {
+		AsyncDml.Instance?.requests?.add(request);
 	}
 
-	public AsyncDml addRequest(Request request) {
-		this.requests?.add(request);
-		return this;
-	}
-
-	public Id runJob() {
+	public static Id runJob() {
 		Id jobId;
 		if (LimitUtils.isQueueableSafe()) {
-			jobId = System.enqueueJob(this);
-			this.requests.clear();
+			jobId = System.enqueueJob(AsyncDml.Instance);
+			AsyncDml.Instance?.requests?.clear();
 		} else {
 			// If the job can't be done via queueable, try to process the requests synchronously
 			final String message = 'Queueable limits reached. Processing {0} DML operations synchronously.';
 			Logger.warn(AsyncDml.class, message);
 			Logger.publish();
-			this.execute(null);
+			AsyncDml.Instance?.execute(null);
 		}
 		return jobId;
 	}
 
+	// **** QUEUEABLE **** // 
 	public void execute(System.QueueableContext context) {
 		for (Request request : this.requests) {
 			request.process();
 		}
 	}
 
+	// **** INNER **** // 
 	public virtual class Request {
 		@TestVisible
 		Dml.Operation operation;
