@@ -214,7 +214,8 @@ public virtual without sharing class Rollup implements System.Queueable, Databas
         }
 
         public Operation(SObjectField targetField, Calculator calculator, Filter filter) {
-            this(targetField, calculator, new AndLogic().addCriteria(filter));
+            this(targetField, calculator);
+            this.addCriteria(filter);
         }
 
         public Operation(SObjectField targetField, Calculator calculator) {

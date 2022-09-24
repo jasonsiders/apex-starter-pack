@@ -113,8 +113,11 @@ private class Rollup_Test {
         Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
 
         // Create a rollup that only looks at Closed Won opps
-        Rollup.Operation operation = new Rollup.Operation(Account.NumberOfEmployees, new CountCalculator())
-            .addCriteria(new Filter(Opportunity.StageName, Filter.EQUALS, 'Closed Won'));
+        Rollup.Operation operation = new Rollup.Operation(
+            Account.NumberOfEmployees, 
+            new CountCalculator(),
+            new Filter(Opportunity.StageName, Filter.EQUALS, 'Closed Won')
+        );
         Rollup rollup = new Rollup(new Rollup.Target(Account.SObjectType))
             .addOperation(Opportunity.AccountId, operation);
         
