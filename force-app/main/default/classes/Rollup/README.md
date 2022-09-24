@@ -14,114 +14,207 @@ These methods worked, but they were themselves were inflexible and repetitive. I
 
 I've since left that company, but haven't stopped thinking about ways to solve this problem. Enter the `Rollup` framework. `Rollup` handles the common logic behind all Rollup operations. Better yet, it automatically bulkifies, and be configured to run in a variety of contexts.
 
-Developers can use its fluent interface to construct infinitely complex operations using just a couple of lines of code. Admins can also construct new rollup operations using no code at all, with the included [Flow Action](#the-rollup-flow-action) and [Custom Metadata Type](#the-rollupmdt-custom-metadata-type).
+Developers can use its fluent interface to construct infinitely complex operations using just a couple of lines of code. In the future, Admins can also construct new rollup operations using no code at all via a Flow Action.
 
 ## Contents
 
--   [Rollup Components](#creating-a-rollup)
+-   [Creating a Rollup](#creating-a-rollup)
     -   [The `Rollup` Class](#the-rollup-class)
-    -   [The `Rollup.Relationship` Class](#the-rollup-relationship-class)
-    -   [The `Rollup.Request` Class](#the-rollup-request-class)
-    -   [The `Rollup.Calculator` Class](#the-rollup-calculator-class)
+    -   [The `Rollup.RuntimeConfig` Class](#the-rollupruntime-config-class)
+    -   [The `Rollup.Target` Class](#the-rolluptarget-class)
+    -   [The `Rollup.Operation` Class](#the-rollupoperation-class)
+    -   [The `Rollup.Calculator` Class](#the-rollupcalculator-class)]
     -   [The `ICriteria` Interface](#the-icriteria-interface)
--   [Usage in Apex](#usage-in-apex)
--   [Usage in Flow](#usage-in-flow)
-    -   [The `Rollup` Flow Action](#the-rollup-flow-action)
-    -   [The `Rollup__mdt` Custom Metadata Type](#the-rollupmdt-custom-metadata-type)
-    -   [The `InvocableRollup` Class](#the-invocable-rollup-class)
-    -   [The `RollupMetadataHelper` Class](#the-rollup-metadata-helper-class)
+-   [Usage](#usage)
 
-## Rollup Components
+## Creating a Rollup
+
+`Rollup` uses a fluent architecture to maximize flexibility. Developers should familiarize themselves with the various objects that go into a rollup operation;
 
 ### **The `Rollup` Class**
 
-The `Rollup` class is the primary actor in the Rollup framework. A **Rollup** object represents Rollup operation(s) for a parent SObjectType. For example, all of these rollup operations on the `Account` would be reprsented by a single `Rollup` object:
+A `Rollup` class represents a single execution of a Rollup method. It encompasses all of the following concepts - some of which are handled by inner types:
 
--   `Account.First_Sale__c`: MIN of of `Opportunity.CloseDate` on all "Closed Won" Opportunities related to the Account.
--   `Account.Last_Correspondance__c`: MAX of `Task.CreatedDate` on all Tasks related to the Account.
--   `Account.Number_of_Open_Cases__c`: COUNT of open Cases related to the Account.
--   `Account.Total_Value__c`: SUM of `Opportunity.Amount` on all "Closed Won" Opportunities related to the Account.
+-   What rollup calculations will be run
+-   On which records will rollup calculations be run
+-   When will the rollup calculations run
 
-The `Rollup` class accepts an `SObjectType` in the constructor. It has three public methods:
-
--   `Rollup addRelationship(Relationship relationship)`: Adds the relationship to the Rollup.
--   `List<SObject> run(Set<Id> targetRecordIds/List<SObject> records)`: Executes the Rollup against a list of target records. This involves calling the private `calcuate()` method on each `Rollup.Relationship`.
--   `List<SObject> runFromChild(List<SObject> childRecords, SObjectField lookupField)`: Finds the target SObjects via the provided lookup field, and then passes those records to the `run()` method.
-
-This example reconstructs the above example as a `Rollup` object (`Rollup.Relationship` construction not shown - see [**The `Rollup.Relationship` Class**](#the-rolluprelationship-class) for more information).
+Developers can construct a `Rollup` by providing it with a `Rollup.Target` object:
 
 ```
-Rollup myRoll = new Rollup(Account.SObjectType)
-    .addRelationship(caseRelationship)
-    .addRelationship(oppsRelationship)
-    .addRelationship(taskrelationship);
-List<Account> results = (List<Account>) myRoll.run(myAccs);
+Rollup.Target target = new Rollup.Target(Account.SObjectType);
+Rollup rollup = new Rollup(target);
 ```
 
-### **The `Rollup.Relationship` Class**
+The `Rollup.Target` object handles rollup calculation logic. See [The `Rollup.Target` Class](#the-rolluptarget-class) for more.
 
-A `Rollup.Relationship` represents all Rollup operations between the `Rollup`'s target SObjectType and a specific Child SObjectType.
+The `Rollup` class has 4 public methods, plus overrides:
 
-The `Rollup.Relationship` object can be constructed using either a `Schema.ChildRelationship` or a `Schema.SObjectField`:
+-   `Rollup addRecords(Set<Id> recordIds/List<SObject> records)`: Adds target records to the Rollup for processing.
+-   `Rollup addRecords(Set<Id> recordIds/List<SObject> records, SObjectField lookupField)`: Adds child records to the Rollup for processing. The `lookupField` specifies the link (lookup relationship) between the child objects and the desired target object.
+-   `Rollup addOperation(SObjectField lookupField, Operation operation)`: Adds a `Rollup.Operation` object to the Rollup for processing. A `Rollup.Operation` object contains the logic needed to process a single rollup calculation. See [The `Rollup.Operation` Class](#the-rollupoperation-class) for more.
+-   `Rollup setRuntime(RuntimeConfig runtime)`: Overrides the Rollup's default `Runtime.Config` object. The `Runtime.Config` class determines whether the rollup calculation will performed synchronously, or asynchronously through a Batch or Queueable job. This method is optional, and only needs to be call if the default implementation of `Rollup.RuntimeConfig` does not suit your needs. See [The `Rollup.RuntimeConfig` Class](#the-rollupruntimeconfig-class) for more.
+-   `Id run()`: This method calculates the updated rollup values for the target records, and then submits them to be updated in the database. If the job was processed asynchronously, this method will return the Id of the asynchronous process. If the job was processed in real-time, `null` will be returned.
+
+Here is an example rollup execution:
 
 ```
-// These objects are the same
-Rollup.Relationship rel1 = new Rollup.Relationship(
-    SchemaUtils.getChildRelationship(Opportunity.AccountId)
+// 1. Build the rollup
+Rollup rollup = new Rollup(new Target(Account.SObjectType))
+    .addRecords(myAccountsVar)
+    .addOperation(Opportunity.AccountId, new Rollup.Operation(
+        Account.Number_of_Opportunities__c,
+        new CountCalculator()
+    ))
+    .setRuntime(
+        new Rollup.RuntimeConfig()
+            .setExplicitContext(Runtime.Context.BATCHAPEX)
+    );
+// 2. Run the rollup
+Id jobId = rollup.run();
+```
+
+### **The `Rollup.RuntimeConfig` Class**
+
+The `Rollup.RuntimeConfig` class defines when a Rollup operation will be run. It extends the `Runtime` class.
+
+By default, the RuntimeConfig class will allow the Rollup to process in real-time if a the number of records does not meet the defined `asyncThreshold`. Once this threshold is met, the RuntimeConfig class determines whether a `System.Queueable` or `Database.Batchable` job is needed to process the Rollup operation. It determines this based on a `batchThreshold` parameter.
+
+This _elastic_ approach means that in most cases, developers don't need to worry about hitting limits, even with very large rollup operations. If needed, Developers may override this elastic framework and mandate that the Rollup always run in a specific context.
+
+Developers may use the following methods to customize the `Rollup.RuntimeConfig`:
+
+-   `Runtime setExplicitContext(Runtime.Context context)`: Overrides the elastic framework, and mandates that the Rollup be run in a specific context. See [The `Runtime.Context` Enum](#the-runtimecontext-enum) for more.
+-   `Runtime setAsyncThreshold(Integer threshold)`: Defines the number of records required for a rollup transaction to be processed asynchronously. If the number of records does not exceed this amount, the rollup will be processed in real-time.
+-   `Runtime setBatchSize(Integer batchSize)`: Defines the batch size of `Database.Batchable` rollup transactions.
+-   `Runtime setBatchThreshold(Integer threshold)`: Defines the number of records required for an asynchronous rollup transaction to be processed via a `Database.Batchable` rollup. If the number of records does not exceed this amount, the rollup will be processed via a `System.Queueable` rollup.
+
+The default values for the thresholds are as follows:
+
+-   `asyncThreshold`: 100
+-   `batchSize`: 200
+-   `batchThreshold`: 200
+
+#### **The `Runtime.Context` Enum**
+
+The `Runtime.Context` enum defines specific execution contexts. `Rollup.RuntimeConfig` uses this enum to specify how the `Rollup` will be run.
+
+Its values include:
+
+-   `BATCHAPEX`
+-   `QUEUEABLE`
+-   `REAL_TIME`
+
+### **The `Rollup.Target` Class**
+
+The `Rollup.Target` class defines the rollup logic to take place. It specifies the target object that a Rollup will write to, as well as the child SObject relationship(s) that the Rollup will use to perform its calculations.
+
+A `Rollup.Target` object can be constructed with an `SObjectType`:
+
+```
+Rollup.Target target = new Rollup.Target(Account.SObjectType);
+```
+
+Developers can add operations to the Target via the `addOperation` method:
+
+```
+Rollup.Target target = new Rollup.Target(Account.SObjectType)
+    .addOperation(Opportunity.AccountId, new Operation(
+        Account.Number_of_Opportunities__c,
+        new CountCalculator()
+    ));
+```
+
+> **Note:** For convenience, the `Rollup` class has its own `addOperation()` method, which calls its `target`'s `addOperation()` method.
+
+If developers wish, they may execute a rollup without DML by calling the Target's `doRollup()` method directly:
+
+```
+Rollup.Target target = new Rollup.Target(Account.SObjectType)
+    .addOperation(Opportunity.AccountId, new Operation(
+        Account.Number_of_Opportunities__c,
+        new CountCalculator()
+    ));
+List<SObject> results = target.process(myRecordsToRollup);
+update results;
+```
+
+### **The `Rollup.Operation` Class**
+
+A `Rollup.Operation` represents a single rollup calculation. A Rollup may have many `Rollup.Operation`s. For example, an Account may have fields for all of the following rollup operations:
+
+-   `Num_Open_Cases__c`: A count of open Cases at any given time.
+-   `Average_Satisfaction__c`: The average `Score__c` on all `Review__c` custom object records related to an Account.
+-   `Total_Value__c`: A sum the `Amount` on all Closed Won Opportunities.
+-   `Last_Activity__c`: The most recent `CreatedDate` of a Task.
+
+All of these rollups may be configured with just a couple of lines of code:
+
+```
+Rollup.Target target = new Rollup.Target(Account.SObjectType)
+    .addOperation(Case.AccountId, new Rollup.Operation(
+        Account.Num_Open_Cases__c,
+        new CountCalculator(),
+        new Filter(Case.IsClosed, Filter.EQUALS, false)
+    ))
+    .addOperation(Review__c.Account__c, new Rollup.Operation(
+        Account.Average_Satisfaction__c,
+        new AvgCalculator().setCalcField(Review__c.Score__c)
+    ))
+    .addOperation(Opportunity.AccountId, new Operation(
+        Account.Total_Value__c,
+        new SumCalculator().setCalcField(Opportunity.Amount),
+        new Filter(Opportunity.IsWon, Filter.EQUALS, true)
+    ))
+    .addOperation(Task.AccountId, new Operation(
+        Account.Last_Activity__c,
+        new MaxCalculator().setCalcField(Task.CreatedDate)
+    ));
+```
+
+The `Rollup.Operation` class can be constructed with the following parameters:
+
+-   `SObjectField targetField`: The field on the target object that calculation results will be written to.
+-   `Rollup.Calculator calculator`: The `Rollup.Calculator` used to calculate the results for each record. See [The `Rollup.Calculator` Class](#the-rollupcalculator-class) for more.
+-   `FilterLogic baseLogic`: (Optional) The base `FilterLogic` used to determine which child records will be used in the calculation. If none is given, defaults to an `AndLogic` instance. See [The `FilterLogic` Class](../DatabaseLayer/README.md/#the-filterlogic-class) for more.
+-   `Filter filter`: (Optional) A single `Filter` object used to determine which child records will be used in the calculation. This filter gets added to the default `filterLogic` for the Operation, which is an `AndLogic` object.
+
+```
+Rollup.Operation op1 = new Rollup.Operation(
+    Account.Number_of_Opps__c,
+    new CountCalculator()
 );
-Rollup.Relationship rel2 = new Rollup.Relationship(
-    Opportunity.AccountId
+Rollup.Operation op2 = new Rollup.Operation(
+    Account.Some_Other_Field__c,
+    new CountCalculator(),
+    new OrLogic()
 );
-```
-
-The `Rollup.Relationship` has just one public method:
-
--   `Rollup.Relationship addRequest(Rollup.Request request)`: Adds a the request to the `Rollup.Relationship`, and returns the current instance.
-
-This example adds a basic request to the `Account.Opportunities` relationship:
-
-```
-Rollup.Relationship relationship = new Rollup.Relationship(
-    Opportunity.AccountId
-).addRequest(new Rollup.Request(
-    Account.Last_Correspondance__c,
-    new MaxCalculator().setCalcField(Task.CreatedDate)
-));
-```
-
-### **The `Rollup.Request` Class**
-
-The `Rollup.Request` represents a single rollup calculation. Here's an example of a single `Rollup.Request`, using our earlier example:
-
--   `Account.First_Sale__c`: MIN of of `Opportunity.CloseDate` on all "Closed Won" Opportunities related to the Account.
-
-A `Rollup.Request` can be constructed with the following parameters:
-
--   `targetField`: A `SObjectField` on the target SObject that determines where the calculation results will be posted.
--   `calculator`: A `Rollup.Calculator` which defines the rollup operation. See [The `Rollup.Calculator` Class](#the-rollupcalculator-class) for more.
--   `criteria`: (optional) An `ICriteria` object that can be used to exclude certain records from the Rollup calculation. Read more about the `ICriteria` interface [here](../DatabaseLayer/README.md/#the-icriteria-interface).
-
-This example `Rollup.Request` will calculate the MAX of `Opportunity.CloseDate` from all Opprotunities where `Opportunity.IsWon = true`. Results will be posted on the `Account.First_Sale__c` field.
-
-```
-Rollup.Request firstSale = new Rollup.Request(
-    Account.First_Sale__c,
-    new MinCalculator().setCalcField(Opportunity.CloseDate),
+Rollup.Operation op3 = new Rollup.Operation(
+    Account.Another_Field__c,
+    new AvgCalculator(),
     new Filter(Opportunity.IsWon, Filter.EQUALS, true)
 );
 ```
 
-The `Rollup.Request` has just one public method:
-
--   `Rollup.Request addCriteria(ICriteria criteria)`: Adds the `ICriteria` object(s) to the request's `FilterLogic` object. Returns the current instance.
+Aside from its constructors, the `Rollup.Operation` class has just one public method: `addCriteria(ICriteria criteria)`. The method can be chained together to add multiple pieces of criteria.
 
 ```
-request = request.addCriteria(
-    new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000)
-);
+Rollup.Operation operation = new Rollup.Operation(
+    Account.Number_of_Opps__c,
+    new AvgCalculator(),
+    new OrLogic()
+).addCriteria(new Filter(
+    Opportunity.IsWon,
+    Filter.EQUALS,
+    true
+)).addCriteria(new Filter(
+    Opportunity.CloseDate,
+    Filter.LESS_THAN,
+    Date.today().addDays(-365)
+));
 ```
 
-> **Note:** By default, the filters use `AND` logic, meaning that all criteria objects must be true for the target record to "pass" the filter. To specify some other logic, pass the correct `FilterLogic` object to the `Rollup.Request` constructor.
+See [The `ICriteria` Interface](../DatabaseLayer/README.md/#the-icriteria-interface) for more.
 
 ### **The `Rollup.Calculator` Class**
 
@@ -178,7 +271,7 @@ public class ReverseSumCalculator extends Rollup.Calculator {
 ```
 
 ```
-Rollup.Request moneyLost = new Rollup.Request(
+Rollup.Operation moneyLost = new Rollup.Operation(
     Account.Money_Lost__c,
     new ReverseSumCalculator().setCalcField(Opportunity.Amount),
     new Filter(Opportunity.IsLost, Filter.EQUALS, true)
@@ -215,106 +308,51 @@ Rollup.Request totalValue = new Rollup.Request(
 
 You can read more about the `ICriteria` interface [here](../DatabaseLayer/README.md/#the-icriteria-interface);
 
-## Usage in Apex
+## Usage
 
-`Rollup` objects can be constructed using a fluent interface pattern. This provides developers with maximum flexibility when defining rollup logic:
+Developers can use `Rollup`'s fluent interface to constrcut complex rollup operations using just a couple of lines of code:
 
 ```
-Rollup.Relationship opps = new Rollup.Relationship(Opportunity.AccountId)
-    .addRequest(new Rollup.Request(
-        Account.Num_Opps__c,
-        new CountCalculator()
+Rollup rollup = new Rollup(new Rollup.Target(Account.SObjectType))
+    .addOperation(Case.AccountId, new Rollup.Operation(
+        Account.Num_Open_Cases__c,
+        new CountCalculator(),
+        new Filter(Case.IsClosed, Filter.EQUALS, false)
     ))
-    .addRequest(new Rollup.Request(
-        Account.Closed_Amount__c,
+    .addOperation(Review__c.Account__c, new Rollup.Operation(
+        Account.Average_Satisfaction__c,
+        new AvgCalculator().setCalcField(Review__c.Score__c)
+    ))
+    .addOperation(Opportunity.AccountId, new Operation(
+        Account.Total_Value__c,
         new SumCalculator().setCalcField(Opportunity.Amount),
-        new Filter(Opportunity.IsWon)
+        new Filter(Opportunity.IsWon, Filter.EQUALS, true)
+    ))
+    .addOperation(Task.AccountId, new Operation(
+        Account.Last_Activity__c,
+        new MaxCalculator().setCalcField(Task.CreatedDate)
     ));
-Rollup rollup = new Rollup().addRelationship(opps);
 ```
 
-## Usage in Flow
-
-### **The `Rollup` Flow Action**
-
-The `Rollup` flow action allows Developers to execute Rollup operations from within Flows:
-
-<img src="../../../../../media/rollup_Example1.png" width="100%">
-
-The flow action accepts the following parameters:
-
--   **`Rollup Metadata Record(s)`**: Accepts either a `Rollup__mdt` or `List<Rollup__mdt>` record(s) variable. The Rollup record(s) defines the rollup details. See [**The `Rollup__mdt` Custom Metadata Type**](#the-rollupmdt-custom-metadata-type) for more.
--   **`Target Record(s)`**: Accepts either a `SObject` or `List<SObject>` record(s) variable. This defines the records which will be fed to the rollup's `run()` method.
--   **`Target Record Context`**: Defines whether the provided `Target Record(s)` are the `Parent Records` or `Child Records` in the operation.
--   **`Timing`**: Defines when the Rollup will run; either `Asynchronous` via a Queueable, or `Synchronous`.
-
-### **The `Rollup__mdt` Custom Metadata Type**
-
-The `Rollup__mdt` defines rollup details for the `Rollup` flow action. It contains everything needed to run a standalone Rollup operation, including details from the `Rollup`, `Rollup.Relationship`, and `Rollup.Request` objects.
-
-Once the flow is invoked, the `InvocableRollup` class constructs unified `Rollup` objects by passing all `Rollup__mdt` record(s) provided in the flow action's `Rollup Metadata Record(s)` to the the `RollupMetadataHelper` class.
-
-The `RollupMetadataHelper` class will group `Rollup__mdt` records by their `Parent SObjectType`, and create a `Rollup` object for each. It will then create a `Rollup.Relationship` for each unique `Child SObjectType`/`Relationship Field` on each new Rollup object. Then it will create a `Rollup.Request` for each `Rollup__mdt` in the correct `Rollup.Relationship`.
-
-Here is an example of a `Rollup__mdt` record:
-
-<img src="../../../../../media/rollup_Example2.png" width="100%">
-
--   `Active`: (Checkbox) Determines whether the current record should be added to Rollups.
--   `Parent SObjectType`: (Text) The API name of Parent SObjectType for the rollup operation.
--   `Target_Field__c`: (Text) The API name of the SObjectField on the Parent SObject where calculation results will be posted.
--   `Child SObjectType`: (Text) The API name of the Child SObjectType for the rollup operation.
--   `Relationship Field`: (Text) The API name of the lookup field on the Child SObjectType that points to the Parent SObjectType for the rollup operation.
--   `Calculation Type`: (Picklist) Describes the Calculation object which will be used in the Rollup operation. For example, `AVG` maps to the `AvgCalculator` object. Not required when using a custom calculator.
--   `Calculator Class Name`: (Text) The Apex Class Name of the custom calculator class (if used). Not required when using a standard calculator.
--   `Calculation Field`: (Text) The SObjectField on the Child SObjectType used to calculate the rollup results. Not required in `COUNT` operations.
-
-> **Note:** Why are all of these SObjectType/SObjectField references expressed in `Text` fields? Though Custom Metadata Types provides Entity Definition, Field Definition, and Entity Particle fields as a more type-safe option, these fields have a glaring [**known issue**](https://github.com/jasonsiders/apex-starter-pack/issues/90) that prevents them from being used with Custom SObjectTypes and Custom Fields.
-
-### **The `Filter__mdt` Custom Metadata Type**
-
-The `Filter__mdt` custom metadata type represents a `Filter` object which can be applied to rollups in flow. The `Filter__mdt` itself is not directly related to a single `Rollup__mdt`, but rather through the `Rollup_Filter__mdt` junction object. This allows for a `Filter__mdt` to be reused on many `Rollup__mdt` if desired.
-
-Here is an example `Filter__mdt` record:
-
-<img src="../../../../../media/rollup_Example4.png" width="100%">
-
--   `SObjectType`:(Text) Defines the `SObjectType` of the `SObjectField`
--   `SObjectField`: (Text) The field used in the left-hand side of the `Filter` equation (ex., "**Amount** > 1000")
--   `Operator`: (Picklist) Defines the operand used in the `Filter` equation (ex., "Amount **>** 1000")
--   `Value`: (Text) Defines the right-hand side of the `Filter` equation (ex., "Amount > **1000**")
-
-**Note**: Salesforce does not have a "generic object" field data type. Rather than defining a `Value` field for every data type (ie., `Checkbox Value`, `Date Value`, `Number Value`, etc.), developers can imagine the `Value` field as text which could plug into a JSON-serialized representation of a `Filter` object:
+Once constructed, developers may run a rollup through its `run()` method:
 
 ```
-{
-    "fieldName": {!SObjectField},
-    "operator": {!Operator}
-    "value": {!Value}
-}
+Id jobId = rollup.run();
 ```
 
-This means that developers should be careful to apply the correct format, depending on the data type:
+The `run()` method will automatically choose the optimal execution context for the operation. Depending on the number of records and other limits, it will process the rollup in real-time, or asynchronously via a `System.Queueable` job, or a `Database.Batchable` job.
 
--   `Boolean`: Not enclosed in quotes, and value must be `true` or `false`.
-    -   Example: `true`
--   `Date`: Enclosed in quotes, and expressed in ISO 8601 format.
-    -   Example: `"2000-01-01"`
--   `DateTime`: Enclosed in quotes, and expressed in ISO 8601 format.
-    -   Example: `"2000-01-01T00:00:00Z"`
--   `Number`: Not enclosed in quotes.
-    -   Example: `10.99`, `100`
--   `String`:
-    -   Example: `"Hello World!"`
+If developers wish to force a specific execution context, they may do so through the `Rollup.RuntimeConfig`'s `setExplicitContext()` method:
 
-### **The `Rollup_Filter__mdt` Custom Metadata Type**
+```
+Rollup.RuntimeConfig config = new Rollup.RuntimeConfig()
+    .setExplicitContext(Runtime.Context.BATCHAPEX);
+rollup.setRuntime(config);
+```
 
-This type is a junction object between `Rollup__mdt` and `Filter__mdt`. It allows for many-to-many relationships between these two objects.
+Alternatively, developers may create a `Database.Batchable` or `System.Queueable` instance of the `Rollup` manually:
 
-Here is an example `Rollup_Filter__mdt` record:
-
-<img src="../../../../../media/rollup_Example3.png" width="100%">
-
--   `Rollup`: The linked `Rollup__mdt` record
--   `Filter`: The linked `Filter__mdt` record
--   `Active`: Defines whether the `Filter` will be enforced on the `Rollup`.
+```
+Database.executeBatch(rollup, 200);
+System.enqueueJob(rollup, 200);
+```

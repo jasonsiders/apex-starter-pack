@@ -8,6 +8,10 @@ public class AvgCalculator extends Rollup.Calculator {
 	final Rollup.Calculator MIN = new MinCalculator();
 	final Rollup.Calculator SUM = new SumCalculator();
 
+	public AvgCalculator() {
+		this.label = 'AVG';
+	}
+
 	public override Rollup.Calculator setCalcField(FieldRef calcField) {
 		super.setCalcField(calcField);
 		this.MAX.setCalcField(calcField);

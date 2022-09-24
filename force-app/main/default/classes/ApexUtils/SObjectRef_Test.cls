@@ -76,6 +76,14 @@ private class SObjectRef_Test {
 		Test.stopTest();
 	}
 
+	@IsTest 
+    static void shouldReturnHashCode() {
+        // Mapping test above doesn't always use the hashCode() method
+        // This is mostly for test coverage
+        SObjectRef obj = new SObjectRef(Account.SObjectType);
+        System.assertNotEquals(null, obj.hashCode(), 'Null hashCode');
+    }
+
 	// **** HELPER **** //
 	static Exception serialize(Object obj) {
 		Exception caughtError;

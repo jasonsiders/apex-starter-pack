@@ -1,4 +1,8 @@
 public class SumCalculator extends Rollup.Calculator {
+	public SumCalculator() {
+		this.label = 'SUM';
+	}
+	
 	public override Decimal calculateNumber(List<SObject> records) {
 		Decimal sum = 0;
 		for (SObject record : records) {

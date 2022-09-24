@@ -1,4 +1,8 @@
 public class MaxCalculator extends Rollup.Calculator {
+	public MaxCalculator() {
+		this.label = 'MAX';
+	}
+
 	public override Date calculateDate(List<SObject> records) {
 		Date maxDate;
 		for (SObject record : records) {

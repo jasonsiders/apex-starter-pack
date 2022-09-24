@@ -1,4 +1,8 @@
 public class MinCalculator extends Rollup.Calculator {
+	public MinCalculator() {
+		this.label = 'MIN';
+	}
+
 	public override Date calculateDate(List<SObject> records) {
 		Date minDate;
 		for (SObject record : records) {

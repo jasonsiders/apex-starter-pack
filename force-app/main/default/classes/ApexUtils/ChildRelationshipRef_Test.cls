@@ -80,6 +80,14 @@ private class ChildRelationshipRef_Test {
 			System.assertEquals(true, refs.containsKey(newRef), 'Map does not contain ' + newRef.toString());
 		}
 	}
+	
+	@IsTest 
+    static void shouldReturnHashCode() {
+        // Mapping test above doesn't always use the hashCode() method
+        // This is mostly for test coverage
+        ChildRelationshipRef obj = new ChildRelationshipRef(Opportunity.AccountId);
+        System.assertNotEquals(null, obj.hashCode(), 'Null hashCode');
+    }
 
 	// **** HELPER **** //
 	public class AsyncContainer implements System.Queueable {

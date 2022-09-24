@@ -1,65 +1,163 @@
-@IsTest
+@IsTest 
 private class Rollup_Test {
-	@IsTest
-	static void shouldRunFromParent() {
-		Soql accountQuery = Databaselayer.Soql.newQuery(Account.SObjectType)
-			.selectSubQuery(new SubQuery(Opportunity.AccountId));
-		List<Account> accounts = (List<Account>) accountQuery.run();
+    @IsTest 
+    static void shouldRunSynchronous() {
+        List<Account> accounts = initMockAccounts(99); 
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
 
-		Test.startTest();
-		Rollup rollup = getSumCalculator();
-		List<Account> results = (List<Account>) rollup.run(accounts);
-		Test.stopTest();
+        Rollup.Target target = initTestTarget(); 
+        Rollup rollup = new Rollup(target);
+        rollup.addRecords(accounts); 
 
-		System.assertEquals(1, results?.size(), 'Wrong # of results');
-		System.assertEquals(3000, results[0].AnnualRevenue, 'Wrong sum of Opportunity.Amount');
-	}
+        Test.startTest();
+        Id jobId = rollup.run(); 
+        Test.stopTest();
+        // Verify that the job ran in the correct context
+        System.assertEquals(null, jobId, 'Job was processed async');
+        // Verify that the records were updated
+        List<Account> results = Dml.Updated?.getRecords(Account.SObjectType);
+        System.assertEquals(accounts?.size(), results?.size(), 'Wrong # of updated records'); 
+        for (Account account : results) {
+            System.assertEquals(account.Opportunities?.size(), account.NumberOfEmployees, 'Wrong COUNT of Account.Opportunities');
+            System.assertEquals(1000, account.AnnualRevenue, 'Wrong SUM of Account.Opportunities.Amount');
+        }
+    }
 
-	@IsTest
-	static void shouldRunFromChild() {
-		Soql oppQuery = Databaselayer.Soql.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
-		List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run();
+    @IsTest 
+    static void shouldRunQueueable() {
+        List<Account> accounts = initMockAccounts(101); 
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
+        
+        Rollup.Target target = initTestTarget(); 
+        Rollup rollup = new Rollup(target);
+        rollup.addRecords(accounts);
 
-		Test.startTest();
-		Rollup rollup = getSumCalculator();
-		List<Account> results = (List<Account>) rollup.runFromChild(opportunities, Opportunity.AccountId);
-		Test.stopTest();
+        Test.startTest();
+        Id jobId = rollup.run();
+        Test.stopTest();
 
-		System.assertEquals(1, results?.size(), 'Wrong # of results');
-		System.assertEquals(3000, results[0].AnnualRevenue, 'Wrong sum of Opportunity.Amount');
-	}
+        // Verify that the job ran in the correct context 
+        System.assertNotEquals(null, jobId, 'Was not run async');
+        testJobType(jobId, Runtime.Context.QUEUEABLE); 
+        // Verify that the records were updated
+        List<Account> results = Dml.Updated?.getRecords(Account.SObjectType);
+        System.assertEquals(accounts?.size(), results?.size(), 'Wrong # of updated records'); 
+        for (Account account : results) {
+            System.assertEquals(account.Opportunities?.size(), account.NumberOfEmployees, 'Wrong COUNT of Account.Opportunities');
+            System.assertEquals(1000, account.AnnualRevenue, 'Wrong SUM of Account.Opportunities.Amount');
+        }
+    }
 
-	@IsTest
-	static void shouldFilterRecords() {
-		Soql oppQuery = Databaselayer.Soql.newQuery(Opportunity.SObjectType).selectFields(Opportunity.AccountId);
-		List<Opportunity> opportunities = (List<Opportunity>) oppQuery.run();
-		// Update one of the Opportunities amounts to 0
-		Set<Id> accountIds = new Set<Id>();
-		Opportunity invalidOpp = opportunities[0];
-		accountIds.add(invalidOpp.AccountId);
-		invalidOpp.Amount = 0;
-		Databaselayer.Dml.doUpdate(invalidOpp);
+    @IsTest 
+    static void shouldRunBatch() {
+        Integer batchSize = 250; 
+        List<Account> accounts = initMockAccounts(batchSize); 
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
 
-		Test.startTest();
-		Rollup rollup = new Rollup(Account.SObjectType)
-			.addRelationship(
-				new Rollup.Relationship(Opportunity.AccountId)
-					.addRequest(
-						new Rollup.Request(
-								Account.AnnualRevenue,
-								new SumCalculator()?.setCalcField(new FieldRef(Opportunity.Amount))
-							)
-							.addCriteria(new Filter(Opportunity.Amount, Filter.GREATER_THAN, 0))
-					)
-			);
-		List<Account> results = (List<Account>) rollup.run(accountIds);
-		Test.stopTest();
+        Rollup.Target target = initTestTarget();
+        // Note: Can't run a Batchable job with more than one batch in @IsTest context
+        Rollup.RuntimeConfig config = new Rollup.RuntimeConfig().setBatchSize(batchSize);
+        Rollup rollup = new Rollup(target).setRuntime(config).addRecords(accounts);
 
-		System.assertEquals(1, results?.size(), 'Wrong # of results');
-		System.assertEquals(2000, results[0].AnnualRevenue, 'Wrong sum of Opportunity.Amount (where Amount > 0)');
-	}
+        Test.startTest();
+        Id jobId = rollup.run(); 
+        Test.stopTest();
 
-	@IsTest
+        // Verify that the job ran in the correct context
+        System.assertNotEquals(null, jobId, 'Was not run async');
+        testJobType(jobId, RunTime.Context.BATCHAPEX); 
+        // Verify that the records were updated
+        List<Account> results = Dml.Updated?.getRecords(Account.SObjectType);
+        System.assertEquals(accounts?.size(), results?.size(), 'Wrong # of updated records'); 
+        for (Account account : results) {
+            System.assertEquals(account.Opportunities?.size(), account.NumberOfEmployees, 'Wrong COUNT of Account.Opportunities');
+            System.assertEquals(1000, account.AnnualRevenue, 'Wrong SUM of Account.Opportunities.Amount');
+        }
+    }
+
+    @IsTest 
+    static void shouldCalculateRollupResults() {
+        // If callers need more control over DML operations,
+        // they can call the target class's doRollup() method directly
+        // This will return a list of updated SObjects
+        List<Account> accounts = initMockAccounts(200); 
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
+        Rollup.Target target = initTestTarget(); 
+
+        Test.startTest();
+        List<Account> results = (List<Account>) target.doRollup(accounts); 
+        Test.stopTest();
+
+        System.assertEquals(results?.size(), accounts?.size(), 'Wrong # of results');
+        for (Account account : results) {
+            System.assertEquals(account.Opportunities?.size(), account.NumberOfEmployees, 'Wrong COUNT of Account.Opportunities');
+            System.assertEquals(1000, account.AnnualRevenue, 'Wrong SUM of Account.Opportunities.Amount');
+        }
+    }
+
+    @IsTest 
+    static void shouldRunWithCriteria() {
+        // Callers can optionally add criteria to their rollups
+        // This will exclude non-matching child records from the calculation
+        List<Account> accounts = initMockAccounts(100); 
+        // Each account should have 1/10 Opps as 'Closed Won'
+        for (Account account : accounts) {
+            Opportunity opp = (Opportunity) CollectionUtils.getIndexOf(account.Opportunities, 1);
+            opp.StageName = 'Closed Won'; 
+        }
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
+
+        // Create a rollup that only looks at Closed Won opps
+        Rollup.Operation operation = new Rollup.Operation(Account.NumberOfEmployees, new CountCalculator())
+            .addCriteria(new Filter(Opportunity.StageName, Filter.EQUALS, 'Closed Won'));
+        Rollup rollup = new Rollup(new Rollup.Target(Account.SObjectType))
+            .addOperation(Opportunity.AccountId, operation);
+        
+        Test.startTest();
+        rollup.run();
+        Test.stopTest();
+
+        // Verify that the records were updated
+        List<Account> results = Dml.Updated?.getRecords(Account.SObjectType);
+        System.assertEquals(accounts?.size(), results?.size(), 'Wrong # of updated records'); 
+        for (Account account : results) {
+            System.assertEquals(1, account.NumberOfEmployees, 'Wrong COUNT of "Closed Won" Opportunities');
+        }
+    }
+
+    @IsTest 
+    static void shouldRunFromChild() {
+        List<Opportunity> opportunities = new List<Opportunity>();
+        List<Account> accounts = initMockAccounts(100); 
+        for (Account account : accounts) {
+            opportunities.addAll(account.Opportunities); 
+        }
+        DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+        Rollup.TargetRecordQuery?.toMock()?.setMockResults(accounts);
+        Rollup.RollupQuery?.toMock()?.setMockResults(accounts);
+
+        Rollup.Target target = initTestTarget(); 
+        Rollup rollup = new Rollup(target).addRecords(opportunities, Opportunity.AccountId);
+        
+        Test.startTest();
+        rollup.run(); 
+        Test.stopTest(); 
+
+        // Verify that the records were updated
+        List<Account> results = Dml.Updated?.getRecords(Account.SObjectType);
+        System.assertEquals(accounts?.size(), results?.size(), 'Wrong # of updated records'); 
+        for (Account account : results) {
+            System.assertEquals(account.Opportunities?.size(), account.NumberOfEmployees, 'Wrong COUNT of Account.Opportunities');
+            System.assertEquals(1000, account.AnnualRevenue, 'Wrong SUM of Account.Opportunities.Amount');
+        } 
+    }
+    
+    @IsTest
 	static void shouldProvideDefaultCalculatorValues() {
 		List<Opportunity> opportunities = new List<Opportunity>();
 		Rollup.Calculator calc = new MockCalculator();
@@ -79,69 +177,48 @@ private class Rollup_Test {
 		System.assertEquals(null, calc.calculate(opportunities), 'Wrong default value for null calcField');
 	}
 
-	@IsTest
-	static void shouldPreventDuplicateRelationships() {
-		Rollup rollup = new Rollup(Account.SObjectType);
-		// Create two relationship objects for the same ChildRelationship
-		Rollup.Relationship rel1 = new Rollup.Relationship(Opportunity.AccountId)
-			.addRequest(new Rollup.Request(Account.NumberOfEmployees, new MockCalculator()));
-		Rollup.Relationship rel2 = new Rollup.Relationship(Opportunity.AccountId)
-			.addRequest(new Rollup.Request(Account.AnnualRevenue, new MockCalculator()));
+    // **** HELPER **** //
+    static List<Account> initMockAccounts(Integer numAccs) {
+        DatabaseLayer.setDmlEngine(new DmlMock());
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < numAccs; i++) {
+            List<Opportunity> opportunities = new List<Opportunity>();
+            for (Integer n = 0; n < 10; n++) {
+                Opportunity opp = new Opportunity(
+                    Id = DmlMock.generateFakeId(Opportunity.SObjectType), 
+                    Amount = 100
+                );
+                opportunities.add(opp);
+            }
+            Account account = (Account) SObjectUtils.setRelatedList(
+                new Account(Name = 'Test Account #' + i),
+                SchemaUtils.getChildRelationship(Opportunity.AccountId),
+                opportunities
+            );
+            accounts.add(account);
+        }
+        DatabaseLayer.Dml.doInsert(accounts);
+        return accounts;
+    }
 
-		Test.startTest();
-		rollup.addRelationship(rel1).addRelationship(rel2);
-		Test.stopTest();
+    static Rollup.Target initTestTarget() {
+        return new Rollup.Target(Account.SObjectType)
+            .addOperation(Opportunity.AccountId, new Rollup.Operation(
+                Account.NumberOfEmployees, 
+                new CountCalculator()
+            ))
+            .addOperation(Opportunity.AccountId, new Rollup.Operation(
+                Account.AnnualRevenue,
+                new SumCalculator().setCalcField(Opportunity.Amount)
+            ));
+    }
 
-		System.assertEquals(1, rollup.relationships?.size(), 'Wrong # of relationsihps');
-		Rollup.Relationship relationship = rollup.relationships.values()[0];
-		System.assertEquals(2, relationship.requests?.size(), 'Wrong # of requests');
-	}
+    static void testJobType(Id jobId, Runtime.Context jobType) {
+        DatabaseLayer.setQueryEngine(new Soql.Factory()); 
+        Soql query = DatabaseLayer.Soql.newQuery(AsyncApexJob.SObjectType).selectFields(AsyncApexJob.JobType);
+        AsyncApexJob job = (AsyncApexJob) CollectionUtils.getIndexOf(query.run(), 0); 
+        System.assertEquals(jobType.name()?.toUpperCase(), job?.JobType?.toUpperCase(), 'Not a ' + jobType.name());
+    }
 
-	@IsTest 
-	static void shouldConstructRequestWithFilter() {
-		Filter filter = new Filter(Opportunity.Amount, Filter.GREATER_THAN, 1000);
-		Rollup.Request request = new Rollup.Request(
-			Account.AnnualRevenue, 
-			new CountCalculator(), 
-			filter
-		);
-		System.assertEquals(1, request?.logic?.getCriteria()?.size(), 'Wrong # of filters added'); 
-	}
-
-	// **** HELPER **** //
-	@TestSetup
-	static void setup() {
-		Account account = new Account(Name = 'Test Account');
-		Databaselayer.Dml.doInsert(account);
-		List<Opportunity> opportunities = new List<Opportunity>();
-		for (Integer i = 0; i < 3; i++) {
-			opportunities.add(
-				new Opportunity(
-					AccountId = account.Id,
-					Amount = 1000,
-					CloseDate = Date.today(),
-					Name = 'Test Opportunity #' + (i + 1),
-					StageName = 'New'
-				)
-			);
-		}
-		Databaselayer.Dml.doInsert(opportunities);
-	}
-
-	private static Rollup getSumCalculator() {
-		return new Rollup(Account.SObjectType)
-			.addRelationship(
-				new Rollup.Relationship(Opportunity.AccountId)
-					.addRequest(
-						new Rollup.Request(
-							Account.AnnualRevenue,
-							new SumCalculator()?.setCalcField(new FieldRef(Opportunity.Amount))
-						)
-					)
-			);
-	}
-
-	// **** INNER **** //
-	public class MockCalculator extends Rollup.Calculator {
-	}
+    public class MockCalculator extends Rollup.Calculator {}
 }

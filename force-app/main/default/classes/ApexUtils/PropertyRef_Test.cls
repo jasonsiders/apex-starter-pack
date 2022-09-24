@@ -69,6 +69,14 @@ private class PropertyRef_Test {
         System.assertEquals(outerObj?.innerClass?.value, propertyMap?.get(parentRef), 'Wrong parentRef.innerClass.value');
     }
 
+    @IsTest 
+    static void shouldReturnHashCode() {
+        // Mapping test above doesn't always use the hashCode() method
+        // This is mostly for test coverage
+        PropertyRef obj = new PropertyRef('Id');
+        System.assertNotEquals(null, obj.hashCode(), 'Null hashCode');
+    }
+
     // **** HELPER **** // 
     public class OuterClass {
         InnerClass innerClass = new InnerClass(); 

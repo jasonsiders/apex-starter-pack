@@ -17,7 +17,7 @@ private class CountCalculator_Test {
 		System.assertEquals(numAccounts, calc.calculate(accounts), 'Wrong COUNT of accounts');
 	}
 
-	@IsTest
+	@IsTest 
 	static void shouldReturn0IfNullRecordList() {
 		Rollup.Calculator calc = new CountCalculator();
 		System.assertEquals(0, calc.calculate(null), 'Null records did not return a COUNT of 0');

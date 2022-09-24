@@ -54,14 +54,6 @@ public virtual class Filter implements ICriteria {
 		this(new FieldRef(field), operatorType, value);
 	}
 
-	public Filter(Filter__mdt filterRecord) {
-		this(
-			filterRecord?.SObjectField__c,
-			Filter.getOperationByAbbreviation(filterRecord?.Operator__c),
-			TypeUtils.parseStringValue(filterRecord?.Value__c)
-		);
-	}
-
 	public Boolean meetsCriteria(SObject record) {
 		// Returns TRUE if the given record meets the Filter's criteria
 		Object recordValue = this.property.getValue(record); 
@@ -173,11 +165,6 @@ public virtual class Filter implements ICriteria {
 			results.add(this.processDateTime(item));
 		}
 		return '(' + String.join(results, ', ') + ')';
-	}
-
-	// **** STATIC **** //
-	static Type getOperationByAbbreviation(String abbreviation) {
-		return Filter.OPERATOR_ABBREVIATIONS?.get(abbreviation);
 	}
 
 	// **** INNER **** //
