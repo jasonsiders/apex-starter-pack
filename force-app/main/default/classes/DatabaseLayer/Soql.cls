@@ -211,7 +211,7 @@ public inherited sharing virtual class Soql {
 				this.getLimit('OFFSET', this.rowOffset),
 				this.getUsage()
 			},
-			new Filter.PrimitiveFilter(Filter.NOT_EQUALS, null),
+			new PrimitiveFilter(Filter.NOT_EQUALS, null),
 			List<String>.class
 		);
 		return String.join(optionalArgs, ' ');

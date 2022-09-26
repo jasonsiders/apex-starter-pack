@@ -881,13 +881,6 @@ private class Filter_Test {
 	}
 
 	@IsTest
-	static void shouldGeneratePrimitiveFilter() {
-		Filter myFilter = new Filter.PrimitiveFilter(Filter.EQUALS, 0);
-		System.assertEquals(true, myFilter.meetsCriteria(0), '0 != 0');
-		System.assertEquals(false, myFilter.meetsCriteria('Hello World!'), '"Hello World!" == 0');
-	}
-
-	@IsTest
 	static void shouldGenerateInnerQueryFilter() {
 		// If a query is passed as the value, wrap it in parentheses to avoid syntax errors
 		Soql innerQuery = Databaselayer.Soql.newQuery(User.SObjectType)

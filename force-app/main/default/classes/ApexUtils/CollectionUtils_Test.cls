@@ -61,7 +61,7 @@ private class CollectionUtils_Test {
 	@IsTest
 	static void shouldFilterListOfPrimitiveTypes() {
 		List<Integer> items = new List<Integer>{ 1, 2, 3, 4, 5 };
-		Filter myFilter = new Filter.PrimitiveFilter(Filter.GREATER_THAN, 1);
+		Filter myFilter = new PrimitiveFilter(Filter.GREATER_THAN, 1);
 
 		Test.startTest();
 		List<Integer> filtered = (List<Integer>) CollectionUtils.filterCollection(items, myFilter, List<Integer>.class);
