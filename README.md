@@ -17,10 +17,10 @@ This repository includes the following libraries:
 
 ### **For General Use**
 
-Click below to deploy the latest version of `apex-starter-pack`:
+`apex-starter-pack` is available as an unlocked package. Click the appropriate link below to install the latest version:
 
 <p>
-    <a href="https://githubsfdeploy.herokuapp.com/app/githubdeploy/jasonsiders/apex-starter-pack">
+    <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnmAAC">
         <img 
             alt="Deploy to Salesforce (Production/Developer Edition)" 
             src="media/prod-deploy.png" 
@@ -28,7 +28,7 @@ Click below to deploy the latest version of `apex-starter-pack`:
         >
     </a>    
     &emsp;
-    <a href="https://githubsfdeploy-sandbox.herokuapp.com/app/githubdeploy/jasonsiders/apex-starter-pack">
+    <a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnmAAC">
     <img 
         alt="Deploy to Salesforce (Sandbox)" 
         src="media/sb-deploy.png" 
