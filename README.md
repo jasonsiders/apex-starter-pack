@@ -20,7 +20,7 @@ This repository includes the following libraries:
 `apex-starter-pack` is available as an unlocked package. Click the appropriate link below to install the latest version:
 
 <p>
-    <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnmAAC">
+    <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnrAAC">
         <img 
             alt="Deploy to Salesforce (Production/Developer Edition)" 
             src="media/prod-deploy.png" 
@@ -28,7 +28,7 @@ This repository includes the following libraries:
         >
     </a>    
     &emsp;
-    <a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnmAAC">
+    <a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04t8b000001RvnrAAC">
     <img 
         alt="Deploy to Salesforce (Sandbox)" 
         src="media/sb-deploy.png" 
