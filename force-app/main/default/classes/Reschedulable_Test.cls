@@ -23,7 +23,6 @@ private class Reschedulable_Test extends Reschedulable {
     }
 
     public override void doScheduledActions(System.SchedulableContext context) {
-        System.debug('Inserting accounts');
         List<Account> accounts = new List<Account>();
         for (Integer i = 0; i < 200; i++) {
             Account account = new Account(Name = 'Test Account #' + i);
