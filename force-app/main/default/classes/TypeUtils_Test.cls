@@ -222,6 +222,13 @@ private class TypeUtils_Test {
 		System.assertEquals(null, TypeUtils.parseStringValue(null), 'Not null');
 	}
 
+	@IsTest
+	static void shouldGetLocalNameOfType() {
+		Type myType = TypeUtils_Test.class;
+		String localName = 'TypeUtils_Test';
+		System.assertEquals(localName, TypeUtils.getLocalName(myType), 'Unexpected type name');
+	}
+
 	public class Example {
 	}
 }

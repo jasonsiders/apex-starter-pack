@@ -23,6 +23,13 @@ public abstract class TypeUtils {
 		return null;
 	}
 
+	public static String getLocalName(Type myType) {
+		// Retrieve the name of a type sans-namespace
+		String namespace = NamespaceUtils.getCurrent() + '.';
+		String fullName = myType?.getName();
+		return fullName?.removeStart(namespace);
+	}
+
 	public static Boolean isList(Object obj) {
 		return TypeUtils.getType(obj)?.getName()?.startsWith(LIST_PREFIX);
 	}
