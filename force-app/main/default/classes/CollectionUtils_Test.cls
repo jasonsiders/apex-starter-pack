@@ -72,32 +72,33 @@ private class CollectionUtils_Test {
 		}
 	}
 
-	@IsTest 
-    static void shouldGetIndexOfCollection() {
-		List<Account> accounts = new List<Account>(); 
+	@IsTest
+	static void shouldGetIndexOfCollection() {
+		List<Account> accounts = new List<Account>();
 		for (Integer i = 0; i < 10; i++) {
-			Account account = new Account(
-				BillingCountry = 'US', 
-				Name = 'Test Account #' + i
-			);
-			accounts.add(account);  
+			Account account = new Account(BillingCountry = 'US', Name = 'Test Account #' + i);
+			accounts.add(account);
 		}
-        
-        // If index is in bounds, will return the value corresponding to that index
-        for (Integer i = 0; i < accounts?.size(); i++) {
-            Account account = (Account) CollectionUtils.getIndexOf(accounts, i);
-            System.assertEquals(accounts[i], account, 'Wrong Account returned'); 
-        }
 
-        // If index is out of bounds, will return null
-        for (Integer illegalIndex : new List<Integer>{-1, accounts?.size() + 1, null}) {
-            System.assertEquals(null, CollectionUtils.getIndexOf(accounts, illegalIndex), 'Illegal index did not return null');
-        }
+		// If index is in bounds, will return the value corresponding to that index
+		for (Integer i = 0; i < accounts?.size(); i++) {
+			Account account = (Account) CollectionUtils.getIndexOf(accounts, i);
+			System.assertEquals(accounts[i], account, 'Wrong Account returned');
+		}
 
-        // If empty/null list, will return null
-        System.assertEquals(null, CollectionUtils.getIndexOf(new List<Account>(), 0), 'Empty list did not return null');
-        System.assertEquals(null, CollectionUtils.getIndexOf(null, 0), 'Null list did not return null');
-    }
+		// If index is out of bounds, will return null
+		for (Integer illegalIndex : new List<Integer>{ -1, accounts?.size() + 1, null }) {
+			System.assertEquals(
+				null,
+				CollectionUtils.getIndexOf(accounts, illegalIndex),
+				'Illegal index did not return null'
+			);
+		}
+
+		// If empty/null list, will return null
+		System.assertEquals(null, CollectionUtils.getIndexOf(new List<Account>(), 0), 'Empty list did not return null');
+		System.assertEquals(null, CollectionUtils.getIndexOf(null, 0), 'Null list did not return null');
+	}
 
 	@IsTest
 	static void shouldReturnIndexSizeOfList() {
@@ -135,37 +136,33 @@ private class CollectionUtils_Test {
 		}
 	}
 
-	@IsTest 
-    static void shouldSplitListIntoChunks() {
-        List<Account> accs = CollectionUtils_Test.initAccounts(1000); 
-        Integer interval = 300; 
-        // This should produce 3 lists w/300 Accounts + 1 list w/100 Accounts
-        
-        Test.startTest();
-        List<List<Account>> results = (List<List<Account>>) CollectionUtils.split(
-            accs, 
-            interval, 
-            List<List<Account>>.class
-        );
-        Test.stopTest();
+	@IsTest
+	static void shouldSplitListIntoChunks() {
+		List<Account> accs = CollectionUtils_Test.initAccounts(1000);
+		Integer interval = 300;
+		// This should produce 3 lists w/300 Accounts + 1 list w/100 Accounts
 
-        System.assertEquals(4, results?.size(), 'Wrong # of List<Account> returned');
-        System.assertEquals(interval, results[0]?.size(), 'Wrong # of Accounts in first list');
-        System.assertEquals(interval, results[1]?.size(), 'Wrong # of Accounts in second list');
-        System.assertEquals(interval, results[2]?.size(), 'Wrong # of Accounts in third list');
-        System.assertEquals(100, results[3]?.size(), 'Wrong # of Accounts in final list');
-        System.assertEquals(1000, accs?.size(), 'Original list was transformed');
-    }
+		Test.startTest();
+		List<List<Account>> results = (List<List<Account>>) CollectionUtils.split(
+			accs,
+			interval,
+			List<List<Account>>.class
+		);
+		Test.stopTest();
+
+		System.assertEquals(4, results?.size(), 'Wrong # of List<Account> returned');
+		System.assertEquals(interval, results[0]?.size(), 'Wrong # of Accounts in first list');
+		System.assertEquals(interval, results[1]?.size(), 'Wrong # of Accounts in second list');
+		System.assertEquals(interval, results[2]?.size(), 'Wrong # of Accounts in third list');
+		System.assertEquals(100, results[3]?.size(), 'Wrong # of Accounts in final list');
+		System.assertEquals(1000, accs?.size(), 'Original list was transformed');
+	}
 
 	// **** HELPER **** //
 	static List<Account> initAccounts(Integer numAccs) {
 		List<Account> accounts = new List<Account>();
 		for (Integer i = 0; i < numAccs; i++) {
-			accounts.add(new Account(
-				AnnualRevenue = 1000 * i, 
-				BillingCountry = 'US',
-				OwnerId = UserInfo.getUserId()
-			));
+			accounts.add(new Account(AnnualRevenue = 1000 * i, BillingCountry = 'US', OwnerId = UserInfo.getUserId()));
 		}
 		return accounts;
 	}
