@@ -10,7 +10,7 @@ private class Soql_Test {
 	@IsTest
 	static void shouldGenerateQueryWihAllFields() {
 		Soql query = new Soql(Account.SObjectType).selectAll();
-		for (SObjectField field : SchemaUtils.describeSObject(Account.SObjectType)?.fields?.getMap()?.values()) {
+		for (SObjectField field : Account.SObjectType?.getDescribe()?.fields?.getMap()?.values()) {
 			String fieldName = String.valueOf(field);
 			System.assert(
 				query.selectClauses?.contains(fieldName),

@@ -1,21 +1,4 @@
 public abstract class SchemaUtils {
-	static Map<SObjectField, DescribeFieldResult> FieldDescribes;
-	static Map<SObjectType, DescribeSObjectResult> SObjectDescribes;
-	static Map<SObjectField, ChildRelationship> ChildRelationships;
-
-	static {
-		SchemaUtils.FieldDescribes = new Map<SObjectField, DescribeFieldResult>();
-		SchemaUtils.SObjectDescribes = new Map<SObjectType, DescribeSObjectResult>();
-		SchemaUtils.ChildRelationships = new Map<SObjectField, ChildRelationship>();
-	}
-
-	public static DescribeSObjectResult describeSObject(SObjectType objectType) {
-		if (SchemaUtils.SObjectDescribes.containsKey(objectType) == false) {
-			SchemaUtils.SObjectDescribes.put(objectType, objectType?.getDescribe());
-		}
-		return SchemaUtils.SObjectDescribes.get(objectType);
-	}
-
 	public static SObjectType getSObjectType(String objectName) {
 		try {
 			return ((SObject) Type.forName(objectName)?.newInstance())?.getSObjectType();
@@ -44,19 +27,12 @@ public abstract class SchemaUtils {
 	public static SObjectType getParentSObjectType(SObjectField lookupField) {
 		// Retrieves the parent SObjectType that a lookup field points to
 		// Any non-lookup fields will return null
-		List<SObjectType> parentSObjectTypes = SchemaUtils.describeField(lookupField)?.getReferenceTo();
+		List<SObjectType> parentSObjectTypes = lookupField?.getDescribe()?.getReferenceTo();
 		return (parentSObjectTypes?.isEmpty() == false) ? parentSObjectTypes[0] : null;
 	}
 
-	public static DescribeFieldResult describeField(SObjectField field) {
-		if (SchemaUtils.FieldDescribes.containsKey(field) == false) {
-			SchemaUtils.FieldDescribes.put(field, field?.getDescribe());
-		}
-		return SchemaUtils.FieldDescribes.get(field);
-	}
-
 	public static SObjectField getSObjectField(SObjectType objectType, String fieldName) {
-		return SchemaUtils.describeSObject(objectType)?.fields?.getMap().get(fieldName);
+		return objectType?.getDescribe()?.fields?.getMap().get(fieldName);
 	}
 
 	public static String getSoqlReference(List<SObjectField> fields) {
@@ -69,7 +45,7 @@ public abstract class SchemaUtils {
 			SObjectField lastField = fields[maxIndex];
 			for (SObjectField field : fields) {
 				String reference = (field != lastField)
-					? SchemaUtils.describeField(field)?.getRelationshipName()
+					? field?.getDescribe()?.getRelationshipName()
 					: String.valueOf(field);
 				references.add(reference);
 			}
@@ -79,12 +55,14 @@ public abstract class SchemaUtils {
 
 	public static ChildRelationship getChildRelationship(SObjectField lookupField) {
 		SObjectType parentObject = SchemaUtils.getParentSObjectType(lookupField);
-		if (parentObject != null && SchemaUtils.ChildRelationships.containsKey(lookupField) == false) {
-			// Map all relationships for the parent SObjectType by the relationship's lookup field
-			for (ChildRelationship relationship : SchemaUtils.describeSObject(parentObject)?.getChildRelationships()) {
-				SchemaUtils.ChildRelationships.put(relationship?.getField(), relationship);
+		List<ChildRelationship> rels = parentObject?.getDescribe()?.getChildRelationships();
+		rels = (rels != null) ? rels : new List<ChildRelationship>(); 
+		for (ChildRelationship rel : rels) {
+			SObjectField relField = rel?.getField(); 
+			if (relField == lookupField) {
+				return rel; 
 			}
 		}
-		return SchemaUtils.ChildRelationships.get(lookupField);
+		return null; 
 	}
 }

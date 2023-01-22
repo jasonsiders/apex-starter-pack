@@ -7,7 +7,7 @@ public abstract class SObjectUtils {
 		Map<String, Object> mappedParent = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(parent));
 		mappedParent.put('attributes', new RecordAttributes(parent));
 		// Link the parent back to the target
-		mappedTarget.put(SchemaUtils.describeField(lookupField)?.getRelationshipName(), mappedParent);
+		mappedTarget.put(lookupField?.getDescribe()?.getRelationshipName(), mappedParent);
 		return (SObject) JSON.deserialize(JSON.serialize(mappedTarget), SObject.class);
 	}
 
