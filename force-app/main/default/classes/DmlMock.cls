@@ -3,7 +3,7 @@ public class DmlMock extends Dml {
 	static Integer numIdsGenerated = 0;
 
 	public static Id generateFakeId(SObjectType objectType) {
-		String prefix = SchemaUtils.describeSObject(objectType)?.getKeyPrefix();
+		String prefix = objectType?.getDescribe()?.getKeyPrefix();
 		String suffix = String.valueOf(numIdsGenerated++);
 		return prefix + '0'.repeat(15 - suffix?.length()) + suffix;
 	}

@@ -82,10 +82,7 @@ public inherited sharing virtual class Soql {
 	}
 
 	public Soql selectAll() {
-		List<SObjectField> allFields = SchemaUtils.describeSObject(this.fromSObject?.toSchemaType())
-			?.fields
-			?.getMap()
-			?.values();
+		List<SObjectField> allFields = this.fromSObject?.toSchemaType()?.getDescribe()?.fields?.getMap()?.values();
 		return this.selectFields(allFields);
 	}
 
