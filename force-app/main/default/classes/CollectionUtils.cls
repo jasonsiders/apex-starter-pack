@@ -42,11 +42,14 @@ public abstract class CollectionUtils {
 	}
 
 	public static Object getIndexOf(List<Object> items, Integer index) {
-		// Safely returns an item at a given index. If the index does not exist, will return null
-		// Note: Indexes starts at 0, but <List>.size() starts at 1
-		Integer size = (items != null) ? items?.size() : 0;
-		Integer minSize = (index + 1);
-		return (size >= minSize) ? items[index] : null;
+		if (index != null && items != null) {
+			Integer size = items?.size();
+			Integer minSize = (index + 1);
+			Integer maxIndex = size - 1;
+			Boolean isValid = (size >= minSize && index >= 0 && index <= maxIndex);
+			return (isValid) ? items[index] : null;
+		}
+		return null;
 	}
 
 	public static Integer getMaxIndex(List<Object> items) {
@@ -68,5 +71,23 @@ public abstract class CollectionUtils {
 
 	public static Object extractValues(List<Object> items, SObjectField field, Type returnType) {
 		return CollectionUtils.extractValues(items, String.valueOf(field), returnType);
+	}
+
+	public static Object split(List<Object> items, Integer chunkSize, Type resultType) {
+		List<Object> shallowCopy = items?.clone(); // Avoid transforming the original list
+		List<Object> results = new List<Object>();
+		while (shallowCopy?.isEmpty() == false) {
+			List<Object> current = new List<Object>();
+			for (Integer i = 0; i < chunkSize; i++) {
+				Integer maxIndex = CollectionUtils.getMaxIndex(shallowCopy);
+				Object lastItem = CollectionUtils.getIndexOf(shallowCopy, maxIndex);
+				if (lastItem != null) {
+					current?.add(lastItem);
+					shallowCopy?.remove(maxIndex);
+				}
+			}
+			results.add(current);
+		}
+		return JSON.deserialize(JSON.serialize(results), resultType);
 	}
 }

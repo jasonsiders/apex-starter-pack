@@ -2,7 +2,7 @@
 private class CollectionUtils_Test {
 	@IsTest
 	static void shouldMapByUniqueKey() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 
 		Test.startTest();
 		Map<Decimal, Account> accountsByRevenue = (Map<Decimal, Account>) CollectionUtils.mapByUniqueKey(
@@ -21,7 +21,7 @@ private class CollectionUtils_Test {
 
 	@IsTest
 	static void shouldMapByCommonKey() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 
 		Test.startTest();
 		Map<Id, List<Account>> accountsByOwner = (Map<Id, List<Account>>) CollectionUtils.mapByCommonKey(
@@ -37,7 +37,7 @@ private class CollectionUtils_Test {
 
 	@IsTest
 	static void shouldFilterListOfComplexTypes() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 		Filter myFilter = new Filter(Account.AnnualRevenue, Filter.NOT_EQUALS, 1000);
 
 		Test.startTest();
@@ -73,19 +73,31 @@ private class CollectionUtils_Test {
 	}
 
 	@IsTest
-	static void shouldReturnIndexOfList() {
-		List<String> items = new List<String>{ 'foo', 'bar', 'hello world!' };
-		// Get items with legal indeces
-		for (Integer i = 0; i < items?.size(); i++) {
-			String item = items[i];
-			System.assertEquals(item, CollectionUtils.getIndexOf(items, i), 'Incorrect result');
+	static void shouldGetIndexOfCollection() {
+		List<Account> accounts = new List<Account>();
+		for (Integer i = 0; i < 10; i++) {
+			Account account = new Account(BillingCountry = 'US', Name = 'Test Account #' + i);
+			accounts.add(account);
 		}
-		// Get items with an illegal index
-		System.assertEquals(
-			null,
-			CollectionUtils.getIndexOf(items, 3),
-			'items[3] is out of bounds, but returned a result anyways'
-		);
+
+		// If index is in bounds, will return the value corresponding to that index
+		for (Integer i = 0; i < accounts?.size(); i++) {
+			Account account = (Account) CollectionUtils.getIndexOf(accounts, i);
+			System.assertEquals(accounts[i], account, 'Wrong Account returned');
+		}
+
+		// If index is out of bounds, will return null
+		for (Integer illegalIndex : new List<Integer>{ -1, accounts?.size() + 1, null }) {
+			System.assertEquals(
+				null,
+				CollectionUtils.getIndexOf(accounts, illegalIndex),
+				'Illegal index did not return null'
+			);
+		}
+
+		// If empty/null list, will return null
+		System.assertEquals(null, CollectionUtils.getIndexOf(new List<Account>(), 0), 'Empty list did not return null');
+		System.assertEquals(null, CollectionUtils.getIndexOf(null, 0), 'Null list did not return null');
 	}
 
 	@IsTest
@@ -124,11 +136,33 @@ private class CollectionUtils_Test {
 		}
 	}
 
+	@IsTest
+	static void shouldSplitListIntoChunks() {
+		List<Account> accs = CollectionUtils_Test.initAccounts(1000);
+		Integer interval = 300;
+		// This should produce 3 lists w/300 Accounts + 1 list w/100 Accounts
+
+		Test.startTest();
+		List<List<Account>> results = (List<List<Account>>) CollectionUtils.split(
+			accs,
+			interval,
+			List<List<Account>>.class
+		);
+		Test.stopTest();
+
+		System.assertEquals(4, results?.size(), 'Wrong # of List<Account> returned');
+		System.assertEquals(interval, results[0]?.size(), 'Wrong # of Accounts in first list');
+		System.assertEquals(interval, results[1]?.size(), 'Wrong # of Accounts in second list');
+		System.assertEquals(interval, results[2]?.size(), 'Wrong # of Accounts in third list');
+		System.assertEquals(100, results[3]?.size(), 'Wrong # of Accounts in final list');
+		System.assertEquals(1000, accs?.size(), 'Original list was transformed');
+	}
+
 	// **** HELPER **** //
-	static List<Account> getTestData() {
+	static List<Account> initAccounts(Integer numAccs) {
 		List<Account> accounts = new List<Account>();
-		for (Integer i = 0; i < 10; i++) {
-			accounts.add(new Account(AnnualRevenue = 1000 * i, OwnerId = UserInfo.getUserId()));
+		for (Integer i = 0; i < numAccs; i++) {
+			accounts.add(new Account(AnnualRevenue = 1000 * i, BillingCountry = 'US', OwnerId = UserInfo.getUserId()));
 		}
 		return accounts;
 	}
