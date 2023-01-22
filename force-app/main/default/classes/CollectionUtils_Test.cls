@@ -2,7 +2,7 @@
 private class CollectionUtils_Test {
 	@IsTest
 	static void shouldMapByUniqueKey() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 
 		Test.startTest();
 		Map<Decimal, Account> accountsByRevenue = (Map<Decimal, Account>) CollectionUtils.mapByUniqueKey(
@@ -21,7 +21,7 @@ private class CollectionUtils_Test {
 
 	@IsTest
 	static void shouldMapByCommonKey() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 
 		Test.startTest();
 		Map<Id, List<Account>> accountsByOwner = (Map<Id, List<Account>>) CollectionUtils.mapByCommonKey(
@@ -37,7 +37,7 @@ private class CollectionUtils_Test {
 
 	@IsTest
 	static void shouldFilterListOfComplexTypes() {
-		List<Account> testData = getTestData();
+		List<Account> testData = CollectionUtils_Test.initAccounts(10);
 		Filter myFilter = new Filter(Account.AnnualRevenue, Filter.NOT_EQUALS, 1000);
 
 		Test.startTest();
@@ -135,11 +135,37 @@ private class CollectionUtils_Test {
 		}
 	}
 
+	@IsTest 
+    static void shouldSplitListIntoChunks() {
+        List<Account> accs = CollectionUtils_Test.initAccounts(1000); 
+        Integer interval = 300; 
+        // This should produce 3 lists w/300 Accounts + 1 list w/100 Accounts
+        
+        Test.startTest();
+        List<List<Account>> results = (List<List<Account>>) CollectionUtils.split(
+            accs, 
+            interval, 
+            List<List<Account>>.class
+        );
+        Test.stopTest();
+
+        System.assertEquals(4, results?.size(), 'Wrong # of List<Account> returned');
+        System.assertEquals(interval, results[0]?.size(), 'Wrong # of Accounts in first list');
+        System.assertEquals(interval, results[1]?.size(), 'Wrong # of Accounts in second list');
+        System.assertEquals(interval, results[2]?.size(), 'Wrong # of Accounts in third list');
+        System.assertEquals(100, results[3]?.size(), 'Wrong # of Accounts in final list');
+        System.assertEquals(1000, accs?.size(), 'Original list was transformed');
+    }
+
 	// **** HELPER **** //
-	static List<Account> getTestData() {
+	static List<Account> initAccounts(Integer numAccs) {
 		List<Account> accounts = new List<Account>();
-		for (Integer i = 0; i < 10; i++) {
-			accounts.add(new Account(AnnualRevenue = 1000 * i, OwnerId = UserInfo.getUserId()));
+		for (Integer i = 0; i < numAccs; i++) {
+			accounts.add(new Account(
+				AnnualRevenue = 1000 * i, 
+				BillingCountry = 'US',
+				OwnerId = UserInfo.getUserId()
+			));
 		}
 		return accounts;
 	}

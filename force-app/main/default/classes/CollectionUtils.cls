@@ -72,4 +72,22 @@ public abstract class CollectionUtils {
 	public static Object extractValues(List<Object> items, SObjectField field, Type returnType) {
 		return CollectionUtils.extractValues(items, String.valueOf(field), returnType);
 	}
+
+	public static Object split(List<Object> items, Integer chunkSize, Type resultType) {
+        List<Object> shallowCopy = items?.clone(); // Avoid transforming the original list
+        List<Object> results = new List<Object>();
+        while(shallowCopy?.isEmpty() == false) {
+            List<Object> current = new List<Object>();
+            for (Integer i = 0; i < chunkSize; i++) {
+                Integer maxIndex = CollectionUtils.getMaxIndex(shallowCopy);
+                Object lastItem = CollectionUtils.getIndexOf(shallowCopy, maxIndex);
+                if (lastItem != null) {
+                    current?.add(lastItem);
+                    shallowCopy?.remove(maxIndex);
+                }
+            }
+            results.add(current); 
+        }  
+        return JSON.deserialize(JSON.serialize(results), resultType);
+    }
 }
