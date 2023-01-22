@@ -1,20 +1,15 @@
 {
-    "packageDirectories": [
-        {
-            "path": "force-app",
-            "default": true,
-            "package": "Apex Starter Pack",
-            "versionName": "v1.0.0",
-            "versionNumber": "1.0.0.NEXT"
-        }
-    ],
-    "name": "apex-starter-pack",
-    "namespace": "",
-    "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "54.0",
-    "packageAliases": {
-        "Apex Starter Pack": "0Ho8b000000sXutCAE",
-        "Apex Starter Pack@0.2.0-1": "04t8b000001RvnmAAC",
-        "Apex Starter Pack@1.0.0-1": "04t8b000001RvnrAAC"
-    }
+	"packageDirectories": [
+		{
+			"path": "force-app",
+			"default": true,
+			"package": "apex-starter-pack",
+			"versionName": "v1.0.0",
+			"versionNumber": "1.0.0.NEXT"
+		}
+	],
+	"name": "apex-starter-pack",
+	"namespace": "",
+	"sfdcLoginUrl": "https://login.salesforce.com",
+	"sourceApiVersion": "56.0"
 }

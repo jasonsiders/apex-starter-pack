@@ -8,9 +8,6 @@ This repository includes the following libraries:
 
 -   [ApexUtils](force-app/main/default/classes/ApexUtils): A collection of utility classes designed to make your life easier.
 -   [DatabaseLayer](force-app/main/default/classes/DatabaseLayer): A DML & SOQL mocking framework.
--   [GarbageCollection](force-app/main/default/classes/GarbageCollection): A framework for automatically handling stale data.
--   [Logger](force-app/main/default/classes/Logger): A simple logging framework that gives targeted visibility into complex processes.
--   [Rollup](force-app/main/default/classes/Rollup): Create custom rollup operations via Apex or Flow.
 -   [TriggerHandler](force-app/main/default/classes/TriggerHandler): A basic Trigger Handler with utility methods to make trigger operations a breeze.
 
 ## Installation
