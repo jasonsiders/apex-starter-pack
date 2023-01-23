@@ -108,9 +108,9 @@ private class AsyncDml_Test {
 		AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, account));
 
 		Test.startTest();
-		// Prevent the job from running - must be in the same Test.start/stopTest context 
+		// Prevent the job from running - must be in the same Test.start/stopTest context
 		for (Integer i = 0; i < Limits.getLimitQueueableJobs(); i++) {
-			System.enqueueJob(new ExampleQueueable()); 
+			System.enqueueJob(new ExampleQueueable());
 		}
 		Id jobId = AsyncDml.runJob();
 		Test.stopTest();
@@ -136,7 +136,7 @@ private class AsyncDml_Test {
 
 	private class ExampleQueueable implements System.Queueable {
 		public void execute(System.QueueableContext context) {
-			System.debug('Queueable ran'); 
+			System.debug('Queueable ran');
 		}
 	}
 }
