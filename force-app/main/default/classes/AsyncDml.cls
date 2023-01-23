@@ -7,7 +7,8 @@ public abstract inherited sharing class AsyncDml {
 
 	public static Id runJob() {
 		Id jobId;
-		if (LimitUtils.isQueueableSafe()) {
+		Boolean hasQueueableCapacity = Limits.getQueueableJobs() < Limits.getLimitQueueableJobs();
+		if (hasQueueableCapacity) {
 			jobId = System.enqueueJob(container);
 		} else {
 			// If the job can't be done via queueable, try to process the requests synchronously

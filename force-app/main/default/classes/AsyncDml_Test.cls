@@ -106,9 +106,12 @@ private class AsyncDml_Test {
 	static void shouldInsertSynchronouslyIfLimitsReached() {
 		Account account = new Account(Name = 'Test Account');
 		AsyncDml.addRequest(new AsyncDml.Request(Dml.Operation.DO_INSERT, account));
-		LimitUtils.instance = new LimitsMock();
 
 		Test.startTest();
+		// Prevent the job from running - must be in the same Test.start/stopTest context
+		for (Integer i = 0; i < Limits.getLimitQueueableJobs(); i++) {
+			System.enqueueJob(new ExampleQueueable());
+		}
 		Id jobId = AsyncDml.runJob();
 		Test.stopTest();
 
@@ -131,11 +134,9 @@ private class AsyncDml_Test {
 		System.assertEquals(null, account.Id, 'Invalid Account was inserted');
 	}
 
-	// **** HELPER **** //
-	public class LimitsMock extends LimitUtils {
-		public override Boolean checkIfQueueableIsSafe() {
-			// Simulate an instance where a new job cannot be enqueued safely
-			return false;
+	private class ExampleQueueable implements System.Queueable {
+		public void execute(System.QueueableContext context) {
+			System.debug('Queueable ran');
 		}
 	}
 }
