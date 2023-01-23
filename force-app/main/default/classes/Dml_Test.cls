@@ -12,7 +12,7 @@ private class Dml_Test {
 	}
 
 	@IsTest
-	static void shouldDoInsert() { 
+	static void shouldDoInsert() {
 		Account account = new Account(Name = 'Test Account #0');
 		Test.startTest();
 		DmlResult dmlResult = DB.Dml.doInsert(account);
@@ -165,9 +165,9 @@ private class Dml_Test {
 		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
 	}
 
-	@IsTest 
+	@IsTest
 	static void shouldDoInsertImmediate() {
-		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects;
 		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
 		Account testAccount = new Account(Name = 'Test Account #0');
 
@@ -181,13 +181,14 @@ private class Dml_Test {
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
 		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
-		Soql query = DB.Soql.newQuery(Account.SObjectType).whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id));
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id));
 		System.assertEquals(true, query?.run()?.isEmpty(), 'Account was actually inserted');
 	}
 
-	@IsTest 
+	@IsTest
 	static void shouldDoUpdateImmediate() {
-		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects;
 		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
 		Account testAccount = (Account) DB.Soql.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
 		final String newName = 'Some other name';
@@ -211,7 +212,7 @@ private class Dml_Test {
 
 	@IsTest
 	static void shouldDoDeleteImmediate() {
-		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects;
 		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
 		Account testAccount = (Account) DB.Soql.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
 
