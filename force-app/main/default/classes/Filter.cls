@@ -68,12 +68,12 @@ public virtual class Filter implements ICriteria {
 
 	public override String toString() {
 		List<String> parts = new List<String>{
-			this.property?.toString(), 
+			this.property?.toString(),
 			this.operator?.getToken(),
-			this.formatValue() 
+			this.formatValue()
 		};
 		return String.join(parts, ' ');
-	} 
+	}
 
 	public Set<String> getFieldNames() {
 		return new Set<String>{ this.property?.toString() };
