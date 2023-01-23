@@ -9,7 +9,7 @@ public without sharing abstract class AsyncUtils {
 			SELECT Id, CronTriggerId, CronTrigger.CronExpression, CronTrigger.CronJobDetail.Name, Status
 			FROM AsyncApexJob
 			WHERE
-				ApexClass.Name = :TypeUtils.getLocalName(jobType)
+				ApexClass.Name = :TypeUtils.getLocalTypeName(jobType)
 				AND Id != :currentJobId
 				AND Status IN :PENDING_STATUSES
 			ORDER BY CreatedDate ASC
