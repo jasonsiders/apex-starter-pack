@@ -157,6 +157,18 @@ private class FilterLogic_Test {
 		System.assertEquals(false, outerLogic.meetsCriteria(testAcc), 'Invalid account meets criteria');
 	}
 
+	@IsTest 
+	static void shouldReturnFieldNames() {
+		FilterLogic logic = new AndLogic().addCriteria(new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()));
+
+		Test.startTest();
+		Set<String> fieldNames = logic?.getFieldNames();
+		Test.stopTest();
+
+		System.assertEquals(1, fieldNames?.size(), 'Wrong # of field names'); 
+		System.assertEquals(true, fieldNames?.contains('OwnerId'), 'Wrong field listed'); 
+	}
+
 	// **** HELPER **** //
 	static List<Filter> testFilters = new List<Filter>{
 		new Filter(Account.OwnerId, Filter.EQUALS, UserInfo.getUserId()),
