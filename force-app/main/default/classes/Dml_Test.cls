@@ -537,8 +537,7 @@ private class Dml_Test {
 		DB.Dml.doDml(Dml.Operation.DO_UPSERT, testLead, Lead.Email);
 		Test.stopTest();
 
-		Soql query = DB.Soql.newQuery(Lead.SObjectType)
-			.whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+		Soql query = DB.Soql.newQuery(Lead.SObjectType).whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
 	}
 
@@ -567,8 +566,7 @@ private class Dml_Test {
 		DB.Dml.doDml(Dml.Operation.DO_UPSERT, testLead, Lead.Email, false);
 		Test.stopTest();
 
-		Soql query = DB.Soql.newQuery(Lead.SObjectType)
-			.whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
+		Soql query = DB.Soql.newQuery(Lead.SObjectType).whereCriteria(new Filter(Lead.Id, Filter.EQUALS, testLead.Id));
 		System.assertEquals(false, query.run().isEmpty(), 'Lead was not upserted');
 	}
 
