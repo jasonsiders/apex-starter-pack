@@ -30,13 +30,13 @@ public virtual inherited sharing class Dml {
 				results = DB.Dml.doInsert(records, allOrNone);
 			}
 			when DO_INSERT_IMMEDIATE {
-				return DB.Dml.doInsertImmediate(records); 
+				results = DB.Dml.doInsertImmediate(records); 
 			}
 			when DO_UPDATE {
 				results = DB.Dml.doUpdate(records, allOrNone);
 			}
 			when DO_UPDATE_IMMEDIATE {
-				return DB.Dml.doUpdateImmediate(records); 
+				results = DB.Dml.doUpdateImmediate(records); 
 			}
 			when DO_UPSERT {
 				results = DB.Dml.doUpsert(records, externalIdField, allOrNone);
@@ -45,7 +45,7 @@ public virtual inherited sharing class Dml {
 				results = DB.Dml.doDelete(records, allOrNone);
 			}
 			when DO_DELETE_IMMEDIATE {
-				return DB.Dml.doDeleteImmediate(records); 
+				results = DB.Dml.doDeleteImmediate(records); 
 			}
 			when DO_UNDELETE {
 				results = DB.Dml.doUndelete(records, allOrNone);
@@ -249,11 +249,12 @@ public virtual inherited sharing class Dml {
 		return this.doConvert(new List<Database.LeadConvert>{ leadConvertObj })[0];
 	}
 
-	// Immediate Methods - for Big Objects
+	// Big Object Methods
 	public virtual List<DmlResult> doInsertImmediate(List<SObject> records) {
-		List<Database.SaveResult> results = Database.insertImmediate(records);
-		Dml.Inserted?.add(records);
-		return DmlResult.wrap(results);
+		// Note: Big Objects cannot be manipulated in @IsTest context - ever
+		Boolean canDml = !Test.isRunningTest();
+		List<Database.SaveResult> results = (canDml) ? Database.insertImmediate(records) : null;
+		return (canDml) ? DmlResult.wrap(results) : new DmlMock().doInsert(records); 
 	}
 
 	public virtual DmlResult doInsertImmediate(SObject record) {
@@ -261,9 +262,9 @@ public virtual inherited sharing class Dml {
 	}
 
 	public virtual List<DmlResult> doUpdateImmediate(List<SObject> records) {
-		List<Database.SaveResult> results = Database.updateImmediate(records);
-		Dml.Updated?.add(records);
-		return DmlResult.wrap(results);
+		Boolean canDml = !Test.isRunningTest();
+		List<Database.SaveResult> results = (canDml) ? Database.updateImmediate(records) : null;
+		return (canDml) ? DmlResult.wrap(results) : new DmlMock().doUpdate(records); 
 	}
 
 	public virtual DmlResult doUpdateImmediate(SObject record) {
@@ -271,9 +272,9 @@ public virtual inherited sharing class Dml {
 	}
 
 	public virtual List<DmlResult> doDeleteImmediate(List<SObject> records) {
-		List<Database.DeleteResult> results = Database.deleteImmediate(records);
-		Dml.Deleted?.add(records);
-		return DmlResult.wrap(results);
+		Boolean canDml = !Test.isRunningTest();
+		List<Database.DeleteResult> results = (canDml) ? Database.deleteImmediate(records) : null;
+		return (canDml) ? DmlResult.wrap(results) : new DmlMock().doDelete(records);
 	}
 
 	public virtual DmlResult doDeleteImmediate(SObject record) {

@@ -180,6 +180,9 @@ private class Dml_Test {
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
+		Soql query = DB.Soql.newQuery(Account.SObjectType).whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id));
+		System.assertEquals(true, query?.run()?.isEmpty(), 'Account was actually inserted');
 	}
 
 	@IsTest 
@@ -199,6 +202,11 @@ private class Dml_Test {
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id))
+			.whereCriteria(new Filter(Account.Name, Filter.EQUALS, newName));
+		System.assertEquals(true, query?.run()?.isEmpty(), 'Account was actually updated');
 	}
 
 	@IsTest
@@ -215,6 +223,11 @@ private class Dml_Test {
 		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
 		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
 		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id))
+			.whereCriteria(new Filter(Account.IsDeleted, Filter.EQUALS, true));
+		System.assertEquals(true, query?.run()?.isEmpty(), 'Account was actually deleted');
 	}
 
 	@IsTest
@@ -497,6 +510,21 @@ private class Dml_Test {
 	}
 
 	@IsTest
+	static void shouldInsertImmediateDynamically() {
+		Account testAccount = new Account(Name = 'Test Account');
+
+		Test.startTest();
+		DB.Dml.doDml(Dml.Operation.DO_INSERT_IMMEDIATE, testAccount);
+		Test.stopTest();
+
+		System.assertNotEquals(null, testAccount.Id, 'Account was not inserted');
+		// NOTE: Database.*Immediate() is reserved for Big Objects, and always mocked in @IsTest context
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+		System.assertEquals(true, query.run().isEmpty(), 'Account was actually inserted');
+	}
+
+	@IsTest
 	static void shouldUpdateDynamically() {
 		Account testAccount = new Account(Name = 'Test Account');
 		DB.Dml.doInsert(testAccount);
@@ -512,6 +540,25 @@ private class Dml_Test {
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		testAccount = (Account) query.run()[0];
 		System.assertEquals(newAccName, testAccount?.Name, 'Account was not updated');
+	}
+
+	@IsTest
+	static void shouldUpdateImmediateDynamically() {
+		Account testAccount = new Account(Name = 'Test Account');
+		DB.Dml.doInsert(testAccount);
+		String newAccName = 'Something else';
+		testAccount.Name = newAccName;
+
+		Test.startTest();
+		DB.Dml.doDml(Dml.Operation.DO_UPDATE_IMMEDIATE, testAccount);
+		Test.stopTest();
+
+		// NOTE: Database.*Immediate() is reserved for Big Objects, and always mocked in @IsTest context
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.selectFields(Account.Name)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+		testAccount = (Account) query.run()[0];
+		System.assertNotEquals(newAccName, testAccount?.Name, 'Account was actually updated');
 	}
 
 	@IsTest
@@ -536,10 +583,26 @@ private class Dml_Test {
 		DB.Dml.doDml(Dml.Operation.DO_DELETE, testAccount);
 		Test.stopTest();
 
+		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
 		Soql query = DB.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Record still exists');
+	}
+
+	@IsTest
+	static void shouldDeleteImmediateDynamically() {
+		Account testAccount = new Account(Name = 'Test Account');
+		DB.Dml.doInsert(testAccount);
+
+		Test.startTest();
+		DB.Dml.doDml(Dml.Operation.DO_DELETE_IMMEDIATE, testAccount);
+		Test.stopTest();
+
 		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount.Id), 'Account was not added to Dml.Deleted');
+		// NOTE: Database.*Immediate() is reserved for Big Objects, and always mocked in @IsTest context
+		Soql query = DB.Soql.newQuery(Account.SObjectType)
+			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
+		System.assertEquals(false, query.run().isEmpty(), 'Record was actually deleted');
 	}
 
 	@IsTest
