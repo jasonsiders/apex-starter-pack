@@ -1,3 +1,3 @@
 public interface TypeAware {
-    Type getType(); 
+	Type getType();
 }

@@ -12,7 +12,7 @@ private class AsyncDml_Test {
 		AsyncDml.runJob();
 		Test.stopTest();
 
-		List<Account> inserted = (List<Account>) Databaselayer.Soql.newQuery(Account.SObjectType).run();
+		List<Account> inserted = (List<Account>) DB.Soql.newQuery(Account.SObjectType).run();
 		System.assertEquals(testAccounts?.size(), inserted?.size(), 'Wrong # of accounts inserted');
 	}
 
@@ -25,8 +25,8 @@ private class AsyncDml_Test {
 			LastName = 'Doe',
 			Phone = '+15555555555'
 		);
-		Databaselayer.Dml.doInsert(testLead);
-		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
+		DB.Dml.doInsert(testLead);
+		Soql statusQuery = DB.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
 			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
@@ -40,7 +40,7 @@ private class AsyncDml_Test {
 		AsyncDml.runJob();
 		Test.stopTest();
 
-		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
+		Soql query = DB.Soql.newQuery(Lead.SObjectType)
 			.whereCriteria(new Filter(Lead.IsConverted, Filter.EQUALS, true));
 		System.assertEquals(1, query.run().size(), 'Wrong # of converted leads');
 	}
@@ -96,7 +96,7 @@ private class AsyncDml_Test {
 		Test.stopTest();
 
 		// Note: We can't actually assert that the triggers were skipped, without having a trigger on a specific object
-		System.assertEquals(1, Databaselayer.Soql.newQuery(Account.SObjectType)?.run().size(), 'DML was not performed');
+		System.assertEquals(1, DB.Soql.newQuery(Account.SObjectType)?.run().size(), 'DML was not performed');
 	}
 
 	@IsTest

@@ -15,14 +15,14 @@ private class SObjectUtils_Test {
 	@IsTest
 	static void shouldSetRelatedList() {
 		// Child Object relationships (like Account.Contacts) are read-only fields too!
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		Account testAccount = new Account(Name = 'Test Account');
-		Databaselayer.Dml.doInsert(testAccount);
+		DB.Dml.doInsert(testAccount);
 		List<Contact> contacts = new List<Contact>();
 		for (Integer i = 0; i < 3; i++) {
 			contacts.add(new Contact(AccountId = testAccount.Id, FirstName = 'Test', LastName = 'Contact #' + (i + 1)));
 		}
-		Databaselayer.Dml.doInsert(contacts);
+		DB.Dml.doInsert(contacts);
 		Schema.ChildRelationship contactRelationship = SchemaUtils.getChildRelationship(Contact.AccountId);
 
 		Test.startTest();
@@ -35,9 +35,9 @@ private class SObjectUtils_Test {
 
 	@IsTest
 	static void shouldSetLookupFieldWithParentValues() {
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		Account testAccount = new Account(Name = 'Test Account');
-		Databaselayer.Dml.doInsert(testAccount);
+		DB.Dml.doInsert(testAccount);
 
 		Test.startTest();
 		Contact testContact = new Contact(AccountId = testAccount.Id, LastName = 'Test Contact');

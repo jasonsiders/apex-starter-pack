@@ -4,7 +4,7 @@ private class DmlResult_Test {
 	static void shouldConvertDeleteResults() {
 		// This type can't be mocked without performing dml - hence the reason for the wrapper class
 		List<Account> records = new List<Account>{ new Account(Name = 'Test') };
-		Databaselayer.Dml.doInsert(records);
+		DB.Dml.doInsert(records);
 		List<Database.DeleteResult> deleteResults = Database.delete(records, false);
 
 		Test.startTest();
@@ -45,8 +45,8 @@ private class DmlResult_Test {
 	static void shouldConvertUndeleteResults() {
 		// This type can't be mocked without performing dml - hence the reason for the wrapper class
 		List<Account> records = new List<Account>{ new Account(Name = 'Test') };
-		Databaselayer.Dml.doInsert(records);
-		Databaselayer.Dml.doDelete(records);
+		DB.Dml.doInsert(records);
+		DB.Dml.doDelete(records);
 		List<Database.UndeleteResult> undeleteResults = Database.undelete(records, false);
 
 		Test.startTest();

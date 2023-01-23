@@ -336,7 +336,7 @@ private class Filter_Test {
 	static void shouldEvaluateForParentObjects() {
 		String accountName = 'Test Account #' + Crypto.getRandomLong();
 		Account testAccount = new Account(Name = accountName);
-		Databaselayer.Dml.doInsert(testAccount);
+		DB.Dml.doInsert(testAccount);
 		Opportunity testOpp = new Opportunity(
 			AccountId = testAccount.Id,
 			Amount = 1000,
@@ -344,8 +344,8 @@ private class Filter_Test {
 			Name = 'Test Opp',
 			StageName = 'New'
 		);
-		Databaselayer.Dml.doInsert(testOpp);
-		testOpp = (Opportunity) Databaselayer.Soql.newQuery(Opportunity.SObjectType)
+		DB.Dml.doInsert(testOpp);
+		testOpp = (Opportunity) DB.Soql.newQuery(Opportunity.SObjectType)
 			.selectFields(new FieldRef(new List<SObjectField>{ Opportunity.AccountId, Account.Name }))
 			.whereCriteria(new Filter(Opportunity.Id, Filter.EQUALS, testOpp.Id))
 			.run()[0];
@@ -883,7 +883,7 @@ private class Filter_Test {
 	@IsTest
 	static void shouldGenerateInnerQueryFilter() {
 		// If a query is passed as the value, wrap it in parentheses to avoid syntax errors
-		Soql innerQuery = Databaselayer.Soql.newQuery(User.SObjectType)
+		Soql innerQuery = DB.Soql.newQuery(User.SObjectType)
 			.deselectId()
 			.selectFields(User.ProfileId)
 			.whereCriteria(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()));

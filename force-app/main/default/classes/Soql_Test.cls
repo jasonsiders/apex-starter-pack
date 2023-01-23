@@ -378,7 +378,7 @@ private class Soql_Test {
 		for (Integer i = 0; i < 3; i++) {
 			accounts.add(new Account(Name = 'Test Account #' + (i + 1)));
 		}
-		Databaselayer.Dml.doInsert(accounts);
+		DB.Dml.doInsert(accounts);
 		Soql query = new Soql(Account.SObjectType)
 			.selectFields(new List<SObjectField>{ Account.Id, Account.CreatedDate, Account.Name })
 			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'))
@@ -406,7 +406,7 @@ private class Soql_Test {
 			accounts.add(new Account(BillingCountry = 'CA', Name = 'CA Account #' + i));
 			accounts.add(new Account(BillingCountry = 'US', Name = 'US Account #' + i));
 		}
-		Databaselayer.Dml.doInsert(accounts);
+		DB.Dml.doInsert(accounts);
 
 		Test.startTest();
 		Soql query = new Soql(Account.SObjectType)
@@ -437,7 +437,7 @@ private class Soql_Test {
 
 	@IsTest
 	static void shouldGenerateNewQuery() {
-		DatabaseLayer.QueryFactory factory = new Soql.Factory();
+		DB.QueryFactory factory = new Soql.Factory();
 		Object queryObj = factory.newQuery(null);
 		System.assertEquals(true, queryObj instanceof Soql, 'Not an instance of Soql.class');
 		System.assertEquals(false, queryObj instanceof SoqlMock, 'Factory created an instance of SoqlMock.class');

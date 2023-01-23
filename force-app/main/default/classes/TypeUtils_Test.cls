@@ -229,9 +229,9 @@ private class TypeUtils_Test {
 		System.assertEquals(localName, TypeUtils.getLocalTypeName(myType), 'Unexpected type name');
 	}
 
-	@IsTest 
+	@IsTest
 	static void shouldGetLocalTypeNameOfObject() {
-		Object obj = new AndLogic(); 
+		Object obj = new AndLogic();
 		String localName = 'AndLogic';
 		System.assertEquals(localName, TypeUtils.getLocalTypeName(obj), 'Unexpected type name');
 	}

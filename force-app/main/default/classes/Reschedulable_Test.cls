@@ -28,6 +28,6 @@ private class Reschedulable_Test extends Reschedulable {
 			Account account = new Account(Name = 'Test Account #' + i);
 			accounts.add(account);
 		}
-		DatabaseLayer.Dml.doInsert(accounts);
+		DB.Dml.doInsert(accounts);
 	}
 }

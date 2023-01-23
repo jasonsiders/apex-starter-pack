@@ -2,9 +2,9 @@
 private class SerializableLeadConvert_Test {
 	@IsTest
 	static void shouldConstructLeadConvertObject() {
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		Lead testLead = new Lead();
-		Databaselayer.Dml.doInsert(testLead);
+		DB.Dml.doInsert(testLead);
 		Database.LeadConvert leadConvert = new Database.LeadConvert();
 		leadConvert.setLeadId(testLead.Id);
 
@@ -114,8 +114,8 @@ private class SerializableLeadConvert_Test {
 			LastName = 'Doe',
 			Phone = '+15555555555'
 		);
-		Databaselayer.Dml.doInsert(testLead);
-		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
+		DB.Dml.doInsert(testLead);
+		Soql statusQuery = DB.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
 			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
@@ -132,7 +132,7 @@ private class SerializableLeadConvert_Test {
 		}
 		Test.stopTest();
 
-		Soql query = Databaselayer.Soql.newQuery(Lead.SObjectType)
+		Soql query = DB.Soql.newQuery(Lead.SObjectType)
 			.whereCriteria(new Filter(Lead.IsConverted, Filter.EQUALS, true));
 		Map<Id, Lead> convertedLeads = new Map<Id, Lead>((List<Lead>) query.run());
 		System.assertEquals(true, convertedLeads.containsKey(testLead.Id), 'Lead was not converted');
@@ -147,8 +147,8 @@ private class SerializableLeadConvert_Test {
 			LastName = 'Doe',
 			Phone = '+15555555555'
 		);
-		Databaselayer.Dml.doInsert(testLead);
-		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
+		DB.Dml.doInsert(testLead);
+		Soql statusQuery = DB.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
 			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
@@ -184,7 +184,7 @@ private class SerializableLeadConvert_Test {
 		}
 
 		public void execute(System.QueueableContext context) {
-			Databaselayer.Dml.doConvert(this.leadConvert);
+			DB.Dml.doConvert(this.leadConvert);
 		}
 	}
 
@@ -197,7 +197,7 @@ private class SerializableLeadConvert_Test {
 
 		public void execute(System.QueueableContext context) {
 			Database.LeadConvert leadConvert = this.convertObj.toLeadConvert();
-			Databaselayer.Dml.doConvert(leadConvert);
+			DB.Dml.doConvert(leadConvert);
 		}
 	}
 }

@@ -7,7 +7,7 @@ private class OrgUtils_Test {
 
 	@IsTest
 	static void shouldIndicateIfDevOrg() {
-		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+		DB.setQueryEngine(new SoqlMock.Factory());
 		// Should return true if Organization.OrganizationType is 'Developer Edition'
 		Organization mockOrg = new Organization();
 		mockOrg = (Organization) SObjectUtils.setReadOnlyField(
@@ -30,7 +30,7 @@ private class OrgUtils_Test {
 
 	@IsTest
 	static void shouldIndicateIfSandbox() {
-		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+		DB.setQueryEngine(new SoqlMock.Factory());
 		// Should return true if Organization.IsSandbox is true
 		Organization mockOrg = new Organization();
 		mockOrg = (Organization) SObjectUtils.setReadOnlyField(mockOrg, Organization.IsSandbox, true);
@@ -45,7 +45,7 @@ private class OrgUtils_Test {
 
 	@IsTest
 	static void shouldIndicateIfProduction() {
-		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+		DB.setQueryEngine(new SoqlMock.Factory());
 		// Should return true if Organization.IsSandbox is false && Organization.OrganizationType != 'Developer Edition'
 		Organization productionOrg = new Organization();
 		productionOrg = (Organization) SObjectUtils.setReadOnlyField(productionOrg, Organization.IsSandbox, false);

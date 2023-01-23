@@ -7,7 +7,7 @@ If you were to be dropped into a new Salesforce project tomorrow, what tools wou
 This repository includes the following libraries:
 
 -   [ApexUtils](force-app/main/default/classes/ApexUtils): A collection of utility classes designed to make your life easier.
--   [DatabaseLayer](force-app/main/default/classes/DatabaseLayer): A DML & SOQL mocking framework.
+-   [DB](force-app/main/default/classes/DB): A DML & SOQL mocking framework.
 -   [TriggerHandler](force-app/main/default/classes/TriggerHandler): A basic Trigger Handler with utility methods to make trigger operations a breeze.
 
 ## Installation

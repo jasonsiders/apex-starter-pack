@@ -111,7 +111,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 		}
 
 		protected virtual List<DmlResult> doDml() {
-			return Databaselayer.Dml.doDml(
+			return DB.Dml.doDml(
 				this.operation,
 				this.records,
 				this.externalIdField?.toSchemaType(),
@@ -134,7 +134,7 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 
 		public override List<DmlResult> doDml() {
 			List<Database.LeadConvert> leadConverts = SerializableLeadConvert.unwrap(this.wrappers);
-			return Databaselayer.Dml.doConvert(leadConverts);
+			return DB.Dml.doConvert(leadConverts);
 		}
 	}
 }

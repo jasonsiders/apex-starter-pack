@@ -276,7 +276,7 @@ public inherited sharing virtual class Soql {
 		FOR_UPDATE
 	}
 
-	public class Factory implements DatabaseLayer.QueryFactory {
+	public class Factory implements DB.QueryFactory {
 		public Soql newQuery(SObjectType fromSObject) {
 			return new Soql(fromSObject);
 		}

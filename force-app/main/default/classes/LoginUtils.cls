@@ -1,6 +1,6 @@
 public abstract class LoginUtils {
 	@TestVisible
-	static Soql ActiveSessionQuery = Databaselayer.Soql.newQuery(AuthSession.SObjectType)
+	static Soql ActiveSessionQuery = DB.Soql.newQuery(AuthSession.SObjectType)
 		.selectFields(new FieldRef(new List<SObjectField>{ AuthSession.LoginHistoryId, LoginHistory.Application }))
 		.selectFields(
 			new List<SObjectField>{ AuthSession.UsersId, AuthSession.LastModifiedDate, AuthSession.NumSecondsValid }

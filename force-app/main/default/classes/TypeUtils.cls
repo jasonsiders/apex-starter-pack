@@ -24,9 +24,9 @@ public abstract class TypeUtils {
 	}
 
 	public static String getLocalTypeName(Object obj) {
-		String typeName = TypeUtils.getTypeName(obj); 
+		String typeName = TypeUtils.getTypeName(obj);
 		Type objType = (String.isNotBlank(typeName)) ? Type.forName(typeName) : null;
-		return TypeUtils.getLocalTypeName(objType); 
+		return TypeUtils.getLocalTypeName(objType);
 	}
 
 	public static String getLocalTypeName(Type myType) {
