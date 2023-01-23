@@ -28,9 +28,9 @@ private class DmlMock_Test {
 
 		System.assertNotEquals(null, account.Id, 'Id was not added');
 		System.assertEquals(true, Dml.Inserted?.containsRecord(account.Id), 'Not inserted');
-		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(account.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -53,9 +53,9 @@ private class DmlMock_Test {
 			Dml.Updated?.getRecord(testAccount).get(Account.Name),
 			'Name was not updated in the "updated" list'
 		);
-		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(testAccount.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -79,9 +79,9 @@ private class DmlMock_Test {
 			Dml.Upserted?.getRecord(testAccount)?.get(Account.Name),
 			'Name was not updated in the "upserted" list'
 		);
-		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(testAccount.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -106,9 +106,9 @@ private class DmlMock_Test {
 			Dml.Upserted?.getRecord(testAccount).get(Account.Name),
 			'Name was not updated in the "upserted" list'
 		);
-		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(testAccount.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -124,9 +124,9 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertEquals(true, Dml.Undeleted?.containsRecord(account.Id), 'Account was not undeleted');
-		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(account.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -141,9 +141,9 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertEquals(true, Dml.Deleted?.containsRecord(account.Id), 'Account was not deleted');
-		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(account.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -158,9 +158,9 @@ private class DmlMock_Test {
 		Test.stopTest();
 
 		System.assertEquals(true, Dml.Deleted?.containsRecord(account.Id), 'Account was not deleted');
-		System.assertEquals(account.Id, dmlResult.recordId, 'Wrong result recordId');
-		System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess value');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # errors');
+		System.assertEquals(account.Id, dmlResult.getId(), 'Wrong result getId()');
+		System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess() value');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # getErrors()');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
 
@@ -206,12 +206,12 @@ private class DmlMock_Test {
 
 		System.assertEquals(1, results?.size(), 'Wrong # of conversion results');
 		ConversionResult result = results[0];
-		System.assertEquals(true, result.isSuccess, 'Wrong isSuccess');
+		System.assertEquals(true, result.isSuccess(), 'Wrong isSuccess()');
 		System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
 		System.assertNotEquals(null, result.getAccountId(), 'Wrong accountId');
 		System.assertNotEquals(null, result.getContactId(), 'Wrong contactId');
 		System.assertNotEquals(null, result.getOpportunityId(), 'Wrong opportunityId');
-		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(0, result.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -250,12 +250,12 @@ private class DmlMock_Test {
 
 		System.assertEquals(1, results?.size(), 'Wrong # of conversion results');
 		ConversionResult result = results[0];
-		System.assertEquals(true, result.isSuccess, 'Wrong isSuccess');
+		System.assertEquals(true, result.isSuccess(), 'Wrong isSuccess()');
 		System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
 		System.assertEquals(testAccount.Id, result.getAccountId(), 'Wrong accountId');
 		System.assertEquals(testContact.Id, result.getContactId(), 'Wrong contactId');
 		System.assertEquals(testOpportunity.Id, result.getOpportunityId(), 'Wrong opportunityId');
-		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(0, result.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -296,16 +296,16 @@ private class DmlMock_Test {
 		DB.Dml.doInsert(accounts);
 
 		Test.startTest();
-		List<DmlResult> dmlResults = dmlMock.mockDmlResults(accounts);
+		List<DmlResult> dmlResults = dmlMock.mockDmlResults(accounts, Database.SaveResult.class);
 		Test.stopTest();
 
 		System.assertEquals(accounts?.size(), dmlResults?.size(), 'Wrong # of results');
 		for (Integer i = 0; i < dmlResults?.size(); i++) {
 			DmlResult dmlResult = dmlResults[i];
 			Account account = accounts[i];
-			System.assertEquals(true, dmlResult.isSuccess, 'Wrong isSuccess');
-			System.assertEquals(account.Id, dmlResult.recordId, 'Wrong recordId');
-			System.assertEquals(0, dmlResult?.errors?.size(), 'Wrong # of errors');
+			System.assertEquals(true, dmlResult.isSuccess(), 'Wrong isSuccess()');
+			System.assertEquals(account.Id, dmlResult.getId(), 'Wrong getId()');
+			System.assertEquals(0, dmlResult?.getErrors()?.size(), 'Wrong # of getErrors()');
 		}
 	}
 

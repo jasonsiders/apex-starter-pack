@@ -24,7 +24,7 @@ private class ConversionResult_Test {
 		ConversionResult result = new ConversionResult(convertResult);
 		Test.stopTest();
 
-		System.assertEquals(convertResult.isSuccess(), result.isSuccess, 'Wrong isSuccess');
+		System.assertEquals(convertResult.isSuccess(), result.isSuccess(), 'Wrong isSuccess()');
 		System.assertEquals(convertResult.getAccountId(), result.getAccountId(), 'Wrong accountId');
 		System.assertEquals(convertResult.getContactId(), result.getContactId(), 'Wrong contactId');
 		System.assertEquals(convertResult.getLeadId(), result.getLeadId(), 'Wrong leadId');
@@ -34,7 +34,7 @@ private class ConversionResult_Test {
 			result.getPersonAccountId(),
 			'Wrong personAccountId'
 		);
-		System.assertEquals(convertResult.getErrors()?.size(), result.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(convertResult.getErrors()?.size(), result.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -61,7 +61,7 @@ private class ConversionResult_Test {
 		ConversionResult result = new ConversionResult(new List<DmlResult.Error>(), true, leadConvertObj);
 		Test.stopTest();
 
-		System.assertEquals(true, result.isSuccess, 'Wrong isSuccess');
+		System.assertEquals(true, result.isSuccess(), 'Wrong isSuccess()');
 		System.assertEquals(leadConvertObj.getAccountId(), result.getAccountId(), 'Wrong accountId');
 		System.assertEquals(leadConvertObj.getContactId(), result.getContactId(), 'Wrong contactId');
 		System.assertEquals(leadConvertObj.getLeadId(), result.getLeadId(), 'Wrong leadId');
@@ -71,6 +71,6 @@ private class ConversionResult_Test {
 			result.getPersonAccountId(),
 			'Wrong personAccountId'
 		);
-		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(0, result.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 }
