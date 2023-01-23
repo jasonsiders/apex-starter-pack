@@ -165,6 +165,58 @@ private class Dml_Test {
 		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
 	}
 
+	@IsTest 
+	static void shouldDoInsertImmediate() {
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
+		Account testAccount = new Account(Name = 'Test Account #0');
+
+		Test.startTest();
+		DmlResult dmlResult = DB.Dml.doInsertImmediate(testAccount);
+		Test.stopTest();
+
+		System.assertEquals(1, Dml.Inserted?.getRecords(Account.SObjectType)?.size(), 'Wrong # of accounts inserted');
+		System.assertNotEquals(null, testAccount?.Id, 'Account was not inserted');
+		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+	}
+
+	@IsTest 
+	static void shouldDoUpdateImmediate() {
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
+		Account testAccount = (Account) DB.Soql.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
+		final String newName = 'Some other name';
+		testAccount.Name = newName;
+
+		Test.startTest();
+		DmlResult dmlResult = DB.Dml.doUpdateImmediate(testAccount);
+		Test.stopTest();
+
+		System.assertEquals(1, Dml.Updated?.getRecords(Account.SObjectType)?.size(), 'Wrong # of updated accounts');
+		System.assertEquals(newName, testAccount?.Name, 'Account was not updated');
+		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+	}
+
+	@IsTest
+	static void shouldDoDeleteImmediate() {
+		// NOTE: The Database.insert/update/deleteImmediate() methods are designed to be used with big objects; 
+		// but these can't be manipulated in @IsTest context, so normal SObjects used instead
+		Account testAccount = (Account) DB.Soql.newQuery(Account.SObjectType).setRowLimit(1).run()[0];
+
+		Test.startTest();
+		DmlResult dmlResult = DB.Dml.doDeleteImmediate(testAccount);
+		Test.stopTest();
+
+		System.assertEquals(1, Dml.Deleted?.getRecords(Account.SObjectType)?.size(), 'Wrong # of deleted accounts');
+		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+	}
+
 	@IsTest
 	static void shouldThrowErrorOnInsert() {
 		Account account = new Account(); // Missing a required field

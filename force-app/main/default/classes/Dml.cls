@@ -29,14 +29,23 @@ public virtual inherited sharing class Dml {
 			when DO_INSERT {
 				results = DB.Dml.doInsert(records, allOrNone);
 			}
+			when DO_INSERT_IMMEDIATE {
+				return DB.Dml.doInsertImmediate(records); 
+			}
 			when DO_UPDATE {
 				results = DB.Dml.doUpdate(records, allOrNone);
+			}
+			when DO_UPDATE_IMMEDIATE {
+				return DB.Dml.doUpdateImmediate(records); 
 			}
 			when DO_UPSERT {
 				results = DB.Dml.doUpsert(records, externalIdField, allOrNone);
 			}
 			when DO_DELETE {
 				results = DB.Dml.doDelete(records, allOrNone);
+			}
+			when DO_DELETE_IMMEDIATE {
+				return DB.Dml.doDeleteImmediate(records); 
 			}
 			when DO_UNDELETE {
 				results = DB.Dml.doUndelete(records, allOrNone);
@@ -240,13 +249,47 @@ public virtual inherited sharing class Dml {
 		return this.doConvert(new List<Database.LeadConvert>{ leadConvertObj })[0];
 	}
 
+	// Immediate Methods - for Big Objects
+	public virtual List<DmlResult> doInsertImmediate(List<SObject> records) {
+		List<Database.SaveResult> results = Database.insertImmediate(records);
+		Dml.Inserted?.add(records);
+		return DmlResult.wrap(results);
+	}
+
+	public virtual DmlResult doInsertImmediate(SObject record) {
+		return this.doInsertImmediate(new List<SObject>{record})[0];
+	}
+
+	public virtual List<DmlResult> doUpdateImmediate(List<SObject> records) {
+		List<Database.SaveResult> results = Database.updateImmediate(records);
+		Dml.Updated?.add(records);
+		return DmlResult.wrap(results);
+	}
+
+	public virtual DmlResult doUpdateImmediate(SObject record) {
+		return this.doUpdateImmediate(new List<SObject>{record})[0];
+	}
+
+	public virtual List<DmlResult> doDeleteImmediate(List<SObject> records) {
+		List<Database.DeleteResult> results = Database.deleteImmediate(records);
+		Dml.Deleted?.add(records);
+		return DmlResult.wrap(results);
+	}
+
+	public virtual DmlResult doDeleteImmediate(SObject record) {
+		return this.doDeleteImmediate(new List<SObject>{record})[0];
+	}
+
 	// **** INNER **** //
 	public enum Operation {
 		DO_PUBLISH,
 		DO_INSERT,
+		DO_INSERT_IMMEDIATE,
 		DO_UPDATE,
+		DO_UPDATE_IMMEDIATE,
 		DO_UPSERT,
 		DO_DELETE,
+		DO_DELETE_IMMEDIATE,
 		DO_UNDELETE,
 		DO_HARD_DELETE
 	}
@@ -313,7 +356,7 @@ public virtual inherited sharing class Dml {
 
 	public class PlatformEventHistory extends History {
 		public PlatformEventHistory() {
-			// Platform events do not have an 'Id' field
+			// Platform events (__e) do not have an 'Id' field
 			this.idField = 'ReplayId';
 		}
 	}
