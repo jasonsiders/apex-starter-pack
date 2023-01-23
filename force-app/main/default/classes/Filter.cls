@@ -67,7 +67,12 @@ public virtual class Filter implements ICriteria {
 	}
 
 	public override String toString() {
-		return this.property?.toString() + ' ' + this.operator?.getToken() + ' ' + this.formatValue();
+		List<String> parts = new List<String>{
+			this.property?.toString(),
+			this.operator?.getToken(),
+			this.formatValue()
+		};
+		return String.join(parts, ' ');
 	}
 
 	public Set<String> getFieldNames() {
@@ -76,7 +81,7 @@ public virtual class Filter implements ICriteria {
 
 	private String formatValue() {
 		// Note: System.Type cannot be used directly in switch expressions
-		switch on TypeUtils.getTypeName(this.value)?.toUpperCase() {
+		switch on TypeUtils.getLocalTypeName(this.value)?.toUpperCase() {
 			when null {
 				return 'null';
 			}
@@ -117,7 +122,7 @@ public virtual class Filter implements ICriteria {
 				return String.format('({0})', new List<String>{ this.value?.toString() });
 			}
 			when else {
-				// Can't convert from Set<ANY> to List<Object>, so this is the best we can do
+				// Can't convert from Set<ANY> to List<Object>, so this is the best we can do'
 				return (TypeUtils.isSet(this.value))
 					? String.valueOf(this.value)?.replace('{', '(')?.replace('}', ')')
 					: String.valueOf(this.value);

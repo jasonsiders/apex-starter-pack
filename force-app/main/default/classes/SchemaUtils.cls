@@ -58,13 +58,13 @@ public abstract class SchemaUtils {
 	public static ChildRelationship getChildRelationship(SObjectField lookupField) {
 		SObjectType parentObject = SchemaUtils.getParentSObjectType(lookupField);
 		List<ChildRelationship> rels = parentObject?.getDescribe()?.getChildRelationships();
-		rels = (rels != null) ? rels : new List<ChildRelationship>(); 
+		rels = (rels != null) ? rels : new List<ChildRelationship>();
 		for (ChildRelationship rel : rels) {
-			SObjectField relField = rel?.getField(); 
+			SObjectField relField = rel?.getField();
 			if (relField == lookupField) {
-				return rel; 
+				return rel;
 			}
 		}
-		return null; 
+		return null;
 	}
 }

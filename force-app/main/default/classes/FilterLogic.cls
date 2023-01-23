@@ -14,7 +14,7 @@ public abstract class FilterLogic implements ICriteria {
 	public Set<String> getFieldNames() {
 		Set<String> fieldNames = new Set<String>();
 		for (ICriteria criteria : this.criterion) {
-			fieldNames.addAll(criteria.getFieldNames());
+			fieldNames.addAll(criteria?.getFieldNames());
 		}
 		return fieldNames;
 	}

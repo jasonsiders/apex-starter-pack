@@ -23,11 +23,17 @@ public abstract class TypeUtils {
 		return null;
 	}
 
-	public static String getLocalName(Type myType) {
+	public static String getLocalTypeName(Object obj) {
+		String typeName = TypeUtils.getTypeName(obj); 
+		Type objType = (String.isNotBlank(typeName)) ? Type.forName(typeName) : null;
+		return TypeUtils.getLocalTypeName(objType); 
+	}
+
+	public static String getLocalTypeName(Type myType) {
 		// Retrieve the name of a type sans-namespace
-		String namespace = NamespaceUtils.getCurrent() + '.';
+		String namespacePrefix = NamespaceUtils.getCurrent() + '.';
 		String fullName = myType?.getName();
-		return fullName?.removeStart(namespace);
+		return fullName?.removeStart(namespacePrefix);
 	}
 
 	public static Boolean isList(Object obj) {
