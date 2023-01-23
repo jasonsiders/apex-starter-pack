@@ -1,18 +1,18 @@
 public virtual inherited sharing class Dml {
 	@TestVisible
-	static History Inserted = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Updated = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Upserted = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Deleted = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Undeleted = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Converted = Test.isRunningTest() ? new History() : null;
-	@TestVisible
-	static History Published = Test.isRunningTest() ? new History()?.setAlternateIdField('ReplayId') : null;
+	static History Inserted, Updated, Upserted, Deleted, Undeleted, Converted, Published;
+
+	static {
+		if (Test.isRunningTest()) {
+			Inserted = new History();
+			Updated = new History(); 
+			Upserted = new History(); 
+			Deleted = new History(); 
+			Undeleted = new History(); 
+			Converted = new History();
+			Published = new PlatformEventHistory(); 
+		}
+	}
 
 	// Operation-based methods
 	public List<DmlResult> doDml(
@@ -251,20 +251,14 @@ public virtual inherited sharing class Dml {
 		DO_HARD_DELETE
 	}
 
-	@TestVisible
-	private class History {
+	public virtual class History {
 		// A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
-		private Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
-		private Map<Id, SObject> recordsById = new Map<Id, SObject>();
-		private String idField = 'Id';
+		protected Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
+		protected Map<Id, SObject> recordsById = new Map<Id, SObject>();
+		protected String idField;
 
-		private History() {
-			// Not available for construction outside of this file
-		}
-
-		private History setAlternateIdField(String idField) {
-			this.idField = idField;
-			return this;
+		public History() {
+			this.idField = 'Id';
 		}
 
 		public Boolean containsRecord(Id recordId) {
@@ -314,6 +308,13 @@ public virtual inherited sharing class Dml {
 				matchingRecords?.add(clone);
 				this.recordsBySObjectType.put(objectRef, matchingRecords);
 			}
+		}
+	}
+
+	public class PlatformEventHistory extends History {
+		public PlatformEventHistory() {
+			// Platform events do not have an 'Id' field
+			this.idField = 'ReplayId';
 		}
 	}
 }

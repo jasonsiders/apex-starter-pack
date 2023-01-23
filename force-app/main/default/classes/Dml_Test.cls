@@ -12,7 +12,7 @@ private class Dml_Test {
 	}
 
 	@IsTest
-	static void shouldDoInsert() {
+	static void shouldDoInsert() { 
 		Account account = new Account(Name = 'Test Account #0');
 		Test.startTest();
 		DmlResult dmlResult = DB.Dml.doInsert(account);
