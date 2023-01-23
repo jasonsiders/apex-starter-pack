@@ -2,20 +2,27 @@ public virtual class DmlResult {
 	// Database.*Result classes do not share a common interface, and they cannot be manually constructed
 	// This makes testing/mocking especially difficult
 	// This class wraps all of those result types
-	public List<Error> errors { get; protected set; }
-	public Boolean isSuccess { get; protected set; }
-	public Id recordId { get; protected set; }
+	List<Error> errors;
+	Boolean isSuccess;
+	Id recordId;
+	Type sourceType;
 
 	@TestVisible
-	protected DmlResult(List<Error> errors, Boolean isSuccess, Id recordId) {
+	protected DmlResult(List<Error> errors, Boolean isSuccess, Id recordId, Type sourceType) {
 		this.errors = errors;
 		this.isSuccess = isSuccess;
 		this.recordId = recordId;
+		this.sourceType = sourceType;
 	}
 
 	@TestVisible
-	protected DmlResult(List<Database.Error> errors, Boolean isSuccess, Id recordId) {
-		this(DmlResult.wrap(errors), isSuccess, recordId);
+	protected DmlResult(List<Database.Error> errors, Boolean isSuccess, Id recordId, Type sourceType) {
+		this(DmlResult.wrap(errors), isSuccess, recordId, sourceType);
+	}
+
+	@TestVisible 
+	protected DmlResult(Id recordId, Type sourceType) {
+		this(new List<DmlResult.Error>(), true, recordId, sourceType);
 	}
 
 	protected DmlResult() {
@@ -24,19 +31,35 @@ public virtual class DmlResult {
 
 	// Constructors wrap a single Result object
 	public DmlResult(Database.DeleteResult result) {
-		this(result.getErrors(), result.isSuccess(), result.getId());
+		this(result.getErrors(), result.isSuccess(), result.getId(), Database.DeleteResult.class);
 	}
 
 	public DmlResult(Database.SaveResult result) {
-		this(result.getErrors(), result.isSuccess(), result.getId());
+		this(result.getErrors(), result.isSuccess(), result.getId(), Database.SaveResult.class);
 	}
 
 	public DmlResult(Database.UndeleteResult result) {
-		this(result.getErrors(), result.isSuccess(), result.getId());
+		this(result.getErrors(), result.isSuccess(), result.getId(), Database.UndeleteResult.class);
 	}
 
 	public DmlResult(Database.UpsertResult result) {
-		this(result.getErrors(), result.isSuccess(), result.getId());
+		this(result.getErrors(), result.isSuccess(), result.getId(), Database.UpsertResult.class);
+	}
+
+	public List<Error> getErrors() {
+		return this.errors;
+	}
+
+	public Boolean isSuccess() {
+		return this.isSuccess;
+	}
+
+	public Id getId() {
+		return this.recordId;
+	}
+
+	public Type getType() {
+		return this.sourceType;
 	}
 
 	// Methods to "wrap" results in bulk
@@ -83,19 +106,40 @@ public virtual class DmlResult {
 
 	public class Error {
 		// Wraps the Database.Error class, which also cannot be constructed
-		public List<String> fields { get; private set; }
-		public String message { get; private set; }
-		public StatusCode statusCode { get; private set; }
-
-		public Error(Database.Error error) {
-			this(error.getFields(), error.getMessage(), error.getStatusCode());
-		}
+		List<String> fields;
+		String message;
+		StatusCode statusCode;
 
 		@TestVisible
 		private Error(List<String> fields, String message, StatusCode statusCode) {
 			this.fields = fields;
 			this.message = message;
 			this.statusCode = statusCode;
+		}
+
+		public Error(Database.Error error) {
+			this(error.getFields(), error.getMessage(), error.getStatusCode());
+		}
+
+		public List<String> getFields() {
+			return this.fields;
+		}
+
+		public String getMessage() {
+			return this.message;
+		}
+
+		public StatusCode getStatusCode() {
+			return this.statusCode;
+		}
+
+		public override String toString() {
+			List<String> messageParts = new List<String>{
+				String.valueOf(this?.getStatusCode()),
+				this?.getMessage(),
+				JSON.serialize(this?.getFields())
+			};
+			return String.join(messageParts, ': ');
 		}
 	}
 }

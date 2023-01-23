@@ -19,9 +19,9 @@ private class Dml_Test {
 		Test.stopTest();
 		System.assertEquals(true, Dml.Inserted?.containsRecord(account), 'Account was not added to History list');
 		System.assertNotEquals(null, account?.Id, 'Account was not inserted');
-		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(account?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -34,9 +34,9 @@ private class Dml_Test {
 		Test.stopTest();
 		System.assertEquals(true, Dml.Updated?.containsRecord(account), 'Account was not added to History list');
 		System.assertEquals(newName, account.Name, 'Account was not updated');
-		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(account?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -49,9 +49,9 @@ private class Dml_Test {
 		DmlResult dmlResult = DB.Dml.doUpsert(account);
 		System.assertEquals(true, Dml.Upserted?.containsRecord(account), 'Account was not added to History list');
 		System.assertEquals(newName, account.Name, 'Account was not updated');
-		System.assertEquals(account?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(account?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -64,9 +64,9 @@ private class Dml_Test {
 		System.assertEquals(true, Dml.Upserted?.containsRecord(testLead), 'Lead was not added to History list');
 		DmlResult dmlResult = DB.Dml.doUpsert(testLead, Lead.Id);
 		System.assertEquals(newName, testLead.LastName, 'Lead was not updated');
-		System.assertEquals(testLead?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testLead?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -81,9 +81,9 @@ private class Dml_Test {
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(false, accounts?.isEmpty(), 'Account was not undeleted');
 		System.assertEquals(true, Dml.Undeleted?.containsRecord(testAccount), 'Account was not added to History list');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -97,9 +97,9 @@ private class Dml_Test {
 		List<Account> accounts = (List<Account>) query.run();
 		System.assertEquals(true, accounts?.isEmpty(), 'Account was not deleted');
 		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount), 'Account was not added to History list');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -115,9 +115,9 @@ private class Dml_Test {
 		testAccount = (Account) query.run()[0];
 		System.assertEquals(true, testAccount.IsDeleted, 'Account was not hard Deleted');
 		System.assertEquals(true, Dml.Deleted?.containsRecord(testAccount), 'Account was not added to History list');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -131,7 +131,7 @@ private class Dml_Test {
 		// Unlike "normal" DML, platform events are not given an ID after insert/publish
 		System.assertEquals(null, event.ReplayId, 'Event was not inserted');
 		System.assertEquals(true, Dml.Published?.containsRecord(event), 'Event was not added to History list');
-		System.assertEquals(true, result.isSuccess, 'Event did not publish. Errors: ' + result.errors);
+		System.assertEquals(true, result.isSuccess(), 'Event did not publish. getErrors(): ' + result.getErrors());
 	}
 
 	@IsTest
@@ -157,12 +157,12 @@ private class Dml_Test {
 		ConversionResult result = (ConversionResult) DB.Dml.doConvert(leadConvertObj);
 		Test.stopTest();
 
-		System.assertEquals(true, result.isSuccess, 'LeadConvert was not a success: ' + JSON.serialize(result.errors));
+		System.assertEquals(true, result.isSuccess(), 'LeadConvert was not a success: ' + JSON.serialize(result.getErrors()));
 		System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
 		System.assertNotEquals(null, result.getAccountId(), 'Null accountId');
 		System.assertNotEquals(null, result.getContactId(), 'Null contactId');
 		System.assertNotEquals(null, result.getOpportunityId(), 'Null opportunityId');
-		System.assertEquals(0, result.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(0, result.getErrors()?.size(), 'Wrong # of getErrors()');
 	}
 
 	@IsTest
@@ -177,9 +177,9 @@ private class Dml_Test {
 
 		System.assertEquals(1, Dml.Inserted?.getRecords(Account.SObjectType)?.size(), 'Wrong # of accounts inserted');
 		System.assertNotEquals(null, testAccount?.Id, 'Account was not inserted');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
 		Soql query = DB.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id));
@@ -200,9 +200,9 @@ private class Dml_Test {
 
 		System.assertEquals(1, Dml.Updated?.getRecords(Account.SObjectType)?.size(), 'Wrong # of updated accounts');
 		System.assertEquals(newName, testAccount?.Name, 'Account was not updated');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
 		Soql query = DB.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id))
@@ -221,9 +221,9 @@ private class Dml_Test {
 		Test.stopTest();
 
 		System.assertEquals(1, Dml.Deleted?.getRecords(Account.SObjectType)?.size(), 'Wrong # of deleted accounts');
-		System.assertEquals(testAccount?.Id, dmlResult.recordId, 'Invalid DML Result');
-		System.assertEquals(true, dmlResult.isSuccess, 'DML marked as unsuccessful');
-		System.assertEquals(0, dmlResult.errors?.size(), 'Wrong # of errors');
+		System.assertEquals(testAccount?.Id, dmlResult.getId(), 'Invalid DML Result');
+		System.assertEquals(true, dmlResult.isSuccess(), 'DML marked as unsuccessful');
+		System.assertEquals(0, dmlResult.getErrors()?.size(), 'Wrong # of getErrors()');
 		// Because Big Objects can NEVER be DML'd in @IsTest context, dml is always mocked here
 		Soql query = DB.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount?.Id))
@@ -358,8 +358,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -375,8 +375,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -392,8 +392,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -413,8 +413,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -434,8 +434,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -454,8 +454,8 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult?.isSuccess, 'Illegal operation succeeded');
-		System.assertEquals(false, dmlResult?.errors?.isEmpty(), 'No errors posted');
+		System.assertEquals(false, dmlResult?.isSuccess(), 'Illegal operation succeeded');
+		System.assertEquals(false, dmlResult?.getErrors()?.isEmpty(), 'No getErrors() posted');
 	}
 
 	@IsTest
@@ -635,7 +635,7 @@ private class Dml_Test {
 		DmlResult dmlResult = DB.Dml.doDml(Dml.Operation.DO_HARD_DELETE, testAccount);
 		Test.stopTest();
 
-		System.assertEquals(testAccount.Id, dmlResult.recordId, 'Wrong result recordId');
+		System.assertEquals(testAccount.Id, dmlResult.getId(), 'Wrong result getId()');
 		Soql query = DB.Soql.newQuery(Account.SObjectType)
 			.whereCriteria(new Filter(Account.Id, Filter.EQUALS, testAccount.Id));
 		System.assertEquals(true, query.run().isEmpty(), 'Account was not deleted');
@@ -671,7 +671,7 @@ private class Dml_Test {
 		}
 		Test.stopTest();
 
-		System.assertEquals(false, dmlResult.isSuccess, 'Dml did not fail');
+		System.assertEquals(false, dmlResult.isSuccess(), 'Dml did not fail');
 	}
 
 	@IsTest

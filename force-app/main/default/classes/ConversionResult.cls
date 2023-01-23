@@ -6,7 +6,7 @@ public class ConversionResult extends DmlResult {
 	Id personAccountId;
 
 	public ConversionResult(Database.LeadConvertResult result) {
-		super(result.getErrors(), result.isSuccess(), result.getLeadId());
+		super(result.getErrors(), result.isSuccess(), result.getLeadId(), Database.LeadConvertResult.class);
 		this.accountId = result.getAccountId();
 		this.contactId = result.getContactId();
 		this.opportunityId = result.getOpportunityId();
@@ -15,7 +15,7 @@ public class ConversionResult extends DmlResult {
 
 	@TestVisible
 	private ConversionResult(List<DmlResult.Error> errors, Boolean isSuccess, Database.LeadConvert leadConvertObj) {
-		super(errors, isSuccess, leadConvertObj?.getLeadId());
+		super(errors, isSuccess, leadConvertObj?.getLeadId(), Database.LeadConvertResult.class);
 		this.accountId = leadConvertObj?.getAccountId();
 		this.contactId = leadConvertObj?.getContactId();
 		this.opportunityId = leadConvertObj?.getOpportunityId();
@@ -31,7 +31,7 @@ public class ConversionResult extends DmlResult {
 	}
 
 	public Id getLeadId() {
-		return this.recordId;
+		return this.getId();
 	}
 
 	public Id getOpportunityId() {

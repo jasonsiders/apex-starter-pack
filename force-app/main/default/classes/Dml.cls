@@ -243,7 +243,7 @@ public virtual inherited sharing class Dml {
 		for (Database.LeadConvertResult convertResult : Database.convertLead(leadConvertObjs)) {
 			ConversionResult result = new ConversionResult(convertResult);
 			results.add(result);
-			if (result?.isSuccess == true) {
+			if (result?.isSuccess() == true) {
 				Lead lead = new Lead(Id = result.getLeadId());
 				Dml.Converted?.add(new List<Lead>{ lead });
 			}

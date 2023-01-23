@@ -40,27 +40,27 @@ public class DmlMock extends Dml {
 	// Publish Methods
 	public override List<DmlResult> doPublish(List<SObject> platformEvents) {
 		Dml.Published?.add(platformEvents);
-		return this.mockDmlResults(platformEvents);
+		return this.mockDmlResults(platformEvents, Database.SaveResult.class);
 	}
 
 	// Insert Methods
 	public override List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
 		records = DmlMock.generateFakeId(records);
 		Dml.Inserted?.add(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.SaveResult.class);
 	}
 
 	// Update Methods
 	public override List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
 		Dml.Updated?.add(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.SaveResult.class);
 	}
 
 	// Upsert Methods
 	public override List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
 		records = DmlMock.generateFakeId(records);
 		Dml.Upserted?.add(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.UpsertResult.class);
 	}
 
 	public override List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
@@ -70,19 +70,19 @@ public class DmlMock extends Dml {
 	// Delete Methods
 	public override List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
 		Dml.Deleted?.add(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.DeleteResult.class);
 	}
 
 	// Hard Delete Methods
 	public override List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
 		this.doDelete(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.DeleteResult.class);
 	}
 
 	// Undelete Methods
 	public override List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
 		Dml.Undeleted?.add(records);
-		return this.mockDmlResults(records);
+		return this.mockDmlResults(records, Database.UndeleteResult.class);
 	}
 
 	// Convert Methods
@@ -131,10 +131,11 @@ public class DmlMock extends Dml {
 
 	// Utility Methods
 	@TestVisible
-	private List<DmlResult> mockDmlResults(List<SObject> records) {
+	private List<DmlResult> mockDmlResults(List<SObject> records, Type sourceType) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (SObject record : records) {
-			dmlResults.add(new DmlResult(new List<DmlResult.Error>(), true, record.Id));
+			DmlResult result = new DmlResult(record.Id, sourceType);
+			dmlResults.add(result);
 		}
 		return dmlResults;
 	}
