@@ -20,7 +20,7 @@ public virtual class DmlResult {
 		this(DmlResult.wrap(errors), isSuccess, recordId, sourceType);
 	}
 
-	@TestVisible 
+	@TestVisible
 	protected DmlResult(Id recordId, Type sourceType) {
 		this(new List<DmlResult.Error>(), true, recordId, sourceType);
 	}

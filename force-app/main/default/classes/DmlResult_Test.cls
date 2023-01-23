@@ -139,8 +139,8 @@ private class DmlResult_Test {
 	@IsTest
 	static void shouldOutputError() {
 		DmlResult result = new DmlResult(Database.update(new Account(), false));
-        List<DmlResult.Error> errors = result?.getErrors();
-		DmlResult.Error error = (errors?.isEmpty() == false) ? errors[0] : null; 
+		List<DmlResult.Error> errors = result?.getErrors();
+		DmlResult.Error error = (errors?.isEmpty() == false) ? errors[0] : null;
 
 		Test.startTest();
 		String errorMsg = String.valueOf(error);

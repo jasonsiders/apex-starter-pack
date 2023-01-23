@@ -157,7 +157,11 @@ private class Dml_Test {
 		ConversionResult result = (ConversionResult) DB.Dml.doConvert(leadConvertObj);
 		Test.stopTest();
 
-		System.assertEquals(true, result.isSuccess(), 'LeadConvert was not a success: ' + JSON.serialize(result.getErrors()));
+		System.assertEquals(
+			true,
+			result.isSuccess(),
+			'LeadConvert was not a success: ' + JSON.serialize(result.getErrors())
+		);
 		System.assertEquals(testLead.Id, result.getLeadId(), 'Wrong leadId');
 		System.assertNotEquals(null, result.getAccountId(), 'Null accountId');
 		System.assertNotEquals(null, result.getContactId(), 'Null contactId');

@@ -11,7 +11,7 @@ private class DmlMock_Test {
 	}
 
 	@IsTest
-	static void shouldAddFakeIdToRecord() { 
+	static void shouldAddFakeIdToRecord() {
 		Account account = (Account) DmlMock.generateFakeId(new Account(Name = 'Test Account'));
 		System.assertNotEquals(null, account.Id, 'Account ID was not set');
 		System.assertEquals('001000000000000000', account.Id, 'Unexpected Id set');
