@@ -42,12 +42,13 @@ private class AsyncDml_Test {
 
 		Soql query = DB.Soql.newQuery(Lead.SObjectType)
 			.whereCriteria(new Filter(Lead.IsConverted, Filter.EQUALS, true));
-		System.assertEquals(1, query.run().size(), 'Wrong # of converted leads');
+		System.assertEquals(1, query?.run()?.size(), 'Wrong # of converted leads');
 	}
 
 	@IsTest
 	static void shouldMakeRequestWithExternalId() {
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), Case.CaseNumber);
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case())
+			?.externalIdField(Case.CaseNumber);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
 		System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
@@ -57,7 +58,7 @@ private class AsyncDml_Test {
 
 	@IsTest
 	static void shouldMakeRequestWithAllOrNone() {
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), false);
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case())?.allOrNone(false);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
 		System.assertEquals(null, request?.externalIdField, 'Wrong externalIdField');
@@ -67,7 +68,9 @@ private class AsyncDml_Test {
 
 	@IsTest
 	static void shouldMakeRequestWithExternalIdAndAllOrNone() {
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case(), Case.CaseNumber, false);
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case())
+			?.allOrNone(false)
+			?.externalIdField(Case.CaseNumber);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
 		System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
@@ -77,7 +80,7 @@ private class AsyncDml_Test {
 
 	@IsTest
 	static void shouldMakeRequestWithSkippedTriggers() {
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case()).skipTriggers();
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case()).skipTriggers(true);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
 		System.assertEquals(null, request?.externalIdField, 'Wrong externalIdField');
@@ -86,9 +89,9 @@ private class AsyncDml_Test {
 	}
 
 	@IsTest
-	static void shouldSkipTriggers() {
+	static void shouldskipTriggers() {
 		Account acc = new Account(Name = 'Test Account');
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, acc).skipTriggers();
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, acc).skipTriggers(true);
 
 		Test.startTest();
 		AsyncDml.addRequest(request);
@@ -116,7 +119,7 @@ private class AsyncDml_Test {
 	@IsTest
 	static void shouldHandleErrors() {
 		Account account = new Account(Name = 'Test Account');
-		AsyncDml.Request req = new AsyncDml.Request(Dml.Operation.DO_UPDATE, account, true);
+		AsyncDml.Request req = new AsyncDml.Request(Dml.Operation.DO_UPDATE, account)?.allOrNone(true);
 		// Can't update an Account with no Id - this will return a System.DmlException
 		AsyncDml.addRequest(req);
 
