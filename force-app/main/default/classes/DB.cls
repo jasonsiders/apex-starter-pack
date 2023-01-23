@@ -1,21 +1,23 @@
-public inherited sharing abstract class DatabaseLayer {
+public abstract class DB {
+	// Represents the environment's database layer. 
+	// Can be stubbed out in @IsTest context to support mocking.
 	public static Dml Dml { get; private set; }
 	public static QueryFactory Soql { get; private set; }
 
 	static {
-		Databaselayer.Dml = new Dml();
-		Databaselayer.Soql = new Soql.Factory();
+		DB.Dml = new Dml();
+		DB.Soql = new Soql.Factory();
 	}
 
 	@TestVisible
 	static Dml setDmlEngine(Dml dmlEngine) {
-		Databaselayer.Dml = dmlEngine;
+		DB.Dml = dmlEngine;
 		return dmlEngine;
 	}
 
 	@TestVisible
 	static QueryFactory setQueryEngine(QueryFactory queryEngine) {
-		Databaselayer.Soql = queryEngine;
+		DB.Soql = queryEngine;
 		return queryEngine;
 	}
 

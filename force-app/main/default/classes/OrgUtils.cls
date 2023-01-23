@@ -2,7 +2,7 @@ public abstract class OrgUtils {
 	@TestVisible
 	static Organization CurrentOrg;
 	@TestVisible
-	static Soql CurrentOrgQuery = Databaselayer.Soql.newQuery(Organization.SObjectType)
+	static Soql CurrentOrgQuery = DB.Soql.newQuery(Organization.SObjectType)
 		.selectFields(new List<SObjectField>{ Organization.IsSandbox, Organization.OrganizationType });
 	static Decimal currentApiVersion;
 	static final String DEV_ED_ORG_TYPE = 'Developer Edition';
@@ -32,7 +32,7 @@ public abstract class OrgUtils {
 		// There's no straightforward way to getting the latest API version
 		// However, this is exposed via the 'attributes' object in SOQL
 		if (OrgUtils.currentApiVersion == null) {
-			Soql query = Databaselayer.Soql.newQuery(Profile.SObjectType).setRowLimit(1);
+			Soql query = DB.Soql.newQuery(Profile.SObjectType).setRowLimit(1);
 			QueryJson results = (QueryJson) CollectionUtils.getIndexOf(
 				(List<QueryJson>) query.run(List<QueryJson>.class),
 				0

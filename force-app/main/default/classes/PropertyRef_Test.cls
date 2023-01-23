@@ -45,9 +45,9 @@ private class PropertyRef_Test {
 
 	@IsTest
 	static void shouldGetValueFromMultiLayerSObjects() {
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		Account account = new Account(Name = 'Test');
-		DatabaseLayer.Dml.doInsert(account);
+		DB.Dml.doInsert(account);
 		Opportunity opp = (Opportunity) SObjectUtils.setLookupField(new Opportunity(), Opportunity.AccountId, account);
 		PropertyRef ref = new PropertyRef('Account.Name');
 		System.assertEquals(account.Name, ref.getValue(opp), 'Wrong Opportunity.Account.Name');

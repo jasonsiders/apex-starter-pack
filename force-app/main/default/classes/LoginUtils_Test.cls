@@ -21,7 +21,7 @@ private class LoginUtils_Test {
 			);
 			existingSessions.add(session);
 		}
-		DatabaseLayer.setQueryEngine(new SoqlMock.Factory());
+		DB.setQueryEngine(new SoqlMock.Factory());
 		LoginUtils.ActiveSessionQuery.toMock()?.setMockResults(existingSessions);
 
 		Test.startTest();
@@ -44,13 +44,13 @@ private class LoginUtils_Test {
 
 	@IsTest
 	static void shouldDetermineIfLoggedIn() {
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		// The current user will always be logged in
 		User me = new User(Id = UserInfo.getUserId());
 		System.assertEquals(true, LoginUtils.userIsLoggedIn(me), 'Current user is not logged in');
 		// A fake user should never be logged in
 		User mockUser = new User();
-		Databaselayer.Dml.doInsert(mockUser);
+		DB.Dml.doInsert(mockUser);
 		System.assertEquals(false, LoginUtils.userIsLoggedIn(mockUser), 'A fake user was flagged as logged in');
 	}
 }

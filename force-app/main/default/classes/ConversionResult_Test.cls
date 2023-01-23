@@ -9,8 +9,8 @@ private class ConversionResult_Test {
 			LastName = 'Doe',
 			Phone = '+15555555555'
 		);
-		Databaselayer.Dml.doInsert(testLead);
-		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
+		DB.Dml.doInsert(testLead);
+		Soql statusQuery = DB.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
 			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);
@@ -39,7 +39,7 @@ private class ConversionResult_Test {
 
 	@IsTest
 	static void shouldConstructFromMock() {
-		DatabaseLayer.setDmlEngine(new DmlMock());
+		DB.setDmlEngine(new DmlMock());
 		Lead testLead = new Lead(
 			Company = 'Acme Inc.',
 			Email = 'john.doe@test.com.invalid',
@@ -47,8 +47,8 @@ private class ConversionResult_Test {
 			LastName = 'Doe',
 			Phone = '+15555555555'
 		);
-		Databaselayer.Dml.doInsert(testLead);
-		Soql statusQuery = Databaselayer.Soql.newQuery(LeadStatus.SObjectType)
+		DB.Dml.doInsert(testLead);
+		Soql statusQuery = DB.Soql.newQuery(LeadStatus.SObjectType)
 			.selectFields(LeadStatus.MasterLabel)
 			.whereCriteria(new Filter(LeadStatus.IsConverted, Filter.EQUALS, true))
 			.setRowLimit(1);

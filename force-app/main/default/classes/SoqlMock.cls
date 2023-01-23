@@ -14,7 +14,7 @@ public class SoqlMock extends Soql {
 		this.mockResults = mockResults;
 	}
 
-	public class Factory implements DatabaseLayer.QueryFactory {
+	public class Factory implements DB.QueryFactory {
 		public Soql newQuery(SObjectType objectType) {
 			return new SoqlMock(objectType);
 		}
