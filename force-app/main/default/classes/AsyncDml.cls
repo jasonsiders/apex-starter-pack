@@ -34,71 +34,50 @@ public virtual inherited sharing class AsyncDml implements System.Queueable {
 
 	// **** INNER **** //
 	public virtual class Request {
-		@TestVisible
-		Dml.Operation operation;
-		@TestVisible
-		List<SObject> records;
-		@TestVisible
-		FieldRef externalIdField;
-		@TestVisible
-		Boolean allOrNone = true;
-		@TestVisible
-		Boolean skipTriggers = false;
+		public Dml.Operation operation { get; private set; }
+		public List<SObject> records { get; private set; }
+		public FieldRef externalIdField { get; private set; }
+		public Boolean allOrNone { get; private set; }
+		public Boolean skipTriggers { get; private set; }
 
 		public Request(
 			Dml.Operation operation,
-			List<SObject> records,
-			SObjectField externalIdField,
-			Boolean allOrNone
+			List<SObject> records
 		) {
 			this.operation = operation;
 			this.records = records;
-			this.externalIdField = (externalIdField != null) ? new FieldRef(externalIdField) : null;
-			this.allOrNone = allOrNone;
-		}
-
-		public Request(Dml.Operation operation, List<SObject> records, SObjectField externalIdField) {
-			this(operation, records, externalIdField, true);
-		}
-
-		public Request(Dml.Operation operation, List<SObject> records, Boolean allOrNone) {
-			this(operation, records, null, allOrNone);
-		}
-
-		public Request(Dml.Operation operation, List<SObject> records) {
-			this(operation, records, null, true);
-		}
-
-		public Request(Dml.Operation operation, SObject record, SObjectField externalIdField, Boolean allOrNone) {
-			this(operation, new List<SObject>{ record }, externalIdField, allOrNone);
-		}
-
-		public Request(Dml.Operation operation, SObject record, SObjectField externalIdField) {
-			this(operation, new List<SObject>{ record }, externalIdField);
-		}
-
-		public Request(Dml.Operation operation, SObject record, Boolean allOrNone) {
-			this(operation, new List<SObject>{ record }, allOrNone);
+			this.allOrNone(true); 
+			this.skipTriggers(false); 
 		}
 
 		public Request(Dml.Operation operation, SObject record) {
 			this(operation, new List<SObject>{ record });
 		}
 
+		public Request externalIdField(SObjectField externalIdField) {
+			this.externalIdField = new FieldRef(externalIdField);
+			return this; 
+		}
+
+		public Request allOrNone(Boolean allOrNone) {
+			this.allOrNone = allOrNone;
+			return this; 
+		}
+
+		public Request skipTriggers(Boolean skipTriggers) {
+			this.skipTriggers = skipTriggers; 
+			return this; 
+		}
+
 		protected Request() {
 			// Needed for inheritance
 		}
 
-		public Request skipTriggers() {
-			this.skipTriggers = true;
-			return this;
-		}
-
 		public List<DmlResult> process() {
 			try {
-				return (this.skipTriggers) ? this.doDmlWithoutTriggers() : this.doDml();
+				return (this.skipTriggers == true) ? this.doDmlWithoutTriggers() : this.doDml();
 			} catch (Exception error) {
-				System.debug(LoggingLevel.ERROR, AsyncDml.class + ': Async operation failed: ' + error);
+				System.debug(LoggingLevel.ERROR, AsyncDml.class + ': Async operation failed: ' + error + '\n' + error?.getStackTraceString());
 				return null;
 			}
 		}
