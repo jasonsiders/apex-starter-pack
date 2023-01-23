@@ -15,7 +15,7 @@ private class AsyncDml_Test {
 		List<Account> inserted = (List<Account>) DB.Soql.newQuery(Account.SObjectType).run();
 		System.assertEquals(testAccounts?.size(), inserted?.size(), 'Wrong # of accounts inserted');
 	}
- 
+
 	@IsTest
 	static void shouldConvertLeadAsynchronously() {
 		Lead testLead = new Lead(
@@ -47,7 +47,8 @@ private class AsyncDml_Test {
 
 	@IsTest
 	static void shouldMakeRequestWithExternalId() {
-		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case())?.externalIdField(Case.CaseNumber);
+		AsyncDml.Request request = new AsyncDml.Request(Dml.Operation.DO_INSERT, new Case())
+			?.externalIdField(Case.CaseNumber);
 		System.assertEquals(Dml.Operation.DO_INSERT, request?.operation, 'Wrong DML operation');
 		System.assertEquals(1, request?.records?.size(), 'Wrong # of records');
 		System.assertEquals(Case.CaseNumber, request?.externalIdField?.toSchemaType(), 'Wrong externalIdField');
