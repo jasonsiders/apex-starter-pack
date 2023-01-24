@@ -4,12 +4,15 @@
 			"path": "force-app",
 			"default": true,
 			"package": "apex-starter-pack",
-			"versionName": "v1.0.0",
-			"versionNumber": "1.0.0.NEXT"
+			"versionName": "v0.1.0",
+			"versionNumber": "0.1.0.NEXT"
 		}
 	],
 	"name": "apex-starter-pack",
 	"namespace": "apxsp",
 	"sfdcLoginUrl": "https://login.salesforce.com",
-	"sourceApiVersion": "56.0"
+	"sourceApiVersion": "56.0",
+	"packageAliases": {
+		"apex-starter-pack": "0HoDn000000k9sMKAQ"
+	}
 }
