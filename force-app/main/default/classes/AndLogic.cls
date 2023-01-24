@@ -1,9 +1,9 @@
-public virtual class AndLogic extends FilterLogic {
-	public AndLogic() {
+global virtual class AndLogic extends FilterLogic {
+	global AndLogic() {
 		this.token = 'AND';
 	}
 
-	public override Boolean meetsCriteria(Object item) {
+	global override Boolean meetsCriteria(Object item) {
 		for (ICriteria criteria : this.criterion) {
 			if (criteria.meetsCriteria(item) == false) {
 				return false;

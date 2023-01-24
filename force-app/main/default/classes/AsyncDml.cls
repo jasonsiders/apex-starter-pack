@@ -1,11 +1,11 @@
-public abstract inherited sharing class AsyncDml {
+global abstract inherited sharing class AsyncDml {
 	static Container container = new Container();
 
-	public static void addRequest(Request request) {
+	global static void addRequest(Request request) {
 		container?.addRequest(request);
 	}
 
-	public static Id runJob() {
+	global static Id runJob() {
 		Id jobId;
 		Boolean hasQueueableCapacity = Limits.getQueueableJobs() < Limits.getLimitQueueableJobs();
 		if (hasQueueableCapacity) {
@@ -21,14 +21,14 @@ public abstract inherited sharing class AsyncDml {
 	}
 
 	// **** INNER **** //
-	public virtual class Request {
+	global virtual class Request {
 		public Dml.Operation operation { get; private set; }
 		public List<SObject> records { get; private set; }
 		public FieldRef externalIdField { get; private set; }
 		public Boolean allOrNone { get; private set; }
 		public Boolean skipTriggers { get; private set; }
 
-		public Request(Dml.Operation operation, List<SObject> records) {
+		global Request(Dml.Operation operation, List<SObject> records) {
 			this.operation = operation;
 			this.records = records;
 			this.externalIdField(null);
@@ -36,25 +36,29 @@ public abstract inherited sharing class AsyncDml {
 			this.skipTriggers(false);
 		}
 
-		public Request(Dml.Operation operation, SObject record) {
+		global Request(Dml.Operation operation, SObject record) {
 			this(operation, new List<SObject>{ record });
 		}
 
-		public Request externalIdField(SObjectField externalIdField) {
+		global Request externalIdField(SObjectField externalIdField) {
 			if (externalIdField != null) {
 				this.externalIdField = new FieldRef(externalIdField);
 			}
 			return this;
 		}
 
-		public Request allOrNone(Boolean allOrNone) {
+		global Request allOrNone(Boolean allOrNone) {
 			this.allOrNone = allOrNone;
 			return this;
 		}
 
-		public Request skipTriggers(Boolean skipTriggers) {
+		global Request skipTriggers(Boolean skipTriggers) {
 			this.skipTriggers = skipTriggers;
 			return this;
+		}
+
+		global virtual List<DmlResult> doDml() {
+			return DB.Dml.doDml(this.operation, this.records, this.externalIdField?.toSchemaType(), this.allOrNone);
 		}
 
 		protected Request() {
@@ -83,22 +87,18 @@ public abstract inherited sharing class AsyncDml {
 			TriggerHandler.enable();
 			return results;
 		}
-
-		protected virtual List<DmlResult> doDml() {
-			return DB.Dml.doDml(this.operation, this.records, this.externalIdField?.toSchemaType(), this.allOrNone);
-		}
 	}
 
-	public class Conversion extends Request {
+	global class Conversion extends Request {
 		// Necessary since Database.LeadConvert objects cannot be deserialized,
 		// which prevents it from being used as a member of a Queueable instance
 		List<SerializableLeadConvert> wrappers;
 
-		public Conversion(List<Database.LeadConvert> leadConverts) {
+		global Conversion(List<Database.LeadConvert> leadConverts) {
 			this.wrappers = SerializableLeadConvert.wrap(leadConverts);
 		}
 
-		public Conversion(Database.LeadConvert leadConvert) {
+		global Conversion(Database.LeadConvert leadConvert) {
 			this(new List<Database.LeadConvert>{ leadConvert });
 		}
 
@@ -111,7 +111,7 @@ public abstract inherited sharing class AsyncDml {
 	private class Container implements System.Queueable {
 		List<Request> requests = new List<Request>();
 
-		public void addRequest(Request request) {
+		private void addRequest(Request request) {
 			this.requests?.add(request);
 		}
 
@@ -121,7 +121,7 @@ public abstract inherited sharing class AsyncDml {
 			}
 		}
 
-		public void reset() {
+		private void reset() {
 			this.requests?.clear();
 		}
 	}

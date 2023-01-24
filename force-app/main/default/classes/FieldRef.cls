@@ -1,8 +1,8 @@
-public class FieldRef implements Mappable, IProperty {
-	public String soqlReference { get; private set; }
-	public SObjectRef rootSObjectType { get; private set; }
-	public List<FieldRef> relationshipFields = new List<FieldRef>();
-	public SObjectRef destinationSObjectType { get; private set; }
+global class FieldRef implements Mappable, IProperty {
+	global String soqlReference { get; private set; }
+	global SObjectRef rootSObjectType { get; private set; }
+	global List<FieldRef> relationshipFields = new List<FieldRef>();
+	global SObjectRef destinationSObjectType { get; private set; }
 	private String destinationFieldName;
 	transient SObjectField destinationField {
 		// Note: SObjectFields aren't serializable; use a getter to manually reconstruct if null
@@ -18,14 +18,14 @@ public class FieldRef implements Mappable, IProperty {
 		private set;
 	}
 
-	public FieldRef(SObjectField field) {
+	global FieldRef(SObjectField field) {
 		// When given a single SObjectField, the root and destination are the same
 		this.setDestinationDetails(field);
 		this.rootSObjectType = this.destinationSObjectType;
 		this.soqlReference = this.destinationFieldName;
 	}
 
-	public FieldRef(List<SObjectField> fieldChain) {
+	global FieldRef(List<SObjectField> fieldChain) {
 		// To be used for a chain of related fields from a source SObjectType
 		// ex., [Case.ContactId, Contact.AccountId, Account.OwnerId] => "Case.Contact.Account.OwnerId"
 		this.soqlReference = SchemaUtils.getSoqlReference(fieldChain);
@@ -41,31 +41,31 @@ public class FieldRef implements Mappable, IProperty {
 		}
 	}
 
-	public Object getValue(SObject record) {
+	global Object getValue(SObject record) {
 		for (FieldRef relationshipField : this.relationshipFields) {
 			record = relationshipField?.getLookupValue(record);
 		}
 		return record?.get(this.destinationField);
 	}
 
-	public Object getValue(Object obj) {
+	global Object getValue(Object obj) {
 		SObject record = (SObject) obj;
 		return this.getValue(record);
 	}
 
-	public SObject getLookupValue(SObject record) {
+	global SObject getLookupValue(SObject record) {
 		return record?.getSObject(this.destinationField);
 	}
 
-	public SObjectField toSchemaType() {
+	global SObjectField toSchemaType() {
 		return this.destinationField;
 	}
 
-	public override String toString() {
+	global override String toString() {
 		return this.soqlReference;
 	}
 
-	public String getFullName() {
+	global String getFullName() {
 		return String.valueOf(this.rootSObjectType) + '.' + this.toString();
 	}
 

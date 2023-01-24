@@ -1,4 +1,4 @@
-public virtual class DmlResult {
+global virtual class DmlResult {
 	// Database.*Result classes do not share a common interface, and they cannot be manually constructed
 	// This makes testing/mocking especially difficult
 	// This class wraps all of those result types
@@ -30,40 +30,40 @@ public virtual class DmlResult {
 	}
 
 	// Constructors wrap a single Result object
-	public DmlResult(Database.DeleteResult result) {
+	global DmlResult(Database.DeleteResult result) {
 		this(result.getErrors(), result.isSuccess(), result.getId(), Database.DeleteResult.class);
 	}
 
-	public DmlResult(Database.SaveResult result) {
+	global DmlResult(Database.SaveResult result) {
 		this(result.getErrors(), result.isSuccess(), result.getId(), Database.SaveResult.class);
 	}
 
-	public DmlResult(Database.UndeleteResult result) {
+	global DmlResult(Database.UndeleteResult result) {
 		this(result.getErrors(), result.isSuccess(), result.getId(), Database.UndeleteResult.class);
 	}
 
-	public DmlResult(Database.UpsertResult result) {
+	global DmlResult(Database.UpsertResult result) {
 		this(result.getErrors(), result.isSuccess(), result.getId(), Database.UpsertResult.class);
 	}
 
-	public List<Error> getErrors() {
+	global List<Error> getErrors() {
 		return this.errors;
 	}
 
-	public Boolean isSuccess() {
+	global Boolean isSuccess() {
 		return this.isSuccess;
 	}
 
-	public Id getId() {
+	global Id getId() {
 		return this.recordId;
 	}
 
-	public Type getType() {
+	global Type getType() {
 		return this.sourceType;
 	}
 
 	// Methods to "wrap" results in bulk
-	public static List<DmlResult> wrap(List<Database.DeleteResult> deleteResults) {
+	global static List<DmlResult> wrap(List<Database.DeleteResult> deleteResults) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (Database.DeleteResult deleteResult : deleteResults) {
 			dmlResults.add(new DmlResult(deleteResult));
@@ -71,7 +71,7 @@ public virtual class DmlResult {
 		return dmlResults;
 	}
 
-	public static List<DmlResult> wrap(List<Database.SaveResult> saveResults) {
+	global static List<DmlResult> wrap(List<Database.SaveResult> saveResults) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (Database.SaveResult saveResult : saveResults) {
 			dmlResults.add(new DmlResult(saveResult));
@@ -79,7 +79,7 @@ public virtual class DmlResult {
 		return dmlResults;
 	}
 
-	public static List<DmlResult> wrap(List<Database.UndeleteResult> undeleteResults) {
+	global static List<DmlResult> wrap(List<Database.UndeleteResult> undeleteResults) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (Database.UndeleteResult undeleteResult : undeleteResults) {
 			dmlResults.add(new DmlResult(undeleteResult));
@@ -87,7 +87,7 @@ public virtual class DmlResult {
 		return dmlResults;
 	}
 
-	public static List<DmlResult> wrap(List<Database.UpsertResult> upsertResults) {
+	global static List<DmlResult> wrap(List<Database.UpsertResult> upsertResults) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (Database.UpsertResult upsertResult : upsertResults) {
 			dmlResults.add(new DmlResult(upsertResult));
@@ -95,7 +95,7 @@ public virtual class DmlResult {
 		return dmlResults;
 	}
 
-	public static List<Error> wrap(List<Database.Error> errors) {
+	global static List<Error> wrap(List<Database.Error> errors) {
 		List<Error> dmlErrors = new List<Error>();
 		errors = (errors != null) ? errors : new List<Database.Error>();
 		for (Database.Error error : errors) {
@@ -104,7 +104,7 @@ public virtual class DmlResult {
 		return dmlErrors;
 	}
 
-	public class Error {
+	global class Error {
 		// Wraps the Database.Error class, which also cannot be constructed
 		List<String> fields;
 		String message;
@@ -117,23 +117,23 @@ public virtual class DmlResult {
 			this.statusCode = statusCode;
 		}
 
-		public Error(Database.Error error) {
+		global Error(Database.Error error) {
 			this(error.getFields(), error.getMessage(), error.getStatusCode());
 		}
 
-		public List<String> getFields() {
+		global List<String> getFields() {
 			return this.fields;
 		}
 
-		public String getMessage() {
+		global String getMessage() {
 			return this.message;
 		}
 
-		public StatusCode getStatusCode() {
+		global StatusCode getStatusCode() {
 			return this.statusCode;
 		}
 
-		public override String toString() {
+		global override String toString() {
 			List<String> messageParts = new List<String>{
 				String.valueOf(this?.getStatusCode()),
 				this?.getMessage(),

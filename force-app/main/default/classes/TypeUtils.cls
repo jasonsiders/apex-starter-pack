@@ -1,16 +1,16 @@
-public abstract class TypeUtils {
+global abstract class TypeUtils {
 	static final String TYPE_ERROR_PREFIX = 'Invalid conversion from runtime type ';
 	static final String TYPE_ERROR_SUFFIX = ' to ' + UnknownType.class.getName();
 	static final String LIST_PREFIX = 'List<';
 	static final String MAP_PREFIX = 'Map<';
 	static final String SET_PREFIX = 'Set<';
 
-	public static Type getType(Object obj) {
+	global static Type getType(Object obj) {
 		String typeName = TypeUtils.getTypeName(obj);
 		return (typeName != null) ? Type.forName(typeName) : null;
 	}
 
-	public static String getTypeName(Object obj) {
+	global static String getTypeName(Object obj) {
 		// Note: Type.forName() does not work on private types
 		// If you need to dynamically get the type of a private object,
 		// call this method instead + Type.forName() in the object's file to avoid errors
@@ -23,32 +23,32 @@ public abstract class TypeUtils {
 		return null;
 	}
 
-	public static String getLocalTypeName(Object obj) {
+	global static String getLocalTypeName(Object obj) {
 		String typeName = TypeUtils.getTypeName(obj);
 		Type objType = (String.isNotBlank(typeName)) ? Type.forName(typeName) : null;
 		return TypeUtils.getLocalTypeName(objType);
 	}
 
-	public static String getLocalTypeName(Type myType) {
+	global static String getLocalTypeName(Type myType) {
 		// Retrieve the name of a type sans-namespace
 		String namespacePrefix = NamespaceUtils.getCurrent() + '.';
 		String fullName = myType?.getName();
 		return fullName?.removeStart(namespacePrefix);
 	}
 
-	public static Boolean isList(Object obj) {
+	global static Boolean isList(Object obj) {
 		return TypeUtils.getType(obj)?.getName()?.startsWith(LIST_PREFIX);
 	}
 
-	public static Boolean isMap(Object obj) {
+	global static Boolean isMap(Object obj) {
 		return TypeUtils.getType(obj)?.getName()?.startsWith(MAP_PREFIX);
 	}
 
-	public static Boolean isSet(Object obj) {
+	global static Boolean isSet(Object obj) {
 		return TypeUtils.getType(obj)?.getName()?.startsWith(SET_PREFIX);
 	}
 
-	public static Boolean isCollection(Object obj) {
+	global static Boolean isCollection(Object obj) {
 		String typeName = TypeUtils.getType(obj)?.getName();
 		for (String token : new List<String>{ LIST_PREFIX, MAP_PREFIX, SET_PREFIX }) {
 			if (typeName?.contains(token)) {
@@ -58,7 +58,7 @@ public abstract class TypeUtils {
 		return false;
 	}
 
-	public static Object parseStringValue(String stringValue) {
+	global static Object parseStringValue(String stringValue) {
 		// Convert any string to an object of a specific type
 		Object value = ((Map<String, Object>) JSON.deserializeUntyped('{"value":' + stringValue + '}')).values()[0];
 		if (TypeUtils.getType(value) == String.class) {
@@ -86,7 +86,7 @@ public abstract class TypeUtils {
 	// Attempting to use < or > symbols directly on Objects will generate a compile error:
 	// ! Inequality operator not allowed for this type: Object
 	// Note: Blob, Boolean, Id, Long, String, and complex types are not supported in greater/less than operations
-	public static Boolean greaterThan(Object value, Object comparison) {
+	global static Boolean greaterThan(Object value, Object comparison) {
 		if (value != null && comparison != null) {
 			switch on TypeUtils.getTypeName(value)?.toUpperCase() {
 				when 'DATE', 'DATETIME' {
@@ -105,7 +105,7 @@ public abstract class TypeUtils {
 		return false;
 	}
 
-	public static Boolean lessThan(Object value, Object comparison) {
+	global static Boolean lessThan(Object value, Object comparison) {
 		if (value != null && comparison != null) {
 			switch on TypeUtils.getTypeName(value)?.toUpperCase() {
 				when 'DATE', 'DATETIME' {

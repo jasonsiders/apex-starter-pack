@@ -1,4 +1,4 @@
-public class ChildRelationshipRef implements Mappable {
+global class ChildRelationshipRef implements Mappable {
 	FieldRef lookupReference;
 	transient ChildRelationship relationship {
 		get {
@@ -11,13 +11,13 @@ public class ChildRelationshipRef implements Mappable {
 		private set;
 	}
 
-	public ChildRelationshipRef(ChildRelationship relationship) {
+	global ChildRelationshipRef(ChildRelationship relationship) {
 		SObjectField lookupField = relationship?.getField();
 		this.lookupReference = new FieldRef(lookupField);
 		this.relationship = relationship;
 	}
 
-	public ChildRelationshipRef(SObjectField lookupField) {
+	global ChildRelationshipRef(SObjectField lookupField) {
 		this.lookupReference = new FieldRef(lookupField);
 		this.relationship = SchemaUtils.getChildRelationship(lookupField);
 		if (this.relationship == null) {
@@ -25,11 +25,11 @@ public class ChildRelationshipRef implements Mappable {
 		}
 	}
 
-	public ChildRelationship toSchemaType() {
+	global ChildRelationship toSchemaType() {
 		return this.relationship;
 	}
 
-	public override String toString() {
+	global override String toString() {
 		SObjectField lookupField = this.lookupReference?.toSchemaType();
 		SObjectType parentType = SchemaUtils.getParentSObjectType(lookupField);
 		return parentType + '.' + this.relationship?.getRelationshipName();

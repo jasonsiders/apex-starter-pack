@@ -1,4 +1,4 @@
-public abstract class LoginUtils {
+global abstract class LoginUtils {
 	@TestVisible
 	static Soql ActiveSessionQuery = DB.Soql.newQuery(AuthSession.SObjectType)
 		.selectFields(new FieldRef(new List<SObjectField>{ AuthSession.LoginHistoryId, LoginHistory.Application }))
@@ -18,7 +18,7 @@ public abstract class LoginUtils {
 		private set;
 	}
 
-	public static Map<Id, List<AuthSession>> getAllActiveSessions() {
+	global static Map<Id, List<AuthSession>> getAllActiveSessions() {
 		Map<Id, List<AuthSession>> activeSessions = new Map<Id, List<AuthSession>>();
 		for (AuthSession session : (List<AuthSession>) LoginUtils.ActiveSessionQuery?.run()) {
 			// Note: Can't easily filter active sessions in SOQL; must calculate manually
@@ -37,19 +37,19 @@ public abstract class LoginUtils {
 		return activeSessions;
 	}
 
-	public static List<AuthSession> getActiveSessions(Id userId) {
+	global static List<AuthSession> getActiveSessions(Id userId) {
 		return LoginUtils.activeSessions?.get(userId);
 	}
 
-	public static List<AuthSession> getActiveSessions(User user) {
+	global static List<AuthSession> getActiveSessions(User user) {
 		return LoginUtils.getActiveSessions(user?.Id);
 	}
 
-	public static Boolean userIsLoggedIn(Id userId) {
+	global static Boolean userIsLoggedIn(Id userId) {
 		return LoginUtils.activeSessions?.containsKey(userId) == true;
 	}
 
-	public static Boolean userIsLoggedIn(User user) {
+	global static Boolean userIsLoggedIn(User user) {
 		return LoginUtils.userIsLoggedIn(user?.Id);
 	}
 }

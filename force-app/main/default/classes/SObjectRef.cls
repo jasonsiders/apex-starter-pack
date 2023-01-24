@@ -1,4 +1,4 @@
-public class SObjectRef implements Mappable {
+global class SObjectRef implements Mappable {
 	// Wraps the SObjectType class, which is not JSON serializable
 	String objectName;
 	transient SObjectType objectType {
@@ -11,28 +11,24 @@ public class SObjectRef implements Mappable {
 		private set;
 	}
 
-	public SObjectRef(SObjectType objectType) {
+	global SObjectRef(SObjectType objectType) {
 		this.objectName = String.valueOf(objectType);
 		this.objectType = objectType;
 	}
 
-	public SObjectRef(SObjectField field) {
+	global SObjectRef(SObjectField field) {
 		this(SchemaUtils.getSObjectType(field));
 	}
 
-	public SObjectRef(SObject record) {
+	global SObjectRef(SObject record) {
 		this(record?.getSObjectType());
 	}
 
-	public Boolean isSObjectTypeOf(SObject record) {
-		return record?.getSObjectType() == this.toSchemaType();
-	}
-
-	public SObjectType toSchemaType() {
+	global SObjectType toSchemaType() {
 		return this.objectType;
 	}
 
-	public override String toString() {
+	global override String toString() {
 		return this.objectName;
 	}
 

@@ -1,9 +1,9 @@
-public virtual class OrLogic extends FilterLogic {
-	public OrLogic() {
+global virtual class OrLogic extends FilterLogic {
+	global OrLogic() {
 		this.token = 'OR';
 	}
 
-	public override Boolean meetsCriteria(Object item) {
+	global override Boolean meetsCriteria(Object item) {
 		for (ICriteria criteria : this.criterion) {
 			if (criteria.meetsCriteria(item) == true) {
 				return true;

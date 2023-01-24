@@ -1,3 +1,3 @@
-public interface TypeAware {
+global interface TypeAware {
 	Type getType();
 }

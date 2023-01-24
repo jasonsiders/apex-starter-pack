@@ -1,4 +1,4 @@
-public inherited sharing virtual class Soql {
+global inherited sharing virtual class Soql {
 	@TestVisible
 	protected Set<String> selectClauses = new Set<String>{ 'Id' };
 	protected SObjectRef fromSObject;
@@ -22,7 +22,7 @@ public inherited sharing virtual class Soql {
 	}
 
 	// **** Running a Query **** //
-	public virtual List<SObject> run() {
+	global virtual List<SObject> run() {
 		// Run the current query object through the database
 		String soql = this.toString();
 		List<SObject> results;
@@ -36,13 +36,13 @@ public inherited sharing virtual class Soql {
 		return results;
 	}
 
-	public virtual Object run(Type returnType) {
+	global virtual Object run(Type returnType) {
 		// Return the query results as an instance of the returnType
 		// Mostly useful for returning Aggregate Query results as a wrapper type
 		return JSON.deserialize(JSON.serialize(this.run()), returnType);
 	}
 
-	public virtual override String toString() {
+	global virtual override String toString() {
 		// Outputs a SOQL Query string, following the syntax defined here:
 		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select.htm#:~:text=SOQL%20query%20syntax%20consists%20of,typeOfField%20whenExpression%5B...%5D
 		List<String> queryArgs = new List<String>{ this.getSelect(), this.getFrom(), this.getOptionalArgs() };
@@ -50,146 +50,146 @@ public inherited sharing virtual class Soql {
 	}
 
 	// **** Building a Query **** //
-	public Soql selectFields(List<FieldRef> fieldReferences) {
+	global Soql selectFields(List<FieldRef> fieldReferences) {
 		for (FieldRef fieldReference : fieldReferences) {
 			this.selectClauses.add(fieldReference?.toString());
 		}
 		return this;
 	}
 
-	public Soql selectFields(FieldRef fieldReference) {
+	global Soql selectFields(FieldRef fieldReference) {
 		return this.selectFields(new List<FieldRef>{ fieldReference });
 	}
 
-	public Soql selectFields(List<SObjectField> fields) {
+	global Soql selectFields(List<SObjectField> fields) {
 		for (SObjectField field : fields) {
 			this.selectClauses.add(String.valueOf(field));
 		}
 		return this;
 	}
 
-	public Soql selectFields(SObjectField field) {
+	global Soql selectFields(SObjectField field) {
 		return this.selectFields(new List<SObjectField>{ field });
 	}
 
-	public Soql selectFields(List<String> fieldNames) {
+	global Soql selectFields(List<String> fieldNames) {
 		this.selectClauses.addAll(fieldNames);
 		return this;
 	}
 
-	public Soql selectFields(String fieldName) {
+	global Soql selectFields(String fieldName) {
 		return this.selectFields(new List<String>{ fieldName });
 	}
 
-	public Soql selectAll() {
+	global Soql selectAll() {
 		List<SObjectField> allFields = this.fromSObject?.toSchemaType()?.getDescribe()?.fields?.getMap()?.values();
 		return this.selectFields(allFields);
 	}
 
-	public Soql selectSubQuery(SubQuery subQuery) {
+	global Soql selectSubQuery(SubQuery subQuery) {
 		return this.selectFields(subQuery.toString());
 	}
 
-	public Soql selectAggregation(SoqlAggregation aggregation) {
+	global Soql selectAggregation(SoqlAggregation aggregation) {
 		// Note: 'Id' should never be included in the SELECT clause for Aggregate queries
 		return this.deselectId()?.selectFields(aggregation?.toString());
 	}
 
-	public Soql deselectId() {
+	global Soql deselectId() {
 		// By default, Id will always be included in queries
 		// Occasionally, (i.e., aggregate & inner queries), this isn't desirable
 		this.selectClauses?.remove('Id');
 		return this;
 	}
 
-	public Soql fromSObject(SObjectType objectType) {
+	global Soql fromSObject(SObjectType objectType) {
 		this.fromSObject = new SObjectRef(objectType);
 		return this;
 	}
 
-	public Soql usingScope(Scope scope) {
+	global Soql usingScope(Scope scope) {
 		this.scope = scope;
 		return this;
 	}
 
-	public Soql withExpression(SoqlWithClause withExpression) {
+	global Soql withExpression(SoqlWithClause withExpression) {
 		this.withExpression = withExpression;
 		return this;
 	}
 
-	public Soql whereCriteria(List<ICriteria> filters) {
+	global Soql whereCriteria(List<ICriteria> filters) {
 		this.whereCriteria?.addCriteria(filters);
 		return this;
 	}
 
-	public Soql whereCriteria(ICriteria filter) {
+	global Soql whereCriteria(ICriteria filter) {
 		return this.whereCriteria(new List<ICriteria>{ filter });
 	}
 
-	public Soql setWhereLogic(Type newLogicType) {
+	global Soql setWhereLogic(Type newLogicType) {
 		List<ICriteria> filters = this.whereCriteria?.getCriteria();
 		this.whereCriteria = ((FilterLogic) newLogicType.newInstance())?.setCriteria(filters);
 		return this;
 	}
 
-	public Soql groupBy(List<FieldRef> fieldReferences) {
+	global Soql groupBy(List<FieldRef> fieldReferences) {
 		for (FieldRef fieldReference : fieldReferences) {
 			this.groupByClauses?.add(fieldReference?.toString());
 		}
 		return this;
 	}
 
-	public Soql groupBy(FieldRef fieldReference) {
+	global Soql groupBy(FieldRef fieldReference) {
 		return this.groupBy(new List<FieldRef>{ fieldReference });
 	}
 
-	public Soql groupBy(List<SObjectField> fields) {
+	global Soql groupBy(List<SObjectField> fields) {
 		for (SObjectField field : fields) {
 			this.groupBy(String.valueOf(field));
 		}
 		return this;
 	}
 
-	public Soql groupBy(SObjectField field) {
+	global Soql groupBy(SObjectField field) {
 		return this.groupBy(new List<SObjectField>{ field });
 	}
 
-	public Soql groupBy(List<String> fieldNames) {
+	global Soql groupBy(List<String> fieldNames) {
 		this.groupByClauses?.addAll(fieldNames);
 		return this;
 	}
 
-	public Soql groupBy(String fieldName) {
+	global Soql groupBy(String fieldName) {
 		return this.groupBy(new List<String>{ fieldName });
 	}
 
-	public Soql havingCriteria(SoqlAggregation.AggregateFilter aggregateCriteria) {
+	global Soql havingCriteria(SoqlAggregation.AggregateFilter aggregateCriteria) {
 		this.havingCriteria?.addCriteria(aggregateCriteria);
 		return this;
 	}
 
-	public Soql setHavingLogic(Type newLogicType) {
+	global Soql setHavingLogic(Type newLogicType) {
 		List<ICriteria> filters = this.havingCriteria?.getCriteria();
 		this.havingCriteria = ((FilterLogic) newLogicType.newInstance())?.setCriteria(filters);
 		return this;
 	}
 
-	public Soql orderBy(SoqlSort orderByClause) {
+	global Soql orderBy(SoqlSort orderByClause) {
 		this.orderByClause = orderByClause;
 		return this;
 	}
 
-	public Soql setRowLimit(Integer rowLimit) {
+	global Soql setRowLimit(Integer rowLimit) {
 		this.rowLimit = rowLimit;
 		return this;
 	}
 
-	public Soql setRowOffset(Integer rowOffset) {
+	global Soql setRowOffset(Integer rowOffset) {
 		this.rowOffset = rowOffset;
 		return this;
 	}
 
-	public Soql forUsage(Usage usage) {
+	global Soql forUsage(Usage usage) {
 		this.usage = usage;
 		return this;
 	}
@@ -213,39 +213,39 @@ public inherited sharing virtual class Soql {
 		);
 		return String.join(optionalArgs, ' ');
 	}
-	protected virtual String getSelect() {
+	global virtual String getSelect() {
 		return String.join(new List<String>(this.selectClauses), ', ');
 	}
 
-	protected virtual String getFrom() {
+	global virtual String getFrom() {
 		return String.valueOf(this.fromSObject);
 	}
 
-	protected virtual String getUsingScope() {
+	global virtual String getUsingScope() {
 		return (this.scope != null) ? 'USING SCOPE ' + String.valueOf(this.scope)?.toLowerCase() : null;
 	}
 
-	protected virtual String getFilter(String token, FilterLogic logic) {
+	global virtual String getFilter(String token, FilterLogic logic) {
 		return (logic?.getCriteria()?.isEmpty() == false) ? token + ' ' + logic?.toString() : null;
 	}
 
-	protected virtual String getWith() {
+	global virtual String getWith() {
 		return this.withExpression?.toString();
 	}
 
-	protected virtual String getGroupBy() {
+	global virtual String getGroupBy() {
 		return (this.groupByClauses?.isEmpty() == false) ? 'GROUP BY ' + String.join(this.groupByClauses, ', ') : null;
 	}
 
-	protected virtual String getOrderBy() {
+	global virtual String getOrderBy() {
 		return (this.orderByClause != null) ? 'ORDER BY ' + this.orderByClause.toString() : null;
 	}
 
-	protected virtual String getLimit(String token, Integer limitValue) {
+	global virtual String getLimit(String token, Integer limitValue) {
 		return (limitValue != null) ? token + ' ' + limitValue : null;
 	}
 
-	protected virtual String getUsage() {
+	global virtual String getUsage() {
 		return (this.usage != null) ? String.valueOf(this.usage)?.replace('_', ' ') : null;
 	}
 
@@ -256,7 +256,7 @@ public inherited sharing virtual class Soql {
 
 	// **** INNER *** //
 	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_using_scope.htm
-	public enum Scope {
+	global enum Scope {
 		DELEGATED,
 		EVERYTHING,
 		MINE,
@@ -269,15 +269,15 @@ public inherited sharing virtual class Soql {
 	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_view.htm
 	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_reference.htm
 	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_update.htm
-	public enum Usage {
+	global enum Usage {
 		ALL_ROWS,
 		FOR_VIEW,
 		FOR_REFERENCE,
 		FOR_UPDATE
 	}
 
-	public class Factory implements DB.QueryFactory {
-		public Soql newQuery(SObjectType fromSObject) {
+	global class Factory implements DB.QueryFactory {
+		global Soql newQuery(SObjectType fromSObject) {
 			return new Soql(fromSObject);
 		}
 	}

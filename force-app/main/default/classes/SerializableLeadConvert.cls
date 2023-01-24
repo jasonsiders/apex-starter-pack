@@ -6,40 +6,33 @@ public inherited sharing class SerializableLeadConvert {
 	 * https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_dml_convertLead.htm
 	 **/
 	@TestVisible
-	Id accountId;
+	Id accountId,
+		contactId,
+		leadId,
+		opportunityId,
+		ownerId;
 	@TestVisible
-	Id contactId;
+	String convertedStatus,
+		opportunityName;
 	@TestVisible
-	String convertedStatus;
-	@TestVisible
-	Id leadId;
-	@TestVisible
-	Id opportunityId;
-	@TestVisible
-	String opportunityName;
-	@TestVisible
-	Id ownerId;
+	Boolean doNotCreateOpportunity,
+		overwriteLeadSource,
+		sendNotificationEmail;
 	@TestVisible
 	SObject personAccount; // Note: Generic SObject, since not all orgs have PersonAccounts enabled
-	@TestVisible
-	Boolean doNotCreateOpportunity;
-	@TestVisible
-	Boolean overwriteLeadSource;
-	@TestVisible
-	Boolean sendNotificationEmail;
 
 	public SerializableLeadConvert(Database.LeadConvert obj) {
-		this.accountId = obj.getAccountId();
-		this.contactId = obj.getContactId();
-		this.convertedStatus = obj.getConvertedStatus();
-		this.leadId = obj.getLeadId();
-		this.opportunityId = obj.getOpportunityId();
-		this.opportunityName = obj.getOpportunityName();
-		this.ownerId = obj.getOwnerId();
-		this.personAccount = obj.getRelatedPersonAccountRecord();
-		this.doNotCreateOpportunity = obj.isDoNotCreateOpportunity();
-		this.overwriteLeadSource = obj.isOverwriteLeadSource();
-		this.sendNotificationEmail = obj.isSendNotificationEmail();
+		this.accountId = obj?.getAccountId();
+		this.contactId = obj?.getContactId();
+		this.convertedStatus = obj?.getConvertedStatus();
+		this.leadId = obj?.getLeadId();
+		this.opportunityId = obj?.getOpportunityId();
+		this.opportunityName = obj?.getOpportunityName();
+		this.ownerId = obj?.getOwnerId();
+		this.personAccount = obj?.getRelatedPersonAccountRecord();
+		this.doNotCreateOpportunity = obj?.isDoNotCreateOpportunity();
+		this.overwriteLeadSource = obj?.isOverwriteLeadSource();
+		this.sendNotificationEmail = obj?.isSendNotificationEmail();
 	}
 
 	public Database.LeadConvert toLeadConvert() {

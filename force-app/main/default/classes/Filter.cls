@@ -1,19 +1,19 @@
-public virtual class Filter implements ICriteria {
+global virtual class Filter implements ICriteria {
 	// Note: Normally, I'd use an enum instead, but each item here has special logic behind it
-	public static final Type EQUALS = EqualsOperator.class;
-	public static final Type NOT_EQUALS = NotEqualsOperator.class;
-	public static final Type IN_COLLECTION = InCollectionOperator.class;
-	public static final Type NOT_IN_COLLECTION = NotInCollectionOperator.class;
-	public static final Type GREATER_THAN = GreaterThanOperator.class;
-	public static final Type GREATER_OR_EQUAL = GreaterOrEqualOperator.class;
-	public static final Type LESS_THAN = LessThanOperator.class;
-	public static final Type LESS_OR_EQUAL = LessOrEqualOperator.class;
-	public static final Type STARTS_WITH = StartsWithOperator.class;
-	public static final Type NOT_STARTS_WITH = NotStartsWithOperator.class;
-	public static final Type ENDS_WITH = EndsWithOperator.class;
-	public static final Type NOT_ENDS_WITH = NotEndsWithOperator.class;
-	public static final Type CONTAINS = ContainsOperator.class;
-	public static final Type NOT_CONTAINS = NotContainsOperator.class;
+	global static final Type EQUALS = EqualsOperator.class;
+	global static final Type NOT_EQUALS = NotEqualsOperator.class;
+	global static final Type IN_COLLECTION = InCollectionOperator.class;
+	global static final Type NOT_IN_COLLECTION = NotInCollectionOperator.class;
+	global static final Type GREATER_THAN = GreaterThanOperator.class;
+	global static final Type GREATER_OR_EQUAL = GreaterOrEqualOperator.class;
+	global static final Type LESS_THAN = LessThanOperator.class;
+	global static final Type LESS_OR_EQUAL = LessOrEqualOperator.class;
+	global static final Type STARTS_WITH = StartsWithOperator.class;
+	global static final Type NOT_STARTS_WITH = NotStartsWithOperator.class;
+	global static final Type ENDS_WITH = EndsWithOperator.class;
+	global static final Type NOT_ENDS_WITH = NotEndsWithOperator.class;
+	global static final Type CONTAINS = ContainsOperator.class;
+	global static final Type NOT_CONTAINS = NotContainsOperator.class;
 
 	static final Map<String, Type> OPERATOR_ABBREVIATIONS = new Map<String, Type>{
 		// This is terribly verbose, but necessary until apex supports reflection
@@ -40,33 +40,33 @@ public virtual class Filter implements ICriteria {
 	@TestVisible
 	protected final Object value { get; protected set; }
 
-	public Filter(IProperty reference, Type operatorType, Object value) {
+	global Filter(IProperty reference, Type operatorType, Object value) {
 		this.property = reference;
 		this.operator = (Operator) operatorType?.newInstance();
 		this.value = value;
 	}
 
-	public Filter(String propertyName, Type operatorType, Object value) {
+	global Filter(String propertyName, Type operatorType, Object value) {
 		this(new PropertyRef(propertyName), operatorType, value);
 	}
 
-	public Filter(SObjectField field, Type operatorType, Object value) {
+	global Filter(SObjectField field, Type operatorType, Object value) {
 		this(new FieldRef(field), operatorType, value);
 	}
 
-	public Boolean meetsCriteria(SObject record) {
+	global Boolean meetsCriteria(SObject record) {
 		// Returns TRUE if the given record meets the Filter's criteria
 		Object recordValue = this.property.getValue(record);
 		return this.operator.meetsCriteria(recordValue, this.value);
 	}
 
-	public virtual Boolean meetsCriteria(Object item) {
+	global virtual Boolean meetsCriteria(Object item) {
 		// Returns TRUE if the given object meets the Filter's criteria
 		Object value = this.property?.getValue(item);
 		return this.operator.meetsCriteria(value, this.value);
 	}
 
-	public override String toString() {
+	global override String toString() {
 		List<String> parts = new List<String>{
 			this.property?.toString(),
 			this.operator?.getToken(),
@@ -75,7 +75,7 @@ public virtual class Filter implements ICriteria {
 		return String.join(parts, ' ');
 	}
 
-	public Set<String> getFieldNames() {
+	global Set<String> getFieldNames() {
 		return new Set<String>{ this.property?.toString() };
 	}
 
@@ -175,12 +175,12 @@ public virtual class Filter implements ICriteria {
 	// **** INNER **** //
 	// Note: In the future, may consider breaking out into its own file
 	// But I like being able to refer to the enumerated types almost like an enum (see top of file)
-	public abstract class Operator {
-		public abstract String getToken();
+	global abstract class Operator {
+		global abstract String getToken();
 
-		public abstract Boolean meetsCriteria(Object value, Object comparison);
+		global abstract Boolean meetsCriteria(Object value, Object comparison);
 
-		protected virtual String processStringValue(String value) {
+		global virtual String processStringValue(String value) {
 			return '\'' + value + '\'';
 		}
 	}
@@ -293,7 +293,7 @@ public virtual class Filter implements ICriteria {
 			return value != null && comparison != null && valueString?.startsWithIgnoreCase(comparisonString);
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'' + value + '%\'';
 		}
 	}
@@ -308,7 +308,7 @@ public virtual class Filter implements ICriteria {
 			return (value != null && comparison != null) ? inverse?.meetsCriteria(value, comparison) == false : false;
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'' + value + '%\'';
 		}
 	}
@@ -325,7 +325,7 @@ public virtual class Filter implements ICriteria {
 			return value != null && comparison != null && valueString?.endsWithIgnoreCase(comparisonString);
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'%' + value + '\'';
 		}
 	}
@@ -340,7 +340,7 @@ public virtual class Filter implements ICriteria {
 			return (value != null && comparison != null) ? inverse?.meetsCriteria(value, comparison) == false : false;
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'%' + value + '\'';
 		}
 	}
@@ -357,7 +357,7 @@ public virtual class Filter implements ICriteria {
 			return value != null && comparison != null && valueString?.containsIgnoreCase(comparisonString);
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'%' + value + '%\'';
 		}
 	}
@@ -372,7 +372,7 @@ public virtual class Filter implements ICriteria {
 			return (value != null && comparison != null) ? inverse?.meetsCriteria(value, comparison) == false : false;
 		}
 
-		protected override String processStringValue(String value) {
+		public override String processStringValue(String value) {
 			return '\'%' + value + '%\'';
 		}
 	}

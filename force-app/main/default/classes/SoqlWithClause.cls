@@ -1,12 +1,12 @@
-public abstract class SoqlWithClause {
-	public abstract String output();
+global abstract class SoqlWithClause {
+	global abstract String output();
 
-	public override String toString() {
+	global override String toString() {
 		return String.format('WITH {0}', new List<String>{ this.output() });
 	}
 
 	// **** INNER **** //
-	public enum Context {
+	global enum Context {
 		// https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_enforce_usermode.htm
 		USER_MODE,
 		SYSTEM_MODE,
@@ -14,26 +14,26 @@ public abstract class SoqlWithClause {
 		SECURITY_ENFORCED
 	}
 
-	public class ContextExpression extends SoqlWithClause {
+	global class ContextExpression extends SoqlWithClause {
 		Context context;
 
-		public ContextExpression(Context context) {
+		global ContextExpression(Context context) {
 			this.context = context;
 		}
 
-		public override String output() {
+		global override String output() {
 			return String.valueOf(this.context);
 		}
 	}
 
-	public class DataCategoryExpression extends SoqlWithClause {
+	global class DataCategoryExpression extends SoqlWithClause {
 		FilterLogic logic;
 
-		public DataCategoryExpression(FilterLogic logic) {
+		global DataCategoryExpression(FilterLogic logic) {
 			this.logic = logic;
 		}
 
-		public override String output() {
+		global override String output() {
 			return logic?.toString();
 		}
 	}

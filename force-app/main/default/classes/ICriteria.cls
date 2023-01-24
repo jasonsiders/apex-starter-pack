@@ -1,4 +1,4 @@
-public interface ICriteria {
+global interface ICriteria {
 	Set<String> getFieldNames();
 	Boolean meetsCriteria(SObject record);
 	Boolean meetsCriteria(Object obj);
