@@ -9,7 +9,7 @@
 		}
 	],
 	"name": "apex-starter-pack",
-	"namespace": "",
+	"namespace": "apxsp",
 	"sfdcLoginUrl": "https://login.salesforce.com",
 	"sourceApiVersion": "56.0"
 }
