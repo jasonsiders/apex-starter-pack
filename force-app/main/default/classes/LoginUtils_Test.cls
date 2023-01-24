@@ -2,11 +2,9 @@
 private class LoginUtils_Test {
 	@IsTest
 	static void shouldRetrieveAllActiveAuthSessions() {
-		// Excluding package context, there should at least be one auth session, for the current User Id
+		// There should at least be one auth session, for the current User Id
 		Map<Id, List<AuthSession>> allSessions = LoginUtils.getAllActiveSessions();
-		if (LoginUtils_Test.outsidePackageContext()) {
-			System.assertEquals(false, allSessions?.isEmpty(), 'No active sessions');
-		}
+		System.assertEquals(false, allSessions?.isEmpty(), 'No active sessions');
 	}
 
 	@IsTest
@@ -42,9 +40,7 @@ private class LoginUtils_Test {
 		// There should be at least one auth session for the current user
 		User me = new User(Id = UserInfo.getUserId());
 		List<AuthSession> mySessions = LoginUtils.getActiveSessions(me);
-		if (LoginUtils_Test.outsidePackageContext()) {
-			System.assertEquals(false, mySessions?.isEmpty(), 'No Active Sessions for current user');
-		}
+		System.assertEquals(false, mySessions?.isEmpty(), 'No Active Sessions for current user');
 	}
 
 	@IsTest
@@ -60,13 +56,5 @@ private class LoginUtils_Test {
 		User mockUser = new User();
 		DB.Dml.doInsert(mockUser);
 		System.assertEquals(false, LoginUtils.userIsLoggedIn(mockUser), 'A fake user was flagged as logged in');
-	}
-
-	static Boolean outsidePackageContext() {
-		try {
-			return (Packaging.getCurrentPackageId() == null);
-		} catch (System.NoDataFoundException error) {
-			return true;
-		}
 	}
 }
