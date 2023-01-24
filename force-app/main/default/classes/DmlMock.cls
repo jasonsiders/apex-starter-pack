@@ -1,25 +1,25 @@
 @IsTest
-public class DmlMock extends Dml {
+global class DmlMock extends Dml {
 	static Integer numIdsGenerated = 0;
 
-	public static Id generateFakeId(SObjectType objectType) {
+	global static Id generateFakeId(SObjectType objectType) {
 		String prefix = objectType?.getDescribe()?.getKeyPrefix();
 		String suffix = String.valueOf(numIdsGenerated++);
 		return prefix + '0'.repeat(15 - suffix?.length()) + suffix;
 	}
 
-	public static SObject generateFakeId(SObject record) {
+	global static SObject generateFakeId(SObject record) {
 		return generateFakeId(new List<SObject>{ record })[0];
 	}
 
-	public static List<SObject> generateFakeId(List<SObject> records) {
+	global static List<SObject> generateFakeId(List<SObject> records) {
 		for (SObject record : records) {
 			record.Id = (record?.Id != null) ? record?.Id : generateFakeId(record?.getSObjectType());
 		}
 		return records;
 	}
 
-	public static void resetHistory() {
+	global static void resetHistory() {
 		// Sometimes in tests, it's useful to reset the Dml tracking,
 		// especially to determine what changes were made during the test action itself, vs. setup
 		for (
@@ -38,55 +38,55 @@ public class DmlMock extends Dml {
 	}
 
 	// Publish Methods
-	public override List<DmlResult> doPublish(List<SObject> platformEvents) {
+	global override List<DmlResult> doPublish(List<SObject> platformEvents) {
 		Dml.Published?.add(platformEvents);
 		return this.mockDmlResults(platformEvents, Database.SaveResult.class);
 	}
 
 	// Insert Methods
-	public override List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doInsert(List<SObject> records, Boolean allOrNone) {
 		records = DmlMock.generateFakeId(records);
 		Dml.Inserted?.add(records);
 		return this.mockDmlResults(records, Database.SaveResult.class);
 	}
 
 	// Update Methods
-	public override List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doUpdate(List<SObject> records, Boolean allOrNone) {
 		Dml.Updated?.add(records);
 		return this.mockDmlResults(records, Database.SaveResult.class);
 	}
 
 	// Upsert Methods
-	public override List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doUpsert(List<SObject> records, Boolean allOrNone) {
 		records = DmlMock.generateFakeId(records);
 		Dml.Upserted?.add(records);
 		return this.mockDmlResults(records, Database.UpsertResult.class);
 	}
 
-	public override List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
+	global override List<DmlResult> doUpsert(List<SObject> records, SObjectField externalIdField, Boolean allOrNone) {
 		return this.doUpsert(records);
 	}
 
 	// Delete Methods
-	public override List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doDelete(List<SObject> records, Boolean allOrNone) {
 		Dml.Deleted?.add(records);
 		return this.mockDmlResults(records, Database.DeleteResult.class);
 	}
 
 	// Hard Delete Methods
-	public override List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doHardDelete(List<SObject> records, Boolean allOrNone) {
 		this.doDelete(records);
 		return this.mockDmlResults(records, Database.DeleteResult.class);
 	}
 
 	// Undelete Methods
-	public override List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
+	global override List<DmlResult> doUndelete(List<SObject> records, Boolean allOrNone) {
 		Dml.Undeleted?.add(records);
 		return this.mockDmlResults(records, Database.UndeleteResult.class);
 	}
 
 	// Convert Methods
-	public override List<DmlResult> doConvert(List<Database.LeadConvert> leadConverts) {
+	global override List<DmlResult> doConvert(List<Database.LeadConvert> leadConverts) {
 		List<ConversionResult> results = new List<ConversionResult>();
 		for (Database.LeadConvert leadConvert : leadConverts) {
 			results.add((ConversionResult) this.doConvert(leadConvert));
@@ -94,7 +94,7 @@ public class DmlMock extends Dml {
 		return results;
 	}
 
-	public override DmlResult doConvert(Database.LeadConvert leadConvert) {
+	global override DmlResult doConvert(Database.LeadConvert leadConvert) {
 		// 1. Find/Create an Account, and populate the LeadConvert object with its Id
 		Boolean isPersonAccount = leadConvert.getRelatedPersonAccountId() != null;
 		Account account = new Account(

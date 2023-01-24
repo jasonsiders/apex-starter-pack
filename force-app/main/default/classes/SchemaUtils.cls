@@ -1,5 +1,5 @@
-public abstract class SchemaUtils {
-	public static SObjectType getSObjectType(String objectName) {
+global abstract class SchemaUtils {
+	global static SObjectType getSObjectType(String objectName) {
 		try {
 			return ((SObject) Type.forName(objectName)?.newInstance())?.getSObjectType();
 		} catch (System.NullPointerException nullError) {
@@ -7,7 +7,7 @@ public abstract class SchemaUtils {
 		}
 	}
 
-	public static SObjectType getSObjectType(SObjectField field) {
+	global static SObjectType getSObjectType(SObjectField field) {
 		// Retrieves the current SObjectType from any SObjectField
 		// Surprising there isn't an easier/built in DescribeFieldResult method to do this
 		// NOTE: (Jan 2023) Salesforce is releasing a new built-in DescribeFieldResult in Spring '23
@@ -26,18 +26,18 @@ public abstract class SchemaUtils {
 		return objectType;
 	}
 
-	public static SObjectType getParentSObjectType(SObjectField lookupField) {
+	global static SObjectType getParentSObjectType(SObjectField lookupField) {
 		// Retrieves the parent SObjectType that a lookup field points to
 		// Any non-lookup fields will return null
 		List<SObjectType> parentSObjectTypes = lookupField?.getDescribe()?.getReferenceTo();
 		return (parentSObjectTypes?.isEmpty() == false) ? parentSObjectTypes[0] : null;
 	}
 
-	public static SObjectField getSObjectField(SObjectType objectType, String fieldName) {
+	global static SObjectField getSObjectField(SObjectType objectType, String fieldName) {
 		return objectType?.getDescribe()?.fields?.getMap().get(fieldName);
 	}
 
-	public static String getSoqlReference(List<SObjectField> fields) {
+	global static String getSoqlReference(List<SObjectField> fields) {
 		// Constructs a SOQL-usable String from multiple related SObjectFields
 		// Fields must be listed in the order of their relationship
 		// ex., "Contact.Account.Owner.Profile.Name"
@@ -55,7 +55,7 @@ public abstract class SchemaUtils {
 		return String.join(references, '.');
 	}
 
-	public static ChildRelationship getChildRelationship(SObjectField lookupField) {
+	global static ChildRelationship getChildRelationship(SObjectField lookupField) {
 		SObjectType parentObject = SchemaUtils.getParentSObjectType(lookupField);
 		List<ChildRelationship> rels = parentObject?.getDescribe()?.getChildRelationships();
 		rels = (rels != null) ? rels : new List<ChildRelationship>();

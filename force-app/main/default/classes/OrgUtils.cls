@@ -1,4 +1,4 @@
-public abstract class OrgUtils {
+global abstract class OrgUtils {
 	@TestVisible
 	static Organization CurrentOrg;
 	@TestVisible
@@ -8,15 +8,15 @@ public abstract class OrgUtils {
 	static final String DEV_ED_ORG_TYPE = 'Developer Edition';
 	static final Decimal DEFAULT_API_VERSION = 55.0;
 
-	public static Boolean isSandboxOrg() {
+	global static Boolean isSandboxOrg() {
 		return OrgUtils.getCurrentOrg().IsSandbox;
 	}
 
-	public static Boolean isDevOrg() {
+	global static Boolean isDevOrg() {
 		return OrgUtils.getCurrentOrg().OrganizationType == OrgUtils.DEV_ED_ORG_TYPE;
 	}
 
-	public static Boolean isProductionOrg() {
+	global static Boolean isProductionOrg() {
 		return OrgUtils.isDevOrg() == false && OrgUtils.isSandboxOrg() == false;
 	}
 
@@ -28,7 +28,7 @@ public abstract class OrgUtils {
 		return OrgUtils.CurrentOrg;
 	}
 
-	public static Decimal getCurrentApiVersion() {
+	global static Decimal getCurrentApiVersion() {
 		// There's no straightforward way to getting the latest API version
 		// However, this is exposed via the 'attributes' object in SOQL
 		if (OrgUtils.currentApiVersion == null) {

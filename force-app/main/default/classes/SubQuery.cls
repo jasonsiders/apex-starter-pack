@@ -1,20 +1,20 @@
-public inherited sharing virtual class SubQuery extends Soql {
+global inherited sharing virtual class SubQuery extends Soql {
 	@TestVisible
 	ChildRelationshipRef relationship;
 
-	public SubQuery(Schema.ChildRelationship relationship) {
+	global SubQuery(Schema.ChildRelationship relationship) {
 		this.relationship = new ChildRelationshipRef(relationship);
 	}
 
-	public SubQuery(SObjectField lookupField) {
+	global SubQuery(SObjectField lookupField) {
 		this(SchemaUtils.getChildRelationship(lookupField));
 	}
 
-	public override String toString() {
+	global override String toString() {
 		return '(' + super.toString() + ')';
 	}
 
-	protected override String getFrom() {
+	global override String getFrom() {
 		return this.relationship?.toSchemaType()?.getRelationshipName();
 	}
 }

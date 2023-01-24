@@ -1,4 +1,4 @@
-public class ConversionResult extends DmlResult {
+global class ConversionResult extends DmlResult {
 	// This object wraps the Database.LeadConvertResult and allows for DML mocking
 	Id accountId;
 	Id contactId;
@@ -22,23 +22,23 @@ public class ConversionResult extends DmlResult {
 		this.personAccountId = leadConvertObj?.getRelatedPersonAccountId();
 	}
 
-	public Id getAccountId() {
+	global Id getAccountId() {
 		return this.accountId;
 	}
 
-	public Id getContactId() {
+	global Id getContactId() {
 		return this.contactId;
 	}
 
-	public Id getLeadId() {
+	global Id getLeadId() {
 		return this.getId();
 	}
 
-	public Id getOpportunityId() {
+	global Id getOpportunityId() {
 		return this.opportunityId;
 	}
 
-	public Id getPersonAccountId() {
+	global Id getPersonAccountId() {
 		return this.personAccountId;
 	}
 }

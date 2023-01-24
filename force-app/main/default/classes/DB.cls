@@ -1,8 +1,8 @@
-public abstract class DB {
+global abstract class DB {
 	// Represents the environment's database layer.
 	// Can be stubbed out in @IsTest context to support mocking.
-	public static Dml Dml { get; private set; }
-	public static QueryFactory Soql { get; private set; }
+	global static Dml Dml { get; private set; }
+	global static QueryFactory Soql { get; private set; }
 
 	static {
 		DB.Dml = new Dml();
@@ -21,7 +21,7 @@ public abstract class DB {
 		return queryEngine;
 	}
 
-	public interface QueryFactory {
+	global interface QueryFactory {
 		Soql newQuery(SObjectType objectType);
 	}
 }

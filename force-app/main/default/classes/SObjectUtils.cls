@@ -1,5 +1,5 @@
-public abstract class SObjectUtils {
-	public static SObject setLookupField(SObject target, SObjectField lookupField, SObject parent) {
+global abstract class SObjectUtils {
+	global static SObject setLookupField(SObject target, SObjectField lookupField, SObject parent) {
 		// Populate the lookup field itself
 		Map<String, Object> mappedTarget = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(target));
 		mappedTarget.put(String.valueOf(lookupField), parent?.Id);
@@ -11,7 +11,7 @@ public abstract class SObjectUtils {
 		return (SObject) JSON.deserialize(JSON.serialize(mappedTarget), SObject.class);
 	}
 
-	public static SObject setRelatedList(SObject target, ChildRelationship relationship, Object value) {
+	global static SObject setRelatedList(SObject target, ChildRelationship relationship, Object value) {
 		Map<String, Object> targetMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(target));
 		List<SObject> childRecords = (List<SObject>) value;
 		// Add an 'Attributes' object to the parent record - required when mocking via JSON (see below)
@@ -19,7 +19,7 @@ public abstract class SObjectUtils {
 		return (SObject) JSON.deserialize(JSON.serializePretty(targetMap), SObject.class);
 	}
 
-	public static SObject setReadOnlyFields(SObject target, Map<SObjectField, Object> values) {
+	global static SObject setReadOnlyFields(SObject target, Map<SObjectField, Object> values) {
 		Map<String, Object> targetMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(target));
 		for (SObjectField field : values.keySet()) {
 			Object value = values.get(field);
@@ -28,7 +28,7 @@ public abstract class SObjectUtils {
 		return (SObject) JSON.deserialize(JSON.serializePretty(targetMap), SObject.class);
 	}
 
-	public static SObject setReadOnlyField(SObject target, SObjectField field, Object value) {
+	global static SObject setReadOnlyField(SObject target, SObjectField field, Object value) {
 		return SObjectUtils.setReadOnlyFields(target, new Map<SObjectField, Object>{ field => value });
 	}
 
@@ -39,7 +39,7 @@ public abstract class SObjectUtils {
 	private class RecordAttributes {
 		String type, url;
 
-		public RecordAttributes(SObject record) {
+		private RecordAttributes(SObject record) {
 			this.type = String.valueOf(record?.getSObjectType());
 			this.url = String.format(
 				'/services/data/{0}/sobjects/{1}/{2}',
@@ -53,7 +53,7 @@ public abstract class SObjectUtils {
 		Integer totalSize;
 		Boolean done = true;
 
-		public RecordListAttributes(List<SObject> records) {
+		private RecordListAttributes(List<SObject> records) {
 			this.records = records;
 			this.totalSize = records?.size();
 		}

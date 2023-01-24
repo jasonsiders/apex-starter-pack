@@ -1,12 +1,12 @@
-public class Cron {
-	public String seconds;
-	public String minutes;
-	public String hours;
-	public String dayOfMonth;
-	public String month;
-	public String dayOfWeek;
+global class Cron {
+	global String seconds;
+	global String minutes;
+	global String hours;
+	global String dayOfMonth;
+	global String month;
+	global String dayOfWeek;
 
-	public Cron(String cronString) {
+	global Cron(String cronString) {
 		// Expecting a string like: "0 0 0 * ? /"
 		List<String> parts = cronString?.split(' ');
 		this.seconds = (String) CollectionUtils.getIndexOf(parts, 0);
@@ -17,7 +17,7 @@ public class Cron {
 		this.dayOfWeek = (String) CollectionUtils.getIndexOf(parts, 5);
 	}
 
-	public String expression() {
+	global String expression() {
 		List<String> parts = new List<String>{
 			this.seconds,
 			this.minutes,
@@ -29,14 +29,14 @@ public class Cron {
 		return String.join(parts, ' ');
 	}
 
-	public Cron minutesFromNow(Integer minsInFuture) {
+	global Cron minutesFromNow(Integer minsInFuture) {
 		// Alter the minutes value to be X minutes from now
 		Integer newMins = DateTime.now().addMinutes(minsInFuture).minute();
 		this.minutes = String.valueOf(newMins);
 		return this;
 	}
 
-	public static Cron hourly() {
+	global static Cron hourly() {
 		// Utility method to generate an hourly cron job
 		// This is the most commonly used cron expression in apex
 		return new Cron('0 0 * * * ?');

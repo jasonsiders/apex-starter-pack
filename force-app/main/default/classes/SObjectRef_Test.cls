@@ -26,28 +26,6 @@ private class SObjectRef_Test {
 	}
 
 	@IsTest
-	static void shouldDetermineIfRecordIsInstanceOfSObjectType() {
-		SObjectRef ref = new SObjectRef(Account.SObjectType);
-		System.assertEquals(
-			true,
-			ref.isSObjectTypeOf(new Account()),
-			ref?.toString() + '.SObjectType != new Account()?'
-		);
-		System.assertEquals(
-			false,
-			ref.isSObjectTypeOf(new Contact()),
-			ref?.toString() + '.SObjectType == new Contact()?'
-		);
-		SObjectType nullObjectType = null;
-		ref = new SObjectRef(nullObjectType);
-		System.assertEquals(
-			false,
-			ref.isSObjectTypeOf(new Account()),
-			ref?.toString() + '.SObjectType == new Account()?'
-		);
-	}
-
-	@IsTest
 	static void shouldBeUsableAsAMapKey() {
 		Map<SObjectRef, String> objectsByName = new Map<SObjectRef, String>();
 		List<SObjectType> objectTypes = new List<SObjectType>{

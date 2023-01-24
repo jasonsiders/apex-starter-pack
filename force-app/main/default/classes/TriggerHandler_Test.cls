@@ -525,7 +525,7 @@ private class TriggerHandler_Test extends TriggerHandler {
 			this.setAccountNameTo('afterUndelete');
 		}
 
-		protected override Type getHandlerType() {
+		public override Type getType() {
 			return ExampleTriggerHandler.class;
 		}
 
@@ -538,12 +538,12 @@ private class TriggerHandler_Test extends TriggerHandler {
 
 	private class BlankTriggerHandler extends TriggerHandler {
 		// Keeps the default implementation
-		protected override Type getHandlerType() {
+		public override Type getType() {
 			return BlankTriggerHandler.class;
 		}
 	}
 
-	protected override Type getHandlerType() {
+	public override Type getType() {
 		// We need to override the abstract method, but this class should never be instantiated
 		throw null;
 	}
