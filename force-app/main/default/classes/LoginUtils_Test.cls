@@ -2,9 +2,11 @@
 private class LoginUtils_Test {
 	@IsTest
 	static void shouldRetrieveAllActiveAuthSessions() {
-		// There should at least be one auth session, for the current User Id
+		// Excluding package context, there should at least be one auth session, for the current User Id
 		Map<Id, List<AuthSession>> allSessions = LoginUtils.getAllActiveSessions();
-		System.assertEquals(false, allSessions?.isEmpty(), 'No active sessions');
+		if (LoginUtils_Test.outsidePackageContext()) {
+			System.assertEquals(false, allSessions?.isEmpty(), 'No active sessions');
+		}
 	}
 
 	@IsTest
@@ -37,20 +39,37 @@ private class LoginUtils_Test {
 
 	@IsTest
 	static void shouldRetrieveActiveAuthSessionsForAUser() {
+		// Excluding package context, there should be at least one auth session for the current user
 		User me = new User(Id = UserInfo.getUserId());
 		List<AuthSession> mySessions = LoginUtils.getActiveSessions(me);
-		System.assertEquals(false, mySessions?.isEmpty(), 'No Active Sessions for current user');
+		if (LoginUtils_Test.outsidePackageContext()) {
+			System.assertEquals(false, mySessions?.isEmpty(), 'No Active Sessions for current user');
+		}
 	}
 
 	@IsTest
 	static void shouldDetermineIfLoggedIn() {
 		DB.setDmlEngine(new DmlMock());
-		// The current user will always be logged in
-		User me = new User(Id = UserInfo.getUserId());
-		System.assertEquals(true, LoginUtils.userIsLoggedIn(me), 'Current user is not logged in');
+		User me = (User) DB.Soql.newQuery(User.SObjectType)
+			?.selectFields(User.Name)
+			?.whereCriteria(new Filter(User.Id, Filter.EQUALS, UserInfo.getUserId()))
+			?.run()[0];
+		Boolean isLoggedIn = LoginUtils.userIsLoggedIn(me);
+		if (LoginUtils_Test.outsidePackageContext()) {
+			// Excluding packaging context, the current user will always be logged in
+			System.assertEquals(true, isLoggedIn, me?.Name + ' user is not logged in');
+		}
 		// A fake user should never be logged in
 		User mockUser = new User();
 		DB.Dml.doInsert(mockUser);
 		System.assertEquals(false, LoginUtils.userIsLoggedIn(mockUser), 'A fake user was flagged as logged in');
+	}
+
+	static Boolean outsidePackageContext() {
+		try {
+			return (Packaging.getCurrentPackageId() == null);
+		} catch (System.NoDataFoundException error) {
+			return true;
+		}
 	}
 }
