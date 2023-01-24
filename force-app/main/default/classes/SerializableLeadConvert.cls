@@ -6,11 +6,18 @@ public inherited sharing class SerializableLeadConvert {
 	 * https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_dml_convertLead.htm
 	 **/
 	@TestVisible
-	Id accountId, contactId, leadId, opportunityId, ownerId; 
+	Id accountId,
+		contactId,
+		leadId,
+		opportunityId,
+		ownerId;
 	@TestVisible
-	String convertedStatus, opportunityName;
+	String convertedStatus,
+		opportunityName;
 	@TestVisible
-	Boolean doNotCreateOpportunity, overwriteLeadSource, sendNotificationEmail;
+	Boolean doNotCreateOpportunity,
+		overwriteLeadSource,
+		sendNotificationEmail;
 	@TestVisible
 	SObject personAccount; // Note: Generic SObject, since not all orgs have PersonAccounts enabled
 
