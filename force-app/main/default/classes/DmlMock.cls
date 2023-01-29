@@ -134,7 +134,8 @@ global class DmlMock extends Dml {
 	private List<DmlResult> mockDmlResults(List<SObject> records, Type sourceType) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (SObject record : records) {
-			DmlResult result = new DmlResult(record.Id, sourceType);
+			// Mocks by default are set to succeed
+			DmlResult result = new DmlResult(new List<DmlResult.Error>(), true, record.Id, sourceType);
 			dmlResults.add(result);
 		}
 		return dmlResults;
