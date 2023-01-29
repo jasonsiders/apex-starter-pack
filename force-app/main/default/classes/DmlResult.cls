@@ -2,10 +2,10 @@ global virtual class DmlResult {
 	// Database.*Result classes do not share a common interface, and they cannot be manually constructed
 	// This makes testing/mocking especially difficult
 	// This class wraps all of those result types
-	List<Error> errors;
-	Boolean isSuccess;
-	Id recordId;
-	Type sourceType;
+	protected List<Error> errors;
+	protected Boolean isSuccess;
+	protected Id recordId;
+	protected Type sourceType;
 
 	@TestVisible
 	protected DmlResult(List<Error> errors, Boolean isSuccess, Id recordId, Type sourceType) {

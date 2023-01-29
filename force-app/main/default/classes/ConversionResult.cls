@@ -1,9 +1,9 @@
-global class ConversionResult extends DmlResult {
+global virtual class ConversionResult extends DmlResult {
 	// This object wraps the Database.LeadConvertResult and allows for DML mocking
-	Id accountId;
-	Id contactId;
-	Id opportunityId;
-	Id personAccountId;
+	protected Id accountId;
+	protected Id contactId;
+	protected Id opportunityId;
+	protected Id personAccountId;
 
 	public ConversionResult(Database.LeadConvertResult result) {
 		super(result.getErrors(), result.isSuccess(), result.getLeadId(), Database.LeadConvertResult.class);
@@ -13,13 +13,8 @@ global class ConversionResult extends DmlResult {
 		this.personAccountId = result.getRelatedPersonAccountId();
 	}
 
-	@TestVisible
-	private ConversionResult(List<DmlResult.Error> errors, Boolean isSuccess, Database.LeadConvert leadConvertObj) {
-		super(errors, isSuccess, leadConvertObj?.getLeadId(), Database.LeadConvertResult.class);
-		this.accountId = leadConvertObj?.getAccountId();
-		this.contactId = leadConvertObj?.getContactId();
-		this.opportunityId = leadConvertObj?.getOpportunityId();
-		this.personAccountId = leadConvertObj?.getRelatedPersonAccountId();
+	protected ConversionResult() {
+		// Required for inheritance
 	}
 
 	global Id getAccountId() {

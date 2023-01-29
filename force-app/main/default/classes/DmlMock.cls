@@ -126,7 +126,7 @@ global class DmlMock extends Dml {
 			this.doInsert(opportunity);
 		}
 		leadConvert.setOpportunityId(opportunity.Id);
-		return new ConversionResult(new List<DmlResult.Error>(), true, leadConvert);
+		return new MockConversionResult(new List<DmlResult.Error>(), true, leadConvert);
 	}
 
 	// Utility Methods
