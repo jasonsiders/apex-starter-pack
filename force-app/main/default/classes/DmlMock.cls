@@ -130,8 +130,7 @@ global class DmlMock extends Dml {
 	}
 
 	// Utility Methods
-	@TestVisible
-	private List<DmlResult> mockDmlResults(List<SObject> records, Type sourceType) {
+	global List<DmlResult> mockDmlResults(List<SObject> records, Type sourceType) {
 		List<DmlResult> dmlResults = new List<DmlResult>();
 		for (SObject record : records) {
 			// Mocks by default are set to succeed

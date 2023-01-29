@@ -1,12 +1,11 @@
 global virtual inherited sharing class Dml {
-	@TestVisible
-	static History Inserted,
-		Updated,
-		Upserted,
-		Deleted,
-		Undeleted,
-		Converted,
-		Published;
+	global static History Inserted;
+	global static History Updated;
+	global static History Upserted;
+	global static History Deleted;
+	global static History Undeleted;
+	global static History Converted;
+	global static History Published;
 
 	static {
 		if (Test.isRunningTest()) {
