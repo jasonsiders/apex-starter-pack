@@ -2,7 +2,7 @@
 global class SoqlMock extends Soql {
 	List<SObject> mockResults = new List<SObject>();
 
-	public SoqlMock(SObjectType objectType) {
+	global SoqlMock(SObjectType objectType) {
 		super(objectType);
 	}
 
