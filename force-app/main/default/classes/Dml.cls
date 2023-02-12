@@ -302,9 +302,9 @@ global virtual inherited sharing class Dml {
 
 	global virtual class History {
 		// A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
-		protected Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
-		protected Map<Id, SObject> recordsById = new Map<Id, SObject>();
-		protected String idField;
+		Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
+		Map<Id, SObject> recordsById = new Map<Id, SObject>();
+		String idField;
 
 		global History() {
 			this.idField = 'Id';
