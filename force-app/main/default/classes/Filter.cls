@@ -127,10 +127,6 @@ global virtual class Filter implements ICriteria {
 		}
 	}
 
-	private FieldRef getFieldRef(SObjectField field) {
-		return (field != null) ? new FieldRef(field) : null;
-	}
-
 	private String processString(String value) {
 		// First, check if the string is actually checking a relative date value
 		// Else, process the string as a string, according to its operator
