@@ -1,15 +1,15 @@
 global abstract class TriggerHandler implements TypeAware {
-	global List<SObject> triggerNew { get; protected set; }
-	global List<SObject> triggerOld { get; protected set; }
-	global Map<Id, SObject> triggerNewMap { get; protected set; }
-	global Map<Id, SObject> triggerOldMap { get; protected set; }
-	@TestVisible
-	System.TriggerOperation operation = Trigger.operationType;
+	global List<SObject> triggerNew;
+	global List<SObject> triggerOld;
+	global Map<Id, SObject> triggerNewMap;
+	global Map<Id, SObject> triggerOldMap;
+	global System.TriggerOperation operation;
 
 	static Boolean IsEnabled = true;
 	static Set<Type> BypassedHandlers = new Set<Type>();
 
 	global TriggerHandler() {
+		this.operation = Trigger.operationType; 
 		this.setTriggerCollections();
 	}
 
@@ -92,17 +92,19 @@ global abstract class TriggerHandler implements TypeAware {
 	global virtual void afterUndelete() {
 	}
 
-	protected void setTriggerCollections() {
-		this.triggerNew = (Trigger.isExecuting) ? Trigger.new : new List<SObject>();
-		this.triggerOld = (Trigger.isExecuting) ? Trigger.old : new List<SObject>();
-		this.triggerNewMap = (Trigger.isExecuting) ? Trigger.newMap : new Map<Id, SObject>();
-		this.triggerOldMap = (Trigger.isExecuting) ? Trigger.oldMap : new Map<Id, SObject>();
+	// **** PRIVATE **** // 
+	private void setTriggerCollections() {
+		Boolean isTrigger = Trigger.isExecuting; 
+		this.triggerNew = (isTrigger) ? Trigger.new : new List<SObject>();
+		this.triggerOld = (isTrigger) ? Trigger.old : new List<SObject>();
+		this.triggerNewMap = (isTrigger) ? Trigger.newMap : new Map<Id, SObject>();
+		this.triggerOldMap = (isTrigger) ? Trigger.oldMap : new Map<Id, SObject>();
 	}
 
-	protected Boolean isEnabled() {
-		// For the handler to run, the TriggerHandler must be enabled,
-		// and the specific handler must not be bypassed
-		return (TriggerHandler.IsEnabled && TriggerHandler.BypassedHandlers?.contains(this.getType()) == false);
+	private Boolean isEnabled() {
+		Boolean enabled = TriggerHandler.isEnabled; 
+		Boolean notBypassed = TriggerHandler.BypassedHandlers?.contains(this.getType()) == false;
+		return (enabled && notBypassed);
 	}
 
 	// **** STATIC **** //
