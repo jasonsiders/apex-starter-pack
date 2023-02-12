@@ -86,4 +86,11 @@ global class FieldRef implements Mappable, IProperty {
 		String fullName = this.getFullName();
 		return (fullName != null) ? System.hashCode(fullName) : System.hashCode('null');
 	}
+	
+	// **** STATIC **** //
+	global static FieldRef getReferenceTo(SObjectField field) {
+		// FieldRefs can technically be initialized with a null SObjectField value
+		// Call this method instead of the constructor directly to guard against this
+		return (field != null) ? new FieldRef(field) : null;
+	}
 }
