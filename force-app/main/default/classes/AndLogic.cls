@@ -1,6 +1,8 @@
 global virtual class AndLogic extends FilterLogic {
+	static final String AND_PREDICATE = 'AND';
+
 	global AndLogic() {
-		this.token = 'AND';
+		super(AND_PREDICATE); 
 	}
 
 	global override Boolean meetsCriteria(Object item) {

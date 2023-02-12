@@ -19,11 +19,11 @@ global abstract class Reschedulable implements System.Schedulable, TypeAware {
 		return this.scheduleNewJob();
 	}
 
-	protected List<AsyncApexJob> getPendingJobs() {
+	global virtual List<AsyncApexJob> getPendingJobs() {
 		return AsyncUtils.getPendingJobs(this.getType(), null);
 	}
 
-	protected void abortJobs(List<AsyncApexJob> jobs) {
+	global virtual void abortJobs(List<AsyncApexJob> jobs) {
 		for (AsyncApexJob job : jobs) {
 			String jobName = job?.CronTrigger?.CronJobDetail?.Name;
 			Id jobId = job?.CronTriggerId;
@@ -34,7 +34,7 @@ global abstract class Reschedulable implements System.Schedulable, TypeAware {
 		}
 	}
 
-	protected Id scheduleNewJob() {
+	global virtual Id scheduleNewJob() {
 		Type jobType = this.getType();
 		String jobName = String.valueOf(jobType);
 		String cronExp = Cron.hourly().minutesFromNow(this.getInterval())?.expression();

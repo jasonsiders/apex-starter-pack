@@ -1,24 +1,29 @@
 global inherited sharing virtual class Soql {
-	@TestVisible
-	protected Set<String> selectClauses = new Set<String>{ 'Id' };
-	protected SObjectRef fromSObject;
-	protected Scope scope;
-	protected SoqlWithClause withExpression;
-	protected FilterLogic whereCriteria = new AndLogic();
-	protected List<String> groupByClauses = new List<String>();
-	protected FilterLogic havingCriteria = new AndLogic();
-	protected SoqlSort orderByClause;
-	protected Integer rowLimit;
-	protected Integer rowOffset;
-	protected Usage usage;
+	static final String ID_REFERENCE = 'Id';
+
+	global Set<String> selectClauses { get; private set; }
+	global SObjectRef fromSObject { get; private set; }
+	global Scope scope { get; private set; }
+	global SoqlWithClause withExpression { get; private set; }
+	global FilterLogic whereCriteria { get; private set; }
+	global List<String> groupByClauses { get; private set; }
+	global FilterLogic havingCriteria { get; private set; }
+	global SoqlSort orderByClause { get; private set; }
+	global Integer rowLimit { get; private set; }
+	global Integer rowOffset { get; private set; }
+	global Usage usage { get; private set; }
 
 	@TestVisible
 	protected Soql(SObjectType objectType) {
+		this(); 
 		this.fromSObject(objectType);
 	}
 
 	protected Soql() {
-		// This constructor allows extending types to call super() methods
+		this.selectClauses = new Set<String>{ID_REFERENCE};
+		this.whereCriteria = new AndLogic();
+		this.groupByClauses = new List<String>();
+		this.havingCriteria = new AndLogic(); 
 	}
 
 	// **** Running a Query **** //
@@ -91,14 +96,14 @@ global inherited sharing virtual class Soql {
 	}
 
 	global Soql selectAggregation(SoqlAggregation aggregation) {
-		// Note: 'Id' should never be included in the SELECT clause for Aggregate queries
+		// Note: Id should never be included in the SELECT clause for Aggregate queries
 		return this.deselectId()?.selectFields(aggregation?.toString());
 	}
 
 	global Soql deselectId() {
 		// By default, Id will always be included in queries
 		// Occasionally, (i.e., aggregate & inner queries), this isn't desirable
-		this.selectClauses?.remove('Id');
+		this.selectClauses?.remove(ID_REFERENCE);
 		return this;
 	}
 
@@ -255,8 +260,8 @@ global inherited sharing virtual class Soql {
 	}
 
 	// **** INNER *** //
-	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_using_scope.htm
 	global enum Scope {
+		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_using_scope.htm
 		DELEGATED,
 		EVERYTHING,
 		MINE,
@@ -266,10 +271,10 @@ global inherited sharing virtual class Soql {
 		TEAM
 	}
 
-	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_view.htm
-	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_reference.htm
-	// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_update.htm
 	global enum Usage {
+		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_view.htm
+		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_reference.htm
+		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_for_update.htm
 		ALL_ROWS,
 		FOR_VIEW,
 		FOR_REFERENCE,

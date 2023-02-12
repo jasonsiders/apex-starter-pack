@@ -1,6 +1,5 @@
 global inherited sharing virtual class SubQuery extends Soql {
-	@TestVisible
-	ChildRelationshipRef relationship;
+	@TestVisible ChildRelationshipRef relationship;
 
 	global SubQuery(Schema.ChildRelationship relationship) {
 		this.relationship = new ChildRelationshipRef(relationship);

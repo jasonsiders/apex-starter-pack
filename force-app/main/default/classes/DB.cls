@@ -9,14 +9,12 @@ global abstract class DB {
 		DB.Soql = new Soql.Factory();
 	}
 
-	@TestVisible
-	static Dml setDmlEngine(Dml dmlEngine) {
+	global static Dml setDmlEngine(Dml dmlEngine) {
 		DB.Dml = dmlEngine;
 		return dmlEngine;
 	}
 
-	@TestVisible
-	static QueryFactory setQueryEngine(QueryFactory queryEngine) {
+	global static QueryFactory setQueryEngine(QueryFactory queryEngine) {
 		DB.Soql = queryEngine;
 		return queryEngine;
 	}

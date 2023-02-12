@@ -33,12 +33,9 @@ global virtual class Filter implements ICriteria {
 		'NOT_CONTAINS' => Filter.NOT_CONTAINS
 	};
 
-	@TestVisible
-	protected final IProperty property { get; protected set; }
-	@TestVisible
-	protected final Operator operator { get; protected set; }
-	@TestVisible
-	protected final Object value { get; protected set; }
+	global final IProperty property;
+	global final Operator operator;
+	global final Object value;
 
 	global Filter(IProperty reference, Type operatorType, Object value) {
 		this.property = reference;
@@ -51,19 +48,19 @@ global virtual class Filter implements ICriteria {
 	}
 
 	global Filter(SObjectField field, Type operatorType, Object value) {
-		this(new FieldRef(field), operatorType, value);
+		this(FieldRef.getReferenceTo(field), operatorType, value);
 	}
 
 	global Boolean meetsCriteria(SObject record) {
 		// Returns TRUE if the given record meets the Filter's criteria
-		Object recordValue = this.property.getValue(record);
-		return this.operator.meetsCriteria(recordValue, this.value);
+		Object recordValue = this.property?.getValue(record);
+		return this.operator?.meetsCriteria(recordValue, this.value);
 	}
 
 	global virtual Boolean meetsCriteria(Object item) {
 		// Returns TRUE if the given object meets the Filter's criteria
 		Object value = this.property?.getValue(item);
-		return this.operator.meetsCriteria(value, this.value);
+		return this.operator?.meetsCriteria(value, this.value);
 	}
 
 	global override String toString() {

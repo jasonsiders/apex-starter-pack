@@ -90,6 +90,12 @@ private class FieldRef_Test {
 		Test.stopTest();
 	}
 
+	@IsTest 
+	static void shouldProvideInstanceOfField() {
+		System.assertEquals(Account.OwnerId, FieldRef.getReferenceTo(Account.OwnerId)?.toSchemaType(), 'Wrong reference returned for non-null value'); 
+		System.assertEquals(null, FieldRef.getReferenceTo(null), 'Wrong reference returned for null value'); 
+	}
+
 	// **** HELPER **** //
 	static Exception testSerialize(Object obj) {
 		Exception caughtError;

@@ -1,13 +1,6 @@
 global abstract class LoginUtils {
 	@TestVisible
-	static Soql ActiveSessionQuery = DB.Soql.newQuery(AuthSession.SObjectType)
-		.selectFields(new FieldRef(new List<SObjectField>{ AuthSession.LoginHistoryId, LoginHistory.Application }))
-		.selectFields(
-			new List<SObjectField>{ AuthSession.UsersId, AuthSession.LastModifiedDate, AuthSession.NumSecondsValid }
-		)
-		.whereCriteria(new Filter(AuthSession.LastModifiedDate, Filter.EQUALS, 'LAST_N_DAYS:1'))
-		.whereCriteria(new Filter(AuthSession.ParentId, Filter.Equals, null))
-		.orderBy(new SoqlSort(AuthSession.CreatedDate, SoqlSort.Order.ASCENDING));
+	static Soql ActiveSessionQuery = LoginUtils.initQuery(); 
 
 	static Map<Id, List<AuthSession>> ActiveSessions {
 		// Map of UserId => List<AuthSession>
@@ -51,5 +44,19 @@ global abstract class LoginUtils {
 
 	global static Boolean userIsLoggedIn(User user) {
 		return LoginUtils.userIsLoggedIn(user?.Id);
+	}
+	
+	static Soql initQuery() {
+		List<FieldRef> queryFields = new List<FieldRef>{
+			new FieldRef(new List<SObjectField>{ AuthSession.LoginHistoryId, LoginHistory.Application }),
+			new FieldRef(AuthSession.UsersId),
+			new FieldRef(AuthSession.LastModifiedDate),
+			new FieldRef(AuthSession.NumSecondsValid)
+		};
+		return DB.Soql.newQuery(AuthSession.SObjectType)
+			.selectFields(queryFields)
+			.whereCriteria(new Filter(AuthSession.LastModifiedDate, Filter.EQUALS, 'LAST_N_DAYS:1'))
+			.whereCriteria(new Filter(AuthSession.ParentId, Filter.Equals, null))
+			.orderBy(new SoqlSort(AuthSession.CreatedDate, SoqlSort.Order.ASCENDING));
 	}
 }
