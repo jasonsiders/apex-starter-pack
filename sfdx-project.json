@@ -1,7 +1,6 @@
 {
     "packageDirectories": [
         {
-            "ancestorId": "04tDn0000006JBBIA2",
             "default": true,
             "package": "apex-starter-pack",
             "path": "force-app",
