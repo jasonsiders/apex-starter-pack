@@ -1,7 +1,10 @@
 {
 	"orgName": "jasonsiders company",
 	"edition": "Developer",
-	"features": ["EnableSetPasswordInApi"],
+	"features": [
+		"EnableSetPasswordInApi"
+	],
+	"release": "previous",
 	"settings": {
 		"lightningExperienceSettings": {
 			"enableS1DesktopEnabled": true
