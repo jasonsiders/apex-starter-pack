@@ -5,21 +5,18 @@ public inherited sharing class SerializableLeadConvert {
 	 * This object serves as a data access object based on the fairly open/transparent model documented below:
 	 * https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_dml_convertLead.htm
 	 **/
-	@TestVisible
-	Id accountId,
-		contactId,
-		leadId,
-		opportunityId,
-		ownerId;
-	@TestVisible
-	String convertedStatus,
-		opportunityName;
-	@TestVisible
-	Boolean doNotCreateOpportunity,
-		overwriteLeadSource,
-		sendNotificationEmail;
-	@TestVisible
-	SObject personAccount; // Note: Generic SObject, since not all orgs have PersonAccounts enabled
+	@TestVisible Id accountId;
+	@TestVisible Id contactId;
+	@TestVisible Id leadId;
+	@TestVisible Id opportunityId;
+	@TestVisible Id ownerId;
+	@TestVisible String convertedStatus;
+	@TestVisible String opportunityName;
+	@TestVisible Boolean doNotCreateOpportunity;
+	@TestVisible Boolean overwriteLeadSource;
+	@TestVisible Boolean sendNotificationEmail;
+	// Note: Generic SObject, since not all orgs have PersonAccounts enabled
+	@TestVisible SObject personAccount; 
 
 	public SerializableLeadConvert(Database.LeadConvert obj) {
 		this.accountId = obj?.getAccountId();

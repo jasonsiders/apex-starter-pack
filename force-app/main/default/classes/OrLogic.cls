@@ -1,6 +1,8 @@
 global virtual class OrLogic extends FilterLogic {
+	static final String OR_PREDICATE = 'OR';
+
 	global OrLogic() {
-		this.token = 'OR';
+		super(OR_PREDICATE);
 	}
 
 	global override Boolean meetsCriteria(Object item) {

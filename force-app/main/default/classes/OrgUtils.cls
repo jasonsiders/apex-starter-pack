@@ -2,8 +2,7 @@ global abstract class OrgUtils {
 	@TestVisible
 	static Organization CurrentOrg;
 	@TestVisible
-	static Soql CurrentOrgQuery = DB.Soql.newQuery(Organization.SObjectType)
-		.selectFields(new List<SObjectField>{ Organization.IsSandbox, Organization.OrganizationType });
+	static Soql CurrentOrgQuery = OrgUtils.initQuery();
 	static Decimal currentApiVersion;
 	static final String DEV_ED_ORG_TYPE = 'Developer Edition';
 	static final Decimal DEFAULT_API_VERSION = 55.0;
@@ -18,6 +17,14 @@ global abstract class OrgUtils {
 
 	global static Boolean isProductionOrg() {
 		return OrgUtils.isDevOrg() == false && OrgUtils.isSandboxOrg() == false;
+	}
+
+	static Soql initQuery() {
+		List<SObjectField> fields = new List<SObjectField>{
+			Organization.IsSandbox, 
+			Organization.OrganizationType 
+		};
+		return DB.Soql.newQuery(Organization.SObjectType)?.selectFields(fields);
 	}
 
 	static Organization getCurrentOrg() {

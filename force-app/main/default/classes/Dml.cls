@@ -1,12 +1,11 @@
 global virtual inherited sharing class Dml {
-	@TestVisible
-	static History Inserted,
-		Updated,
-		Upserted,
-		Deleted,
-		Undeleted,
-		Converted,
-		Published;
+	global static History Inserted;
+	global static History Updated;
+	global static History Upserted;
+	global static History Deleted;
+	global static History Undeleted;
+	global static History Converted;
+	global static History Published;
 
 	static {
 		if (Test.isRunningTest()) {
@@ -303,9 +302,9 @@ global virtual inherited sharing class Dml {
 
 	global virtual class History {
 		// A record of all records which were recordsBySObjectType by the DML engine, by SObjectType
-		protected Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
-		protected Map<Id, SObject> recordsById = new Map<Id, SObject>();
-		protected String idField;
+		Map<SObjectRef, List<SObject>> recordsBySObjectType = new Map<SObjectRef, List<SObject>>();
+		Map<Id, SObject> recordsById = new Map<Id, SObject>();
+		String idField;
 
 		global History() {
 			this.idField = 'Id';
