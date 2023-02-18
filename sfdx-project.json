@@ -4,8 +4,8 @@
       "default": true,
       "package": "apex-starter-pack",
       "path": "force-app",
-      "versionName": "v0.3.0",
-      "versionNumber": "0.3.0.NEXT"
+      "versionName": "v0.4.0",
+      "versionNumber": "0.4.0.NEXT"
     }
   ],
   "name": "apex-starter-pack",
@@ -16,6 +16,7 @@
     "apex-starter-pack": "0HoDn000000k9sMKAQ",
     "apex-starter-pack@0.1.0-1": "04tDn0000006JBBIA2",
     "apex-starter-pack@0.2.0-1": "04tDn0000006e0CIAQ",
-    "apex-starter-pack@0.3.0-1": "04tDn0000006m0cIAA"
+    "apex-starter-pack@0.3.0-1": "04tDn0000006m0cIAA",
+    "apex-starter-pack@0.4.0-1": "04tDn0000006m1GIAQ"
   }
 }
