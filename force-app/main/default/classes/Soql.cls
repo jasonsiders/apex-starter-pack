@@ -254,11 +254,6 @@ global inherited sharing virtual class Soql {
 		return (this.usage != null) ? String.valueOf(this.usage)?.replace('_', ' ') : null;
 	}
 
-	@TestVisible
-	private SoqlMock toMock() {
-		return (SoqlMock) this;
-	}
-
 	// **** INNER *** //
 	global enum Scope {
 		// https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_using_scope.htm

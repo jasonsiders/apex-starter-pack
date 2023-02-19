@@ -6,12 +6,17 @@ global class SoqlMock extends Soql {
 		super(objectType);
 	}
 
+	global SoqlMock() {
+		super();
+	}
+
 	global override List<SObject> run() {
 		return this.mockResults;
 	}
 
-	global void setMockResults(List<SObject> mockResults) {
+	global Soql setMockResults(List<SObject> mockResults) {
 		this.mockResults = mockResults;
+		return this;
 	}
 
 	global class Factory implements DB.QueryFactory {

@@ -15,7 +15,7 @@ private class OrgUtils_Test {
 			Organization.OrganizationType,
 			'Developer Edition'
 		);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ mockOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ mockOrg });
 		System.assertEquals(true, OrgUtils.isDevOrg(), 'Dev org returned false');
 		// Should return false if Organization.OrganizationType != 'Developer Edition'
 		OrgUtils.currentOrg = null; // Allow the query to re-run
@@ -24,7 +24,7 @@ private class OrgUtils_Test {
 			Organization.OrganizationType,
 			'Any other value'
 		);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ mockOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ mockOrg });
 		System.assertEquals(false, OrgUtils.isDevOrg(), 'Non-dev org returned true');
 	}
 
@@ -34,12 +34,12 @@ private class OrgUtils_Test {
 		// Should return true if Organization.IsSandbox is true
 		Organization mockOrg = new Organization();
 		mockOrg = (Organization) SObjectUtils.setReadOnlyField(mockOrg, Organization.IsSandbox, true);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ mockOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ mockOrg });
 		System.assertEquals(true, OrgUtils.isSandboxOrg(), 'Sandbox org returned false');
 		// Should return false if Organization.IsSandbox is false
 		OrgUtils.currentOrg = null;
 		mockOrg = (Organization) SObjectUtils.setReadOnlyField(mockOrg, Organization.IsSandbox, false);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ mockOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ mockOrg });
 		System.assertEquals(false, OrgUtils.isSandboxOrg(), 'Non-Sandbox org returned true');
 	}
 
@@ -54,7 +54,7 @@ private class OrgUtils_Test {
 			Organization.OrganizationType,
 			'Enterprise Edition'
 		);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ productionOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ productionOrg });
 		System.assertEquals(true, OrgUtils.isProductionOrg(), 'Enterprise Edition org returned false');
 		// If IsSandbox, will return false
 		OrgUtils.currentOrg = null;
@@ -63,7 +63,7 @@ private class OrgUtils_Test {
 			Organization.IsSandbox,
 			true
 		);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ sandboxOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ sandboxOrg });
 		System.assertEquals(false, OrgUtils.isProductionOrg(), 'Sandbox org returned true');
 		// If Dev Org, will return false
 		OrgUtils.currentOrg = null;
@@ -72,7 +72,7 @@ private class OrgUtils_Test {
 			Organization.OrganizationType,
 			'Developer Edition'
 		);
-		OrgUtils.CurrentOrgQuery.toMock().setMockResults(new List<Organization>{ devEdOrg });
+		OrgUtils.CurrentOrgQuery = new SoqlMock().setMockResults(new List<Organization>{ devEdOrg });
 		System.assertEquals(false, OrgUtils.isProductionOrg(), 'Developer org returned true');
 	}
 }

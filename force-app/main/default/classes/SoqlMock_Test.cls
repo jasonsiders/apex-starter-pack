@@ -10,10 +10,7 @@ private class SoqlMock_Test {
 			accounts.add(new Account(Name = 'Test Account #' + (i + 1), AnnualRevenue = (i * i)));
 		}
 		DB.Dml.doInsert(accounts);
-		Soql query = DB.Soql.newQuery(Account.SObjectType)
-			.selectFields(new List<SObjectField>{ Account.Name, Account.AnnualRevenue })
-			.whereCriteria(new Filter(Account.Name, Filter.STARTS_WITH, 'Test Account'));
-		query?.toMock()?.setMockResults(accounts);
+		Soql query = new SoqlMock()?.setMockResults(accounts);
 
 		Test.startTest();
 		List<Account> results = (List<Account>) query.run();
@@ -42,7 +39,7 @@ private class SoqlMock_Test {
 		System.assertEquals(0, query?.run()?.size(), 'Wrong # of results');
 		// Add some mock data to the query, indirectly. Now it should return those results
 		List<Account> mockData = new List<Account>{ new Account(Name = 'Test Account') };
-		query?.toMock()?.setMockResults(mockData);
+		query = new SoqlMock()?.setMockResults(mockData);
 		System.assertEquals(mockData, query?.run(), 'Did not return mockData');
 	}
 

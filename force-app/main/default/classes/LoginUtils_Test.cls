@@ -25,7 +25,7 @@ private class LoginUtils_Test {
 			existingSessions.add(session);
 		}
 		DB.setQueryEngine(new SoqlMock.Factory());
-		LoginUtils.ActiveSessionQuery.toMock()?.setMockResults(existingSessions);
+		LoginUtils.ActiveSessionQuery = new SoqlMock()?.setMockResults(existingSessions);
 
 		Test.startTest();
 		Map<Id, List<AuthSession>> allSessions = LoginUtils.getAllActiveSessions();

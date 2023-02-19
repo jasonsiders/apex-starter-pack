@@ -443,13 +443,6 @@ private class Soql_Test {
 		System.assertEquals(false, queryObj instanceof SoqlMock, 'Factory created an instance of SoqlMock.class');
 	}
 
-	@IsTest
-	static void shouldReturnAMockVersionOfItself() {
-		Soql query = new SoqlMock(Account.SObjectType);
-		SoqlMock mock = query?.toMock();
-		System.assertEquals(query?.toString(), mock?.toString(), 'Mock does not match the original query');
-	}
-
 	// **** HELPER **** //
 	static void checkQueryString(String expected, Soql query) {
 		System.assert(
