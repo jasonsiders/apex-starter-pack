@@ -12,11 +12,9 @@ global abstract class NamespaceUtils {
 	global static String getNamespaceOf(String typeName) {
 		// Return the namespace of a specific object type
 		for (String suffix : new List<String>{'__', '.'}) {
-			System.debug(typeName + '.contains(' + suffix + ')?');
 			if (typeName?.contains(suffix)) {
 				String regex = '\\' + suffix; 
 				List<String> parts = typeName?.split(regex);
-				System.debug('parts: ' + parts);
 				return parts[0];
 			}
 		}
