@@ -128,7 +128,7 @@ global abstract class TypeUtils {
 		// Most namespaced objects are separated by a '.', with the exception of Schema objects (ex., SObjectTypes)
 		// return the correct separateor depending on the object
 		for (String separator : new List<String>{'__', '.'}) {
-			if (typeName?.contains(separator)) {
+			if (typeName?.contains(separator) == true) {
 				return separator;
 			}
 		}
