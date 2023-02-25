@@ -17,7 +17,7 @@ global class SObjectRef implements Mappable {
 	}
 
 	global SObjectRef(SObjectField field) {
-		this(SchemaUtils.getSObjectType(field));
+		this(field?.getDescribe()?.getSObjectType());
 	}
 
 	global SObjectRef(SObject record) {
