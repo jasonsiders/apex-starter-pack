@@ -11,13 +11,13 @@ global abstract class NamespaceUtils {
 
 	global static String getNamespaceOf(String typeName) {
 		// Return the namespace of a specific object type
-		for (String suffix : new List<String>{'__', '.'}) {
-			if (typeName?.contains(suffix)) {
-				String regex = '\\' + suffix; 
+		for (String separator : new List<String>{'__', '.'}) {
+			if (typeName?.contains(separator)) {
+				String regex = '\\' + separator; 
 				List<String> parts = typeName?.split(regex);
-				return parts[0];
+				return parts?.isEmpty() == false ? parts[0] : null;
 			}
 		}
 		return null;
-	}	
+	}
 }
