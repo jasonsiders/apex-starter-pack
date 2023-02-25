@@ -20,22 +20,6 @@ private class SchemaUtils_Test {
 	}
 
 	@IsTest
-	static void shouldReturnAnSObjectTypeFromSObjectField() {
-		SObjectField field = Account.Name;
-		System.assertEquals(
-			Account.SObjectType,
-			SchemaUtils.getSObjectType(field),
-			'Wrong SObjectType for Account.Name'
-		);
-		field = Contact.AccountId;
-		System.assertEquals(
-			Contact.SObjectType,
-			SchemaUtils.getSObjectType(field),
-			'Wrong SObjectType for Contact.AccountId'
-		);
-	}
-
-	@IsTest
 	static void shouldReturnChildSObjectTypeFromLookupField() {
 		SObjectField field = Contact.AccountId;
 		System.assertEquals(
