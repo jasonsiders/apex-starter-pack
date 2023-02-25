@@ -7,6 +7,10 @@ global abstract class SchemaUtils {
 		}
 	}
 
+	global static SObjectType getSObjectType(SObjectField field) {
+		return field?.getDescribe()?.getSObjectType(); 
+	}
+
 	global static SObjectType getParentSObjectType(SObjectField lookupField) {
 		// Retrieves the parent SObjectType that a lookup field points to
 		// Any non-lookup fields will return null

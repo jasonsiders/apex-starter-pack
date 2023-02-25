@@ -19,6 +19,14 @@ private class SchemaUtils_Test {
 		System.assertEquals(null, SchemaUtils.getSObjectType(objectName), 'Null input did not return null output');
 	}
 
+	@IsTest 
+	static void shouldReturnSourceSObjectTypeFromField() {
+		SObjectField field = Account.OwnerId; 
+		System.assertEquals(Account.SObjectType, SchemaUtils.getSObjectType(field), 'Wrong SObjectType');
+		field = null;
+		System.assertEquals(null, SchemaUtils.getSObjectType(field), 'Null field did not return null SObjectType');
+	}
+
 	@IsTest
 	static void shouldReturnChildSObjectTypeFromLookupField() {
 		SObjectField field = Contact.AccountId;
