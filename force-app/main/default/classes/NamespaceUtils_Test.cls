@@ -3,22 +3,20 @@ private class NamespaceUtils_Test {
 	@IsTest
 	static void shouldReturnCurrentNamespace() {
 		List<ApexClass> matching = [SELECT NamespacePrefix FROM ApexClass WHERE Name = 'NamespaceUtils_Test'];
-		ApexClass thisClass = (ApexClass) CollectionUtils.getIndexOf(matching, 0);
-		String expected = thisClass?.NamespacePrefix;
+		ApexClass currentClass = (ApexClass) CollectionUtils.getIndexOf(matching, 0);
+		String expected = currentClass?.NamespacePrefix;
+		Type classType = NamespaceUtils_Test.class;
 
 		Test.startTest();
-		String namespace = NamespaceUtils.getCurrent();
+		String namespace = NamespaceUtils.getNamespaceOf(classType);
 		Test.stopTest();
 
 		System.assertEquals(expected, namespace, 'Wrong namespace returned');
 	}
 
-	@IsTest
-	static void shouldOnlyQueryOnce() {
-		for (Integer i = 0; i < 101; i++) {
-			// This would break if we were calling SOQL each time!
-			NamespaceUtils.getCurrent();
-		}
-		System.assertEquals(1, Limits.getQueries(), 'Wrong # of queries made');
+	@IsTest 
+	static void shouldReturnNullForNonNamespacedObject() {
+		Account account = new Account(); // Never will have a namespace
+		System.assertEquals(null, NamespaceUtils.getNamespaceOf(account), 'Account has a namespace');
 	}
 }
