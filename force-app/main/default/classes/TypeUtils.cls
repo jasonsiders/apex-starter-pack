@@ -31,8 +31,9 @@ global abstract class TypeUtils {
 
 	global static String getLocalTypeName(Type myType) {
 		// Retrieve the name of a type sans-namespace
-		String namespacePrefix = NamespaceUtils.getCurrent() + '.';
 		String fullName = myType?.getName();
+		String separator = TypeUtils.getSeparator(fullName);
+		String namespacePrefix = NamespaceUtils.getNamespaceOf(myType) + separator; 
 		return fullName?.removeStart(namespacePrefix);
 	}
 
@@ -121,6 +122,17 @@ global abstract class TypeUtils {
 			}
 		}
 		return false;
+	}
+	
+	static String getSeparator(String typeName) {
+		// Most namespaced objects are separated by a '.', with the exception of Schema objects (ex., SObjectTypes)
+		// return the correct separateor depending on the object
+		for (String separator : new List<String>{'__', '.'}) {
+			if (typeName?.contains(separator) == true) {
+				return separator;
+			}
+		}
+		return ''; 
 	}
 
 	private class UnknownType {

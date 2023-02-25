@@ -236,6 +236,12 @@ private class TypeUtils_Test {
 		System.assertEquals(localName, TypeUtils.getLocalTypeName(obj), 'Unexpected type name');
 	}
 
+	@IsTest 
+	static void shouldGetLocalTypeOfUnpackagedObject() {
+		Object obj = new Account(); 
+		System.assertEquals('Account', TypeUtils.getLocalTypeName(obj), 'Unexpected type name');
+	}
+
 	public class Example {
 	}
 }
