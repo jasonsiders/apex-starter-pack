@@ -732,11 +732,11 @@ private class Dml_Test {
 		Test.stopTest();
 
 		System.assertEquals(accounts, Dml.Inserted?.getRecords(Account.SObjectType), 'Accounts were not Inserted');
-		System.assertEquals(null, Dml.Updated?.getRecords(Account.SObjectType), 'Accounts were Updated');
-		System.assertEquals(null, Dml.Upserted?.getRecords(Account.SObjectType), 'Accounts were Upserted');
-		System.assertEquals(null, Dml.Deleted?.getRecords(Account.SObjectType), 'Accounts were Deleted');
-		System.assertEquals(null, Dml.Undeleted?.getRecords(Account.SObjectType), 'Accounts were Undeleted');
-		System.assertEquals(null, Dml.Published?.getRecords(Account.SObjectType), 'Accounts were Published');
+		System.assertEquals(true, Dml.Updated?.getRecords(Account.SObjectType)?.isEmpty(), 'Accounts were Updated');
+		System.assertEquals(true, Dml.Upserted?.getRecords(Account.SObjectType)?.isEmpty(), 'Accounts were Upserted');
+		System.assertEquals(true, Dml.Deleted?.getRecords(Account.SObjectType)?.isEmpty(), 'Accounts were Deleted');
+		System.assertEquals(true, Dml.Undeleted?.getRecords(Account.SObjectType)?.isEmpty(), 'Accounts were Undeleted');
+		System.assertEquals(true, Dml.Published?.getRecords(Account.SObjectType)?.isEmpty(), 'Accounts were Published');
 	}
 
 	@IsTest
