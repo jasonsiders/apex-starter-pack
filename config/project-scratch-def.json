@@ -4,7 +4,6 @@
 	"features": [
 		"EnableSetPasswordInApi"
 	],
-	"release": "previous",
 	"settings": {
 		"lightningExperienceSettings": {
 			"enableS1DesktopEnabled": true
