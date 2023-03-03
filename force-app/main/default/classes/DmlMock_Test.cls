@@ -173,8 +173,7 @@ private class DmlMock_Test {
 		DmlResult dmlResult = DB.Dml.doPublish(event);
 		Test.stopTest();
 
-		List<PlatformStatusAlertEvent> events = ((List<PlatformStatusAlertEvent>) Dml.Published
-			?.getRecords(PlatformStatusAlertEvent.SObjectType));
+		List<PlatformStatusAlertEvent> events = Dml.Published?.getRecords(PlatformStatusAlertEvent.SObjectType);
 		System.assertEquals(1, events?.size(), 'Wrong # of published events');
 		System.assertEquals(0, Limits.getDmlStatements(), 'Wrong # DML statements');
 	}
