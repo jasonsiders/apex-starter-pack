@@ -329,7 +329,8 @@ global virtual inherited sharing class Dml {
 		}
 
 		global List<SObject> getRecords(SObjectType objectType) {
-			return this.recordsBySObjectType.get(new SObjectRef(objectType));
+			List<SObject> results = this.recordsBySObjectType.get(new SObjectRef(objectType));
+			return (results != null) ? results : new List<SObject>();
 		}
 
 		global List<SObject> getAll() {
