@@ -119,41 +119,26 @@ global abstract class CacheManager {
     global class PlatformPartition implements Partition {
         Cache.Partition partition; 
 
+        @TestVisible
         private PlatformPartition(Cache.Partition partition) {
             this.partition = partition; 
         }
 
         global Boolean contains(String key) {
-            try {
-                return this.partition?.contains(key); 
-            } catch (Exception error) {
-                return false; 
-            }
+            return this.partition?.contains(key) == true; 
         }
 
         global Object get(String key) {
-            try {
-                return this.partition?.get(key); 
-            } catch (Exception error) {
-                return null; 
-            }
+            return this.partition?.get(key); 
         }
 
         global PlatformPartition put(String key, Object value) {
-            try {
-                this.partition?.put(key, value); 
-            } catch (Exception error) {
-                // Fail silently
-            }
+            this.partition?.put(key, value); 
             return this; 
         }
 
         global PlatformPartition remove(String key) {
-            try {
-                this.partition?.remove(key); 
-            } catch (Exception error) {
-                // Fail silently
-            }
+            this.partition?.remove(key); 
             return this; 
         }
     }
