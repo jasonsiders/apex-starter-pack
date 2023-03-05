@@ -122,6 +122,69 @@ global class CacheManager_Test {
         System.assertEquals(null, division?.get(key), 'Mock division did not return null for missing key');
     }
 
+    @IsTest 
+    static void shouldHandleNullValuesInOrgCache() {
+        CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
+        String key = 'foo';
+        Object value = null;
+
+        Test.startTest();
+        try {
+            CacheManager.getDivision(cacheType)?.put(key, value);
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.put(): ' + error);
+        }
+        try {
+            Object result = CacheManager.getDivision(cacheType)?.get(key); 
+            System.assertEquals(null, result, 'Null cache value did not return null');
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.get(): ' + error);
+        }
+        Test.stopTest();
+    }
+
+    @IsTest 
+    static void shouldHandleNullValuesInSessionCache() {
+        CacheManager.CacheType cacheType = CacheManager.CacheType.SESSION;
+        String key = 'foo';
+        Object value = null;
+
+        Test.startTest();
+        try {
+            CacheManager.getDivision(cacheType)?.put(key, value);
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.put(): ' + error);
+        }
+        try {
+            Object result = CacheManager.getDivision(cacheType)?.get(key); 
+            System.assertEquals(null, result, 'Null cache value did not return null');
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.get(): ' + error);
+        }
+        Test.stopTest();
+    }
+
+    @IsTest 
+    static void shouldHandleNullValuesInTransactionCache() {
+        CacheManager.CacheType cacheType = CacheManager.CacheType.TRANSACTIONAL;
+        String key = 'foo';
+        Object value = null;
+
+        Test.startTest();
+        try {
+            CacheManager.getDivision(cacheType)?.put(key, value);
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.put(): ' + error);
+        }
+        try {
+            Object result = CacheManager.getDivision(cacheType)?.get(key); 
+            System.assertEquals(null, result, 'Null cache value did not return null');
+        } catch (Exception error) {
+            System.assert(false, 'An error was thrown during cache.get(): ' + error);
+        }
+        Test.stopTest();
+    }
+
     // **** INNER **** //
     global virtual class MockPlatformCache extends CacheManager.PlatformCache {
         global override Cache.Partition getUnderlyingPartition(String partitionName) {
