@@ -1,5 +1,5 @@
 @IsTest 
-private class CacheManager_Test {
+global class CacheManager_Test {
     @IsTest 
     static void shouldInteractWithDefaultOrgCache() {
         String key = 'CacheManager_Test: foo';
@@ -16,7 +16,7 @@ private class CacheManager_Test {
         System.assertEquals(value, partition?.get(key), 'Wrong value for key');
         partition?.remove(key);
         System.assertEquals(false, partition?.contains(key), 'Key was not removed');
-        Test.stopTest();
+        Test.stopTest(); 
     }
 
     @IsTest 
@@ -100,30 +100,40 @@ private class CacheManager_Test {
     }
 
     @IsTest 
-    static void shouldInteractWithPlatformPartitions() {
-        // This is mostly for test coverage. If Org/Session cache is not enabled in an org, will fallback to TransactionCache
-        Boolean isEnabled = true; 
-        Cache.Partition cachePartition;
-        try {
-            String partitionName = Cache.Org.getName(); 
-            cachePartition = Cache.Org.getPartition(partitionName);
-        } catch (Exception error) {
-            // Cache doesn't exist - will affect our asserts later
-            isEnabled = false;
-        }
-        CacheManager.PlatformPartition partition = new CacheManager.PlatformPartition(cachePartition);
-        String key = 'CacheManager_Test.foo';
-        Object value = Crypto.getRandomInteger();
-        
+    static void shouldMockPlatformCache() {
+        CacheManager.Division mockDivision = new MockPlatformCache(); 
+        // This mock division type will always no-op
+        CacheManager.CacheType cacheType = CacheManager.CacheType.ORG; 
+        CacheManager.DIVISIONS_BY_TYPE?.put(cacheType, mockDivision);
+        String key = 'foo';
+        Object value = 'bar';
+
         Test.startTest();
-        System.assertEquals(false, partition?.contains(key), 'Unmapped key already exists in partition');
-        partition?.put(key, value);
-        Object cachedValue = partition?.get(key);
-        if (isEnabled) {
-            System.assertEquals(value, cachedValue, 'Incorrect cached value'); 
+        CacheManager.Division division = CacheManager.getDivision(cacheType); 
+        System.assertEquals(MockPlatformCache.class, TypeUtils.getType(division), 'Wrong Division type');
+        System.assertEquals(false, division?.contains(key), 'Mock division contains a key');
+        System.assertEquals(null, division?.get(key), 'Mock division did not return null for missing key');
+        // Mock divisions put/remove methods are no-op
+        division?.put(key, value); 
+        System.assertEquals(false, division?.contains(key), 'Mock division contains a key');
+        System.assertEquals(null, division?.get(key), 'Mock division did not return null for missing key');
+        division?.remove(key);
+        System.assertEquals(false, division?.contains(key), 'Mock division contains a key');
+        System.assertEquals(null, division?.get(key), 'Mock division did not return null for missing key');
+    }
+
+    // **** INNER **** //
+    global virtual class MockPlatformCache extends CacheManager.PlatformCache {
+        global override Cache.Partition getUnderlyingPartition(String partitionName) {
+            return null;
         }
-        partition?.remove(key);
-        System.assertEquals(false, partition?.contains(key), 'Removed key still exists in partition');
-        Test.stopTest();
+
+        global override String getDefaultPartitionName() {
+            return 'My_Cache_Partition';
+        }
+        
+        global override CacheManager.Partition getFallbackCache() {
+            return new PlatformPartition(null); 
+        }
     }
 }

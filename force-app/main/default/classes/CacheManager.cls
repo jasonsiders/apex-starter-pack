@@ -23,7 +23,7 @@ global abstract class CacheManager {
     // **** INNER **** //
     global enum CacheType {
         ORG,
-        SESSION, 
+        SESSION,
         TRANSACTIONAL
     }
 
@@ -36,9 +36,7 @@ global abstract class CacheManager {
     }
 
     global interface Division extends Partition {
-        // A division represents a group of partitions of the same CacheType
-        // Divisions also contain Partition methods as shorthand; 
-        // when these are called, it refers to its default partition
+        // A division represents a group of Partitions of a particular CacheDivision type
         Partition getPartition(String partitionName);
         Partition getDefault();
     }
@@ -49,26 +47,24 @@ global abstract class CacheManager {
 
         global Partition getPartition(String partitionName) {
             try {
-                Cache.Partition partition = this.getUnderlyingPartition(partitionName); 
-                return new PlatformPartition(partition); 
+                return new PlatformPartition(this.getUnderlyingPartition(partitionName)); 
             } catch (Exception error) {
-                // The partition likely doesn't exist; fallback to TransactionCache
-                return this.getTransactionCache();
+                // The partition likely doesn't exist;sx fallback to TransactionCache
+                return this.getFallbackCache();
             }
         }
 
         global Partition getDefault() {
             try {
-                String partitionName = this.getDefaultPartitionName(); 
-                return this.getPartition(partitionName); 
+                return this.getPartition(this.getDefaultPartitionName()); 
             } catch (Exception error) {
                 // A default partition likely doesn't exist; fallback to TransactionCache
-                return this.getTransactionCache();
+                return this.getFallbackCache();
             }
         }
 
         global Boolean contains(String key) {
-            return this.getDefault()?.contains(key) == true; 
+            return this.getDefault()?.contains(key) == true;
         }
 
         global Object get(String key) {
@@ -76,14 +72,14 @@ global abstract class CacheManager {
         }
 
         global Partition put(String key, Object value) {
-            return this.getDefault()?.put(key, value); 
+            return this.getDefault()?.put(key, value);
         }
 
         global Partition remove(String key) {
             return this.getDefault()?.remove(key); 
         }
 
-        protected Partition getTransactionCache() {
+        protected virtual Partition getFallbackCache() {
             return CacheManager.getPartition(CacheType.TRANSACTIONAL); 
         }
     }
@@ -170,12 +166,12 @@ global abstract class CacheManager {
             return this.cacheMap?.get(key); 
         }
 
-        global TransactionCache put(String key, Object value) {
+        global Partition put(String key, Object value) {
             this.cacheMap?.put(key, value); 
             return this; 
         }
 
-        global TransactionCache remove(String key) {
+        global Partition remove(String key) {
             this.cacheMap?.remove(key);
             return this; 
         }
