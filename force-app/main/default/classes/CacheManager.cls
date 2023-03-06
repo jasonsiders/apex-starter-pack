@@ -48,19 +48,23 @@ global abstract class CacheManager {
         global abstract String getDefaultPartitionName();
 
         global Partition getPartition(String partitionName) {
+            Partition result;
             try {
-                return new PlatformPartition(this.getUnderlyingPartition(partitionName)); 
+                Cache.Partition cachePartition = this.getUnderlyingPartition(partitionName);
+                Decimal capacity = cachePartition?.getCapacity();
+                result = (capacity > 0) ? new PlatformPartition(cachePartition) : null;
             } catch (Exception error) {
-                // The partition likely doesn't exist;sx fallback to TransactionCache
-                return this.getFallbackCache();
+                // The partition likely doesn't exist
             }
+            return (result != null) ? result : this.getFallbackCache();
         }
 
         global Partition getDefault() {
             try {
-                return this.getPartition(this.getDefaultPartitionName()); 
+                String defaultPartitionName = this.getDefaultPartitionName();
+                return this.getPartition(defaultPartitionName); 
             } catch (Exception error) {
-                // A default partition likely doesn't exist; fallback to TransactionCache
+                // A default partition likely doesn't exist
                 return this.getFallbackCache();
             }
         }
@@ -92,6 +96,7 @@ global abstract class CacheManager {
         }
 
         global override Cache.Partition getUnderlyingPartition(String partitionName) {
+            System.debug('OrgCache: ' + Cache.Org.getCapacity());
             return Cache.Org.getPartition(partitionName); 
         }
 
@@ -106,6 +111,7 @@ global abstract class CacheManager {
         }
 
         global override Cache.Partition getUnderlyingPartition(String partitionName) {
+            System.debug('SessionCache: ' + Cache.Session.getCapacity());
             return Cache.Session.getPartition(partitionName); 
         }
 
