@@ -123,6 +123,22 @@ global class CacheManager_Test {
     }
 
     @IsTest 
+    static void shouldFallbackToTransactionCache() {
+        CacheManager.Division mockDivision = new InvalidCache();
+        // This mock division will always throw an exception, 
+        // This exception will be caught & resolved via Transaction cache
+        CacheManager.CacheType cacheType = CacheManager.CacheType.ORG; 
+        CacheManager.DIVISIONS_BY_TYPE?.put(cacheType, mockDivision);
+        
+        Test.startTest();
+        CacheManager.Division division = CacheManager.getDivision(cacheType); 
+        System.assertEquals(InvalidCache.class, TypeUtils.getType(division), 'Wrong Division type');
+        CacheManager.Partition partition = division?.getDefault();
+        System.assertEquals(CacheManager.TransactionCache.class, TypeUtils.getType(partition), 'Wrong Partition');
+        Test.stopTest();
+    }
+
+    @IsTest 
     static void shouldHandleNullValuesInOrgCache() {
         CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
         String key = 'foo';
@@ -197,6 +213,16 @@ global class CacheManager_Test {
         
         global override CacheManager.Partition getFallbackCache() {
             return new PlatformPartition(null); 
+        }
+    }
+
+    global virtual class InvalidCache extends CacheManager.PlatformCache {
+        global override Cache.Partition getUnderlyingPartition(String partitionName) {
+            throw new Cache.Org.OrgCacheException();
+        }
+
+        global override String getDefaultPartitionName() {
+            throw new Cache.Org.OrgCacheException();
         }
     }
 }

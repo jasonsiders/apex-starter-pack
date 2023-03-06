@@ -8,7 +8,9 @@ global abstract class CacheManager {
     };
 
     global static Division getDivision(CacheType cacheType) {
-        return CacheManager.DIVISIONS_BY_TYPE?.get(cacheType); 
+        Division division = CacheManager.DIVISIONS_BY_TYPE?.get(cacheType); 
+        System.debug('CacheManager.getDivision(' + cacheType + ') -> ' + TypeUtils.getType(division));
+        return division;
     }
 
     global static Partition getPartition(CacheType cacheType, String partitionName) {
@@ -121,19 +123,26 @@ global abstract class CacheManager {
         }
 
         global Boolean contains(String key) {
+            System.debug('PlatformCache.contains(' + key + ')');
             return this.partition?.contains(key) == true; 
         }
 
         global Object get(String key) {
-            return this.partition?.get(key); 
+            Object value = this.partition?.get(key); 
+            System.debug('PlatformCache.contains(' + key + ') -> ' + value);
+            return (value != NULL_VALUE) ? value : null;
         }
 
         global PlatformPartition put(String key, Object value) {
+            System.debug('PlatformCache.put(' + key + ', ' + value + ')');
+            // PlatformCache cannot accept null values
+            value = (value != null) ? value : NULL_VALUE; 
             this.partition?.put(key, value); 
             return this; 
         }
 
         global PlatformPartition remove(String key) {
+            System.debug('PlatformCache.remove(' + key + ')');
             this.partition?.remove(key); 
             return this; 
         }
@@ -159,19 +168,24 @@ global abstract class CacheManager {
         }
 
         global Boolean contains(String key) {
+            System.debug('TransactionCache.contains(' + key + ')');
             return this.cacheMap?.containsKey(key); 
         }
 
         global Object get(String key) {
-            return this.cacheMap?.get(key); 
+            Object value = this.cacheMap?.get(key); 
+            System.debug('TransactionCache.get(' + key + ') -> ' + value);
+            return value;
         }
 
         global Partition put(String key, Object value) {
+            System.debug('TransactionCache.put(' + key + ', ' + value + ')');
             this.cacheMap?.put(key, value); 
             return this; 
         }
 
         global Partition remove(String key) {
+            System.debug('TransactionCache.remove(' + key + ')');
             this.cacheMap?.remove(key);
             return this; 
         }
