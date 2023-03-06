@@ -2,7 +2,7 @@
 global class CacheManager_Test {
     @IsTest 
     static void shouldInteractWithDefaultOrgCache() {
-        String key = 'CacheManager_Test: foo';
+        String key = 'foo';
         Object value = 'bar';
         CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
         CacheManager.Partition partition = CacheManager.getPartition(cacheType);
@@ -21,7 +21,7 @@ global class CacheManager_Test {
 
     @IsTest 
     static void shouldInteractWithDefaultSessionCache() {
-        String key = 'CacheManager_Test: foo';
+        String key = 'foo';
         Object value = 'bar';
         CacheManager.CacheType cacheType = CacheManager.CacheType.SESSION;
         CacheManager.Partition partition = CacheManager.getPartition(cacheType);
@@ -40,7 +40,7 @@ global class CacheManager_Test {
 
     @IsTest 
     static void shouldInteractWithDefaultTransactionCache() {
-        String key = 'CacheManager_Test: foo';
+        String key = 'foo';
         Object value = 'bar';
         CacheManager.CacheType cacheType = CacheManager.CacheType.TRANSACTIONAL;
         CacheManager.Partition partition = CacheManager.getPartition(cacheType);
@@ -59,7 +59,7 @@ global class CacheManager_Test {
 
     @IsTest 
     static void shouldHandleMissingOrgPartition() {
-        String partitionName = 'Non-existing partition blah blah blah';
+        String partitionName = 'NonExistentPartition';
         CacheManager.CacheType cacheType = CacheManager.CacheType.ORG; 
 
         Test.startTest();
@@ -73,7 +73,7 @@ global class CacheManager_Test {
 
     @IsTest 
     static void shouldHandleMissingSessionPartition() {
-        String partitionName = 'Non-existing partition blah blah blah';
+        String partitionName = 'NonExistentPartition';
         CacheManager.CacheType cacheType = CacheManager.CacheType.SESSION; 
 
         Test.startTest();
@@ -87,7 +87,7 @@ global class CacheManager_Test {
 
     @IsTest 
     static void shouldHandleMissingTransactionPartition() {
-        String partitionName = 'Non-existing partition blah blah blah';
+        String partitionName = 'NonExistentPartition';
         CacheManager.CacheType cacheType = CacheManager.CacheType.TRANSACTIONAL; 
 
         Test.startTest();
