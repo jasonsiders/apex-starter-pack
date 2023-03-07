@@ -1,5 +1,18 @@
 @IsTest 
 global class CacheManager_Test {
+    /*
+        Add to test methods:
+        Map<String, Boolean> contains(Set<String> keys);
+        Boolean containsAll(Set<String> keys);
+        Boolean containsSome(Set<String> keys);
+        Map<String, Object> get(Set<String> keys);
+        Map<String, Object> getAll();
+        Set<String> getKeys();
+        Partition put(Map<String, Object> valueMap);
+        Partition remove(Set<String> keys);
+        Partition removeAll();
+    */
+
     @IsTest 
     static void shouldInteractWithDefaultOrgCache() {
         String key = 'foo';
