@@ -2,47 +2,40 @@
 global class CacheManager_Test {
     @IsTest
     static void shouldInteractWithOrgCache() {
-        CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
-        CacheManager.Partition partition = CacheManager.getPartition(cacheType);
+        CacheManager.Partition partition = CacheManager.getOrgCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest
     static void shouldInteractWithSessionCache() {
-        CacheManager.CacheType cacheType = CacheManager.CacheType.SESSION;
-        CacheManager.Partition partition = CacheManager.getPartition(cacheType);
-        System.debug('partition: ' + partition);
+        CacheManager.Partition partition = CacheManager.getSessionCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest
     static void shouldInteractWithTransactionCache() {
-        CacheManager.CacheType cacheType = CacheManager.CacheType.TRANSACTIONAL;
-        CacheManager.Partition partition = CacheManager.getPartition(cacheType);
+        CacheManager.Partition partition = CacheManager.getTransactionCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest
     static void shouldInteractWithOrgDivision() {
         // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
-        CacheManager.Division division = CacheManager.getDivision(cacheType);
+        CacheManager.CacheDivision division = CacheManager.getOrgCache();
         CacheManager_Test.interactWithCache(division);
     }
 
     @IsTest
     static void shouldInteractWithSessionDivision() {
         // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheType cacheType = CacheManager.CacheType.SESSION;
-        CacheManager.Division division = CacheManager.getDivision(cacheType);
+        CacheManager.CacheDivision division = CacheManager.getSessionCache();
         CacheManager_Test.interactWithCache(division);
     }
 
     @IsTest
     static void shouldInteractWithTransactionDivision() {
         // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheType cacheType = CacheManager.CacheType.TRANSACTIONAL;
-        CacheManager.Division division = CacheManager.getDivision(cacheType);
+        CacheManager.CacheDivision division = CacheManager.getTransactionCache();
         CacheManager_Test.interactWithCache(division);
     }
 
@@ -74,7 +67,7 @@ global class CacheManager_Test {
 
         Test.startTest();
         // Get the default partition
-        CacheManager.Partition partition = CacheManager.getPartition(cacheType);
+        CacheManager.Partition partition = CacheManager.getCache(cacheType)?.getDefault();
         Test.stopTest();
 
         System.assertEquals(true, partition instanceof CacheManager.TransactionCache, 'Did not return fallback cache: ' + partition);
@@ -134,21 +127,21 @@ global class CacheManager_Test {
         String fakePartitionName = 'blahblahblahblah1234';
 
         Test.startTest();
-        CacheManager.Partition partition = CacheManager.getPartition(cacheType, fakePartitionName);
+        CacheManager.Partition partition = CacheManager.getCache(cacheType)?.getPartition(fakePartitionName);
         Test.stopTest();
 
         System.assertEquals(true, partition instanceof CacheManager.TransactionCache, 'Did not fallback to transaction cache');
     }
 
     global class MockPlatformCache extends CacheManager.PlatformCache {
-        global MockPlatformCache(CacheManager.CacheType cacheType) {
+        private MockPlatformCache(CacheManager.CacheType cacheType) {
             super(cacheType);
         }
     }
 
     global class InvalidPlatformCache extends CacheManager.PlatformCache {
         // Simulates a PlatformCache partition that has not been set up yet
-        global InvalidPlatformCache(CacheManager.CacheType cacheType) {
+        private InvalidPlatformCache(CacheManager.CacheType cacheType) {
             super(cacheType);
         }
 

@@ -1,6 +1,6 @@
 global abstract class CacheManager {
     @TestVisible
-    static final Map<CacheType, Division> DIVISIONS_BY_TYPE = new Map<CacheType, Division>{
+    static final Map<CacheType, CacheDivision> DIVISIONS_BY_TYPE = new Map<CacheType, CacheDivision>{
         CacheType.ORG => new PlatformCache(CacheType.ORG),
         CacheType.SESSION => new PlatformCache(CacheType.SESSION),
         CacheType.TRANSACTIONAL => new TransactionCache()
@@ -11,16 +11,20 @@ global abstract class CacheManager {
     // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_platform_cache_limits.htm
     static final Integer DEFAULT_TTL_SECS = 86400;
 
-    global static Division getDivision(CacheType cacheType) {
+    global static CacheDivision getOrgCache() {
+        return CacheManager.getCache(CacheType.ORG);
+    }
+
+    global static CacheDivision getSessionCache() {
+        return CacheManager.getCache(CacheType.SESSION);
+    }
+
+    global static CacheDivision getTransactionCache() {
+        return CacheManager.getCache(CacheType.TRANSACTIONAL);
+    }
+    
+    global static CacheDivision getCache(CacheType cacheType) {
         return DIVISIONS_BY_TYPE?.get(cacheType);
-    }
-
-    global static Partition getPartition(CacheType cacheType, String partitionName) {
-        return CacheManager.getDivision(cacheType)?.getPartition(partitionName);
-    }
-
-    global static Partition getPartition(CacheType cacheType) {
-        return CacheManager.getDivision(cacheType)?.getDefault();
     }
 
     // **** INNER **** //
@@ -38,7 +42,8 @@ global abstract class CacheManager {
         Partition remove(String key);
     }
 
-    global abstract class Division implements Partition {
+    global abstract class CacheDivision implements Partition {
+        // A cache division represents a "Category" of cache. Possible categories enumerated by CacheType.
         global abstract Partition getPartition(String partitionName);
         global abstract Partition getDefault();
 
@@ -67,10 +72,14 @@ global abstract class CacheManager {
         }
     }
 
-    global virtual class TransactionCache extends Division {
+    global virtual class TransactionCache extends CacheDivision {
         // Transaction cache isn't platform cache at all - a static Map that persists throughout a single transaction
         // It can be used as a "fallback" in the event that platform cache isn't enabled for an org
         Map<String, Object> cacheMap = new Map<String, Object>();
+
+        protected TransactionCache() {
+            // Can't be constructed outside this file
+        }
 
         // Only ever one partition in TransactionCache, and it's always available
         global override Partition getPartition(String partitionName) {
@@ -106,7 +115,7 @@ global abstract class CacheManager {
         }
     }
 
-    global virtual class PlatformCache extends Division {
+    global virtual class PlatformCache extends CacheDivision {
         protected CacheManager.CacheType cacheType;
 
         protected PlatformCache(CacheManager.CacheType cacheType) {
@@ -151,8 +160,7 @@ global abstract class CacheManager {
         }
 
         protected virtual Partition getFallback() {
-            CacheType fallbackType = CacheManager.CacheType.TRANSACTIONAL;
-            return CacheManager.getPartition(fallbackType);
+            return CacheManager.getTransactionCache();
         }
     }
 
