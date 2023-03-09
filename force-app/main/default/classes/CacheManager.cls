@@ -36,10 +36,20 @@ global abstract class CacheManager {
 
     global interface Partition {
         Boolean contains(String key);
+        Map<String, Boolean> contains(Set<String> keys);
+        Boolean containsAll(Set<String> keys);
+        Boolean containsSome(Set<String> keys);
         Object get(String key);
+        Map<String, Object> get(Set<String> keys); 
+        Map<String, Object> getAll();
+        Set<String> getKeys();
         Partition put(String key, Object value);
+        Partition put(Map<String, Object> keyValues);
         Partition put(String key, Object value, Integer ttlSecs);
+        Partition put(Map<String, Object> keyValues, Integer ttlSecs); 
         Partition remove(String key);
+        Partition remove(Set<String> keys);
+        Partition removeAll(); 
     }
 
     global abstract class CacheDivision implements Partition {
@@ -52,23 +62,63 @@ global abstract class CacheManager {
             return this.getDefault()?.contains(key) == true;
         }
 
+        global virtual Map<String, Boolean> contains(Set<String> keys) {
+            return this.getDefault()?.contains(keys); 
+        } 
+
+        global virtual Boolean containsAll(Set<String> keys) {
+            return this.getDefault()?.containsAll(keys);
+        }
+
+        global virtual Boolean containsSome(Set<String> keys) {
+            return this.getDefault()?.containsSome(keys); 
+        }
+
         global virtual Object get(String key) {
             return this.getDefault()?.get(key);
         }
 
+        global virtual Map<String, Object> get(Set<String> keys) {
+            return this.getDefault()?.get(keys); 
+        }
+
+        global virtual Map<String, Object> getAll() {
+            return this.getDefault()?.getAll(); 
+        }
+
+        global virtual Set<String> getKeys() {
+            return this.getDefault()?.getKeys(); 
+        }
+
         global virtual Partition put(String key, Object value) {
-            this.getDefault()?.put(key, value);
-            return this;
+            return this.put(new Map<String, Object>{key => value});
+        }
+
+        global virtual Partition put(Map<String, Object> keyValues) {
+            return this.put(keyValues, DEFAULT_TTL_SECS);
         }
 
         global virtual Partition put(String key, Object value, Integer ttlSecs) {
-            this.getDefault()?.put(key, value, ttlSecs);
-            return this;
+            return this.put(new Map<String, Object>{key => value}, ttlSecs); 
+        }
+
+        global virtual Partition put(Map<String, Object> keyValues, Integer ttlSecs) {
+            this.getDefault()?.put(keyValues, ttlSecs); 
+            return this; 
         }
 
         global virtual Partition remove(String key) {
-            this.getDefault()?.remove(key);
-            return this;
+            return this.remove(new Set<String>{key});
+        }
+
+        global virtual Partition remove(Set<String> keys) {
+            this.getDefault()?.remove(keys); 
+            return this; 
+        }
+
+        global virtual Partition removeAll() {
+            this.getDefault()?.removeAll();
+            return this; 
         }
     }
 
@@ -94,24 +144,78 @@ global abstract class CacheManager {
             return this.cacheMap?.containsKey(key) == true;
         }
 
+        global override Map<String, Boolean> contains(Set<String> keys) {
+            Map<String, Boolean> results = new Map<String, Boolean>(); 
+            for (String key : keys) {
+                Boolean contains = this.contains(key); 
+                results.put(key, contains); 
+            }
+            return results; 
+        }
+
+        global override Boolean containsAll(Set<String> keys) {
+            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
+            return results?.size() == 1 && results?.contains(true);
+        }
+
+        global override Boolean containsSome(Set<String> keys) {
+            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true; 
+        }
+
         global override Object get(String key) {
             return this.cacheMap?.get(key);
         }
 
+        global override Map<String, Object> get(Set<String> keys) {
+            Map<String, Object> results = new Map<String, Object>();
+            for (String key : keys) {
+                Object value = this.cacheMap?.get(key);
+                results.put(key, value); 
+            }
+            return results; 
+        }
+
+        global override Map<String, Object> getAll() {
+            Set<String> allKeys = this.getKeys();
+            return this.get(allKeys); 
+        }
+
+        global override Set<String> getKeys() {
+            return this.cacheMap?.keySet(); 
+        }
+
         global override Partition put(String key, Object value) {
-            return this.put(key, value, DEFAULT_TTL_SECS);
+            return this.put(new Map<String, Object>{key => value});
+        }
+
+        global override Partition put(Map<String, Object> keyValues) {
+            return this.put(keyValues, DEFAULT_TTL_SECS);
         }
 
         global override Partition put(String key, Object value, Integer ttlSecs) {
+            return this.put(new Map<String, Object>{key => value}, ttlSecs); 
+        }
+
+        global override Partition put(Map<String, Object> keyValues, Integer ttlSecs) {
             // The concept of "ttlSecs" does not exist in TransactionCache,
             // values are only persisted for the length of the current transaction
-            this.cacheMap?.put(key, value);
-            return this;
+            this.cacheMap?.putAll(keyValues);
+            return this; 
         }
 
         global override Partition remove(String key) {
             this.cacheMap?.remove(key);
             return this;
+        }
+
+        global override Partition remove(Set<String> keys) {
+            this.cacheMap?.keySet()?.removeAll(keys);
+            return this; 
+        }
+
+        global override Partition removeAll() {
+            this.cacheMap?.clear();
+            return this; 
         }
     }
 
@@ -177,13 +281,43 @@ global abstract class CacheManager {
             return this.partition?.contains(key) == true;
         }
 
+        global Map<String, Boolean> contains(Set<String> keys) {
+            return this.partition?.contains(keys); 
+        }
+
+        global Boolean containsAll(Set<String> keys) {
+            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
+            return results?.size() == 1 && results?.contains(true); 
+        }
+
+        global Boolean containsSome(Set<String> keys) {
+            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true;
+        }
+
         global Object get(String key) {
             Object value = this.partition?.get(key);
             return (value != NULL_VALUE) ? value : null;
         }
 
+        global Map<String, Object> get(Set<String> keys) {
+            return this.get(keys); 
+        }
+
+        global Map<String, Object> getAll() {
+            Set<String> allKeys = this.getKeys();
+            return this.get(allKeys);
+        }
+
+        global Set<String> getKeys() {
+            return this.partition?.getKeys();
+        }
+
         global Partition put(String key, Object value) {
-            return this.put(key, value, DEFAULT_TTL_SECS);
+            return this.put(new Map<String, Object>{key => value}); 
+        }
+
+        global Partition put(Map<String, Object> keyValues) {
+            return this.put(keyValues, DEFAULT_TTL_SECS);
         }
 
         global Partition put(String key, Object value, Integer ttlSecs) {
@@ -192,9 +326,28 @@ global abstract class CacheManager {
             return this;
         }
 
+        global Partition put(Map<String, Object> keyValues, Integer ttlSecs) {
+            for (String key : keyValues?.keySet()) {
+                Object value = keyValues?.get(key); 
+                this.put(key, value, ttlSecs); 
+            }
+            return this; 
+        }
+
         global Partition remove(String key) {
-            this.partition?.remove(key);
-            return this;
+            return this.remove(new Set<String>{key});
+        }
+
+        global Partition remove(Set<String> keys) {
+            for (String key : keys) {
+                this.partition?.remove(key); 
+            }
+            return this; 
+        }
+
+        global Partition removeAll() {
+            Set<String> allKeys = this.getKeys();
+            return this.remove(allKeys);
         }
     }
 }
