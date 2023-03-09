@@ -1,27 +1,28 @@
 global abstract class CacheManager {
-    static final String NULL_VALUE = '<<<NULL_CACHE_VALUE>>>';
     @TestVisible
     static final Map<CacheType, Division> DIVISIONS_BY_TYPE = new Map<CacheType, Division>{
-        CacheType.ORG => new OrgCache(),
-        CacheType.SESSION => new SessionCache(),
+        CacheType.ORG => new PlatformCache(CacheType.ORG),
+        CacheType.SESSION => new PlatformCache(CacheType.SESSION),
         CacheType.TRANSACTIONAL => new TransactionCache()
     };
+    // Note: Necessary because PlatformCache doesn't allow *actual* null values
+    static final String NULL_VALUE = '<<<NULL_CACHE_VALUE>>>';
+    // Note: Cache tokens default to & can persist for a maximum of 24 hours/86400 seconds:
+    // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_platform_cache_limits.htm
+    static final Integer DEFAULT_TTL_SECS = 86400;
 
     global static Division getDivision(CacheType cacheType) {
-        Division division = CacheManager.DIVISIONS_BY_TYPE?.get(cacheType); 
-        System.debug('CacheManager.getDivision(' + cacheType + ') -> ' + TypeUtils.getType(division));
-        return division;
+        return DIVISIONS_BY_TYPE?.get(cacheType);
     }
 
     global static Partition getPartition(CacheType cacheType, String partitionName) {
-        return CacheManager.getDivision(cacheType)?.getPartition(partitionName); 
+        return CacheManager.getDivision(cacheType)?.getPartition(partitionName);
     }
 
     global static Partition getPartition(CacheType cacheType) {
-        // Returns the default partition for this CacheType
-        return CacheManager.getDivision(cacheType)?.getDefault(); 
+        return CacheManager.getDivision(cacheType)?.getDefault();
     }
-    
+
     // **** INNER **** //
     global enum CacheType {
         ORG,
@@ -30,325 +31,162 @@ global abstract class CacheManager {
     }
 
     global interface Partition {
-        // A partition abstracts the mechanism used to store & retrieve cache data
-        Boolean contains(String key); 
-        Map<String, Boolean> contains(Set<String> keys);
-        Boolean containsAll(Set<String> keys);
-        Boolean containsSome(Set<String> keys);
-        Object get(String key); 
-        Map<String, Object> get(Set<String> keys);
-        Map<String, Object> getAll();
-        Set<String> getKeys();
-        Partition put(String key, Object value); 
-        Partition put(Map<String, Object> valueMap);
-        Partition remove(String key); 
-        Partition remove(Set<String> keys);
-        Partition removeAll();
+        Boolean contains(String key);
+        Object get(String key);
+        Partition put(String key, Object value);
+        Partition put(String key, Object value, Integer ttlSecs);
+        Partition remove(String key);
     }
 
-    global interface Division extends Partition {
-        // A division represents a group of Partitions of a particular CacheDivision type
-        Partition getPartition(String partitionName);
-        Partition getDefault();
-    }
+    global abstract class Division implements Partition {
+        global abstract Partition getPartition(String partitionName);
+        global abstract Partition getDefault();
 
-    global abstract class PlatformCache implements Division {
-        global abstract Cache.Partition getUnderlyingPartition(String partitionName); 
-        global abstract String getDefaultPartitionName();
-
-        global Partition getPartition(String partitionName) {
-            Partition result;
-            try {
-                Cache.Partition cachePartition = this.getUnderlyingPartition(partitionName);
-                Decimal capacity = cachePartition?.getCapacity();
-                result = (capacity > 0) ? new PlatformPartition(cachePartition) : null;
-            } catch (Exception error) {
-                // The partition likely doesn't exist
-            }
-            return (result != null) ? result : this.getFallbackCache();
-        }
-
-        global Partition getDefault() {
-            try {
-                String defaultPartitionName = this.getDefaultPartitionName();
-                return this.getPartition(defaultPartitionName); 
-            } catch (Exception error) {
-                // A default partition likely doesn't exist
-                return this.getFallbackCache();
-            }
-        }
-
-        global Boolean contains(String key) {
+        // Partition methods should all point to the default partition
+        global virtual Boolean contains(String key) {
             return this.getDefault()?.contains(key) == true;
         }
 
-        global Map<String, Boolean> contains(Set<String> keys) {
-            return this.getDefault()?.contains(keys); 
-        }
-
-        global Boolean containsAll(Set<String> keys) {
-            return this.getDefault()?.containsAll(keys);
-        }
-
-        global Boolean containsSome(Set<String> keys) {
-            return this.getDefault()?.containsSome(keys);
-        }
-
-        global Object get(String key) {
+        global virtual Object get(String key) {
             return this.getDefault()?.get(key);
         }
 
-        global Map<String, Object> get(Set<String> keys) {
-            return this.getDefault()?.get(keys);
+        global virtual Partition put(String key, Object value) {
+            this.getDefault()?.put(key, value);
+            return this;
         }
 
-        global Map<String, Object> getAll() {
-            return this.getDefault()?.getAll();
+        global virtual Partition put(String key, Object value, Integer ttlSecs) {
+            this.getDefault()?.put(key, value, ttlSecs);
+            return this;
         }
 
-        global Set<String> getKeys() {
-            return this.getDefault()?.getKeys();
+        global virtual Partition remove(String key) {
+            this.getDefault()?.remove(key);
+            return this;
+        }
+    }
+
+    global virtual class TransactionCache extends Division {
+        // Transaction cache isn't platform cache at all - a static Map that persists throughout a single transaction
+        // It can be used as a "fallback" in the event that platform cache isn't enabled for an org
+        Map<String, Object> cacheMap = new Map<String, Object>();
+
+        // Only ever one partition in TransactionCache, and it's always available
+        global override Partition getPartition(String partitionName) {
+            return this;
         }
 
-        global Partition put(String key, Object value) {
-            return this.getDefault()?.put(key, value); 
+        global override Partition getDefault() {
+            return this;
         }
 
-        global Partition put(Map<String, Object> valueMap) {
-            for (String key : valueMap?.keySet()) {
-                Object value = valueMap?.get(key);
-                this.put(key, value);
+        global override Boolean contains(String key) {
+            return this.cacheMap?.containsKey(key) == true;
+        }
+
+        global override Object get(String key) {
+            return this.cacheMap?.get(key);
+        }
+
+        global override Partition put(String key, Object value) {
+            return this.put(key, value, DEFAULT_TTL_SECS);
+        }
+
+        global override Partition put(String key, Object value, Integer ttlSecs) {
+            // The concept of "ttlSecs" does not exist in TransactionCache,
+            // values are only persisted for the length of the current transaction
+            this.cacheMap?.put(key, value);
+            return this;
+        }
+
+        global override Partition remove(String key) {
+            this.cacheMap?.remove(key);
+            return this;
+        }
+    }
+
+    global virtual class PlatformCache extends Division {
+        protected CacheManager.CacheType cacheType;
+
+        protected PlatformCache(CacheManager.CacheType cacheType) {
+            this.cacheType = cacheType;
+        }
+
+        global virtual override Partition getPartition(String partitionName) {
+            Partition partition;
+            try {
+                // For some reason, not allowed to reference these in ternaries w/out casting back to super class
+                Cache.Partition cachePartition;
+                switch on this.cacheType {
+                    when ORG {
+                        cachePartition = Cache.Org.getPartition(partitionName);
+                    }
+                    when SESSION {
+                        cachePartition = Cache.Session.getPartition(partitionName);
+                    }
+                }
+                Decimal capacity = (cachePartition != null) ? cachePartition?.getCapacity() : 0;
+                partition = (capacity > 0) ? new PlatformPartition(cachePartition) : null; 
+            } catch (Exception error) {
+                // PlatformCache not set up - use fallback partition
             }
-            return this; 
+            return (partition != null) ? partition : this.getFallback();
         }
 
-        global Partition remove(String key) {
-            return this.getDefault()?.remove(key); 
-        }
-
-        global Partition remove(Set<String> keys) {
-            for (String key : keys) {
-                this.remove(key); 
+        global virtual override Partition getDefault() {
+            try {
+                switch on this.cacheType {
+                    when ORG {
+                        return this.getPartition(Cache.Org.getName());
+                    }
+                    when SESSION {
+                        return this.getPartition(Cache.Session.getName());
+                    }
+                }
+            } catch (Exception error) {
+                // Default partition likely doesn't exist, or cache isn't enabled
             }
-            return this; 
+            return this.getFallback();
         }
 
-        global Partition removeAll() {
-            Set<String> keys = this.getKeys();
-            return this.remove(keys);
-        }
-
-        protected virtual Partition getFallbackCache() {
-            return CacheManager.getPartition(CacheType.TRANSACTIONAL); 
+        protected virtual Partition getFallback() {
+            CacheType fallbackType = CacheManager.CacheType.TRANSACTIONAL;
+            return CacheManager.getPartition(fallbackType);
         }
     }
 
-    global class OrgCache extends PlatformCache {
-        private OrgCache() {
-            // Cannot be constructed outside of this file
-        }
-
-        global override Cache.Partition getUnderlyingPartition(String partitionName) {
-            System.debug('OrgCache: ' + Cache.Org.getCapacity());
-            return Cache.Org.getPartition(partitionName); 
-        }
-
-        global override String getDefaultPartitionName() {
-            return Cache.Org.getName();
-        }
-    }
-
-    global class SessionCache extends PlatformCache {
-        private SessionCache() {
-            // Cannot be constructed outside of this file
-        }
-
-        global override Cache.Partition getUnderlyingPartition(String partitionName) {
-            System.debug('SessionCache: ' + Cache.Session.getCapacity());
-            return Cache.Session.getPartition(partitionName); 
-        }
-
-        global override String getDefaultPartitionName() {
-            return Cache.Session.getName();  
-        }
-    }
-
-    global class PlatformPartition implements Partition {
-        Cache.Partition partition; 
+    global virtual class PlatformPartition implements Partition {
+        // A platform partition is tightly coupled with a Cache.Partition
+        Cache.Partition partition;
 
         @TestVisible
-        private PlatformPartition(Cache.Partition partition) {
-            this.partition = partition; 
+        protected PlatformPartition(Cache.Partition partition) {
+            this.partition = partition;
         }
 
         global Boolean contains(String key) {
-            System.debug('PlatformCache.contains(' + key + ')');
-            return this.partition?.contains(key) == true; 
-        }
-
-        global Map<String, Boolean> contains(Set<String> keys) {
-            return this.partition?.contains(keys);
-        }
-
-        global Boolean containsAll(Set<String> keys) {
-            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
-            return results?.size() == 1 && results?.contains(true);
-        }
-
-        global Boolean containsSome(Set<String> keys) {
-            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true; 
+            return this.partition?.contains(key) == true;
         }
 
         global Object get(String key) {
-            Object value = this.partition?.get(key); 
-            System.debug('PlatformCache.contains(' + key + ') -> ' + value);
+            Object value = this.partition?.get(key);
             return (value != NULL_VALUE) ? value : null;
         }
 
-        global Map<String, Object> get(Set<String> keys) {
-            return this.partition?.get(keys);
-        }
-
-        global Map<String, Object> getAll() {
-            Set<String> keys = this.getKeys();
-            return this.get(keys);
-        }
-
-        global Set<String> getKeys() {
-            return this.partition?.getKeys();
-        }
-
-        global PlatformPartition put(String key, Object value) {
-            System.debug('PlatformCache.put(' + key + ', ' + value + ')');
-            // PlatformCache cannot accept null values
-            value = (value != null) ? value : NULL_VALUE; 
-            this.partition?.put(key, value); 
-            return this; 
-        }
-
-        global PlatformPartition put(Map<String, Object> valueMap) {
-            for (String key : valueMap?.keySet()) {
-                Object value = valueMap?.get(key);
-                this.put(key, value);
-            }
-            return this; 
-        }
-
-        global PlatformPartition remove(String key) {
-            System.debug('PlatformCache.remove(' + key + ')');
-            this.partition?.remove(key); 
-            return this; 
-        }
-
-        global PlatformPartition remove(Set<String> keys) {
-            for (String key : keys) {
-                this.remove(key);
-            }
-            return this; 
-        }
-
-        global PlatformPartition removeAll() {
-            Set<String> keys = this.getKeys(); 
-            return this.remove(keys); 
-        }
-    }
-
-    global class TransactionCache implements Division, Partition {
-        // Transaction-based caching is not tied to Platform cache
-        // When platform cache misses or other errors occur, the system uses Transaction cache as a fallback
-        final Map<String, Object> cacheMap = new Map<String, Object>();
-
-        private TransactionCache() {
-            // Cannot be constructed outside of this file
-        }
-
-        global Partition getPartition(String doesntMatter) {
-            // There is only one "Partition" of Transaction cache; the static map above
-            return this.getDefault(); 
-        }
-
-        global Partition getDefault() {
-            // Since there is only one "partition" of platform cache, the division is also the partition
-            return this; 
-        }
-
-        global Boolean contains(String key) {
-            System.debug('TransactionCache.contains(' + key + ')');
-            return this.cacheMap?.containsKey(key); 
-        }
-
-        global Map<String, Boolean> contains(Set<String> keys) {
-            Map<String, Boolean> results = new Map<String, Boolean>();
-            for (String key : keys) {
-                Boolean containsKey = this.cacheMap?.containsKey(key) == true; 
-                results?.put(key, containsKey);
-            }
-            return results; 
-        }
-
-        global Boolean containsAll(Set<String> keys) {
-            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
-            return results?.size() == 1 && results?.contains(true); 
-        }
-
-        global Boolean containsSome(Set<String> keys) {
-            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true; 
-        }
-
-        global Object get(String key) {
-            Object value = this.cacheMap?.get(key); 
-            System.debug('TransactionCache.get(' + key + ') -> ' + value);
-            return value;
-        }
-
-        global Map<String, Object> get(Set<String> keys) {
-            Map<String, Object> results = new Map<String, Object>();
-            for (String key : keys) {
-                Object value = this.cacheMap?.get(key);
-                results.put(key, value);
-            }
-            return results; 
-        }
-
-        global Map<String, Object> getAll() {
-            Set<String> keys = this.getKeys();
-            return this.get(keys);
-        }
-
-        global Set<String> getKeys() {
-            return this.cacheMap?.keySet();
-        }
-
         global Partition put(String key, Object value) {
-            System.debug('TransactionCache.put(' + key + ', ' + value + ')');
-            this.cacheMap?.put(key, value); 
-            return this; 
+            return this.put(key, value, DEFAULT_TTL_SECS);
         }
 
-        global Partition put(Map<String, Object> valueMap) {
-            for (String key : valueMap?.keySet()) {
-                Object value = valueMap?.get(key);
-                this.put(key, value);
-            }
-            return this; 
+        global Partition put(String key, Object value, Integer ttlSecs) {
+            Object cacheValue = (value != null) ? value : NULL_VALUE;
+            this.partition?.put(key, cacheValue, ttlSecs);
+            return this;
         }
 
         global Partition remove(String key) {
-            System.debug('TransactionCache.remove(' + key + ')');
-            this.cacheMap?.remove(key);
-            return this; 
-        }
-
-        global Partition remove(Set<String> keys) {
-            for (String key : keys) {
-                this.remove(key); 
-            }
-            return this; 
-        }
-
-        global Partition removeAll() {
-            Set<String> keys = this.getKeys();
-            return this.remove(keys); 
+            this.partition?.remove(key);
+            return this;
         }
     }
 }
