@@ -2,41 +2,41 @@
 global class CacheManager_Test {
     @IsTest
     static void shouldInteractWithOrgCache() {
+        // Developers can call partition methods on the cache itself - it will point to its default partition
+        CacheManager.Cache cache = CacheManager.getOrgCache();
+        CacheManager_Test.interactWithCache(cache);
+    }
+
+    @IsTest
+    static void shouldInteractWithSessionCache() {
+        // Developers can call partition methods on the cache itself - it will point to its default partition
+        CacheManager.Cache cache = CacheManager.getSessionCache();
+        CacheManager_Test.interactWithCache(cache);
+    }
+
+    @IsTest
+    static void shouldInteractWithTransactionCache() {
+        // Developers can call partition methods on the cache itself - it will point to its default partition
+        CacheManager.Cache cache = CacheManager.getTransactionCache();
+        CacheManager_Test.interactWithCache(cache);
+    }
+    
+    @IsTest
+    static void shouldInteractWithOrgPartition() {
         CacheManager.Partition partition = CacheManager.getOrgCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest
-    static void shouldInteractWithSessionCache() {
+    static void shouldInteractWithSessionPartition() {
         CacheManager.Partition partition = CacheManager.getSessionCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest
-    static void shouldInteractWithTransactionCache() {
+    static void shouldInteractWithTransactionPartition() {
         CacheManager.Partition partition = CacheManager.getTransactionCache()?.getDefault();
         CacheManager_Test.interactWithCache(partition);
-    }
-
-    @IsTest
-    static void shouldInteractWithOrgDivision() {
-        // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheDivision division = CacheManager.getOrgCache();
-        CacheManager_Test.interactWithCache(division);
-    }
-
-    @IsTest
-    static void shouldInteractWithSessionDivision() {
-        // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheDivision division = CacheManager.getSessionCache();
-        CacheManager_Test.interactWithCache(division);
-    }
-
-    @IsTest
-    static void shouldInteractWithTransactionDivision() {
-        // Developers can call partition methods on the division itself - it will point to its default partition
-        CacheManager.CacheDivision division = CacheManager.getTransactionCache();
-        CacheManager_Test.interactWithCache(division);
     }
 
     @IsTest
@@ -63,7 +63,7 @@ global class CacheManager_Test {
     static void shouldHandleMissingDefaultOrgCache() {
         // Load a mock unconfigured cache, since we can't control org configuration
         CacheManager.CacheType cacheType = CacheManager.CacheType.ORG;
-        CacheManager.DIVISIONS_BY_TYPE.put(cacheType, new InvalidPlatformCache(cacheType));
+        CacheManager.CACHE_BY_TYPE.put(cacheType, new InvalidPlatformCache(cacheType));
 
         Test.startTest();
         // Get the default partition

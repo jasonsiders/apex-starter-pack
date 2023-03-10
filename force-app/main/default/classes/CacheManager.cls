@@ -1,32 +1,32 @@
 global abstract class CacheManager {
-    @TestVisible
-    static final Map<CacheType, CacheDivision> DIVISIONS_BY_TYPE = new Map<CacheType, CacheDivision>{
-        CacheType.ORG => new PlatformCache(CacheType.ORG),
-        CacheType.SESSION => new PlatformCache(CacheType.SESSION),
-        CacheType.TRANSACTIONAL => new TransactionCache()
-    };
     // Note: Necessary because PlatformCache doesn't allow *actual* null values
     static final String NULL_VALUE = '<<<NULL_CACHE_VALUE>>>';
     // Note: Cache tokens default to & can persist for a maximum of 24 hours/86400 seconds:
     // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_platform_cache_limits.htm
     static final Integer DEFAULT_TTL_SECS = 86400;
+    @TestVisible
+    static final Map<CacheType, Cache> CACHE_BY_TYPE = new Map<CacheType, Cache>{
+        CacheType.ORG => new PlatformCache(CacheType.ORG),
+        CacheType.SESSION => new PlatformCache(CacheType.SESSION),
+        CacheType.TRANSACTIONAL => new TransactionCache()
+    };
 
-    global static CacheDivision getOrgCache() {
+    global static Cache getOrgCache() {
         return CacheManager.getCache(CacheType.ORG);
     }
 
-    global static CacheDivision getSessionCache() {
+    global static Cache getSessionCache() {
         return CacheManager.getCache(CacheType.SESSION);
     }
 
-    global static CacheDivision getTransactionCache() {
+    global static Cache getTransactionCache() {
         return CacheManager.getCache(CacheType.TRANSACTIONAL);
     }
     
-    global static CacheDivision getCache(CacheType cacheType) {
-        return DIVISIONS_BY_TYPE?.get(cacheType);
+    global static Cache getCache(CacheType cacheType) {
+        return CACHE_BY_TYPE?.get(cacheType);
     }
-    
+
     // **** INNER **** //
     global enum CacheType {
         ORG,
@@ -52,8 +52,8 @@ global abstract class CacheManager {
         Partition removeAll(); 
     }
 
-    global abstract class CacheDivision implements Partition {
-        // A cache division represents a "Category" of cache. Possible categories enumerated by CacheType.
+    global abstract class Cache implements Partition {
+        // Represents a "Category" of cache. Possible categories enumerated by CacheType.
         global abstract Partition getPartition(String partitionName);
         global abstract Partition getDefault();
 
@@ -122,7 +122,7 @@ global abstract class CacheManager {
         }
     }
 
-    global virtual class TransactionCache extends CacheDivision {
+    global virtual class TransactionCache extends Cache {
         // Transaction cache isn't platform cache at all - a static Map that persists throughout a single transaction
         // It can be used as a "fallback" in the event that platform cache isn't enabled for an org
         Map<String, Object> cacheMap = new Map<String, Object>();
@@ -219,7 +219,7 @@ global abstract class CacheManager {
         }
     }
 
-    global virtual class PlatformCache extends CacheDivision {
+    global virtual class PlatformCache extends Cache {
         protected CacheManager.CacheType cacheType;
 
         protected PlatformCache(CacheManager.CacheType cacheType) {
@@ -229,7 +229,6 @@ global abstract class CacheManager {
         global virtual override Partition getPartition(String partitionName) {
             Partition partition;
             try {
-                // For some reason, not allowed to reference these in ternaries w/out casting back to super class
                 Cache.Partition cachePartition;
                 switch on this.cacheType {
                     when ORG {
@@ -242,7 +241,7 @@ global abstract class CacheManager {
                 Decimal capacity = (cachePartition != null) ? cachePartition?.getCapacity() : 0;
                 partition = (capacity > 0) ? new PlatformPartition(cachePartition) : null; 
             } catch (Exception error) {
-                // PlatformCache not set up - use fallback partition
+                // Platform Cache is not configured for this org - use fallback partition
             }
             return (partition != null) ? partition : this.getFallback();
         }
