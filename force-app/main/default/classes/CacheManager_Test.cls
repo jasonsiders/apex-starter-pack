@@ -70,19 +70,19 @@ global class CacheManager_Test {
         CacheManager.Partition partition = CacheManager.getCache(cacheType)?.getDefault();
         Test.stopTest();
 
-        System.assertEquals(true, partition instanceof CacheManager.TransactionCache, 'Did not return fallback cache: ' + partition);
-    }
+        System.assertEquals(true, partition instanceof TransactionCache, 'Did not return fallback cache: ' + partition);
+    } 
 
     @IsTest
     static void shouldInteractWithPlatformPartition() {
         // Mostly for test coverage in orgs that do not have platform cache enabled
         // We would never have a null partition IRL thanks to the fallback cache mechanism
-        CacheManager.PlatformPartition partition = new CacheManager.PlatformPartition(null);
+        PlatformCache.Partition partition = new PlatformCache.Partition(null);
         Map<String, Object> cacheMap = new Map<String, Object>{
             'foo' => 'bar',
             'abcd' => 1234,
             'today' => Date.today()
-        };
+        }; 
         
         Test.startTest();
         // Test put() methods - since the partition is null, this will do nothing
@@ -124,7 +124,7 @@ global class CacheManager_Test {
         CacheManager.Partition partition = platformCache?.getPartition('SomePartition');
         Test.stopTest();
 
-        System.assertEquals(true, partition instanceOf CacheManager.TransactionCache, 'Did not use fallback cache');
+        System.assertEquals(true, partition instanceOf TransactionCache, 'Did not use fallback cache');
     }
 
     // **** HELPER **** //
@@ -223,16 +223,16 @@ global class CacheManager_Test {
         CacheManager.Partition partition = CacheManager.getCache(cacheType)?.getPartition(fakePartitionName);
         Test.stopTest();
 
-        System.assertEquals(true, partition instanceof CacheManager.TransactionCache, 'Did not fallback to transaction cache');
+        System.assertEquals(true, partition instanceof TransactionCache, 'Did not fallback to transaction cache');
     }
 
-    global class MockPlatformCache extends CacheManager.PlatformCache {
+    global class MockPlatformCache extends PlatformCache {
         private MockPlatformCache(CacheManager.CacheType cacheType) {
             super(cacheType);
         }
     }
 
-    global class InvalidPlatformCache extends CacheManager.PlatformCache {
+    global class InvalidPlatformCache extends PlatformCache {
         // Simulates a PlatformCache partition that has not been set up yet
         private InvalidPlatformCache(CacheManager.CacheType cacheType) {
             super(cacheType);
