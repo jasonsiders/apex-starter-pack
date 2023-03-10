@@ -120,6 +120,12 @@ global abstract class CacheManager {
             this.getDefault()?.removeAll();
             return this; 
         }
+
+        protected Set<Boolean> getContainsResultSet(Set<String> keys) {
+            List<Boolean> resultList = this.contains(keys)?.values();
+            resultList = (resultList != null) ? resultList : new List<Boolean>();
+            return new Set<Boolean>(resultList);
+        }
     }
 
     global virtual class TransactionCache extends CacheDivision {
@@ -154,12 +160,12 @@ global abstract class CacheManager {
         }
 
         global override Boolean containsAll(Set<String> keys) {
-            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
-            return results?.size() == 1 && results?.contains(true);
+            Set<Boolean> resultSet = this.getContainsResultSet(keys);
+            return resultSet?.size() == 1 && resultSet?.contains(true);
         }
 
         global override Boolean containsSome(Set<String> keys) {
-            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true; 
+            return this.getContainsResultSet(keys)?.contains(true) == true; 
         }
 
         global override Object get(String key) {
@@ -286,12 +292,12 @@ global abstract class CacheManager {
         }
 
         global Boolean containsAll(Set<String> keys) {
-            Set<Boolean> results = new Set<Boolean>(this.contains(keys)?.values());
-            return results?.size() == 1 && results?.contains(true); 
+            Set<Boolean> resultSet = this.getContainsResultSet(keys);
+            return resultSet?.size() == 1 && resultSet?.contains(true); 
         }
 
         global Boolean containsSome(Set<String> keys) {
-            return new Set<Boolean>(this.contains(keys)?.values())?.contains(true) == true;
+            return this.getContainsResultSet(keys)?.contains(true) == true; 
         }
 
         global Object get(String key) {
@@ -348,6 +354,13 @@ global abstract class CacheManager {
         global Partition removeAll() {
             Set<String> allKeys = this.getKeys();
             return this.remove(allKeys);
+        }
+
+        protected Set<Boolean> getContainsResultSet(Set<String> keys) {
+            // TODO: Don't love that this is duplicated from the PlatformCache method...
+            List<Boolean> resultList = this.contains(keys)?.values();
+            resultList = (resultList != null) ? resultList : new List<Boolean>();
+            return new Set<Boolean>(resultList);
         }
     }
 }

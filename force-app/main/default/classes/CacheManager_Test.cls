@@ -79,13 +79,7 @@ global class CacheManager_Test {
         CacheManager.PlatformPartition partition = new CacheManager.PlatformPartition(null);
         String key = 'foo';
         Object value = 'bar';
-
-        Test.startTest();
-        partition?.put(key, value);
-        System.assertEquals(false, partition?.contains(key), 'Null partition contains key');
-        System.assertEquals(null, partition?.get(key), 'Null partition contains value');
-        partition?.remove(key);
-        Test.stopTest();
+        CacheManager_Test.interactWithCache(partition);
     }
 
     @IsTest 
