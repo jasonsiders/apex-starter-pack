@@ -27,7 +27,7 @@ global abstract class CacheManager {
         return DIVISIONS_BY_TYPE?.get(cacheType);
     }
 
-    static Set<Object> dedupe(List<Object> items) {
+    static Set<Object> toSet(List<Object> items) {
         return (items != null) ? new Set<Object>(items) : new Set<Object>();
     }
 
@@ -158,15 +158,12 @@ global abstract class CacheManager {
         }
 
         global override Boolean containsAll(Set<String> keys) {
-            List<Boolean> resultList = this.contains(keys)?.values();
-            Set<Object> resultSet = CacheManager.dedupe(resultList);
+            Set<Object> resultSet = CollectionUtils.toSet(this.contains(keys)?.values());
             return resultSet?.size() == 1 && resultSet?.contains(true);
         }
 
         global override Boolean containsSome(Set<String> keys) {
-            List<Boolean> resultList = this.contains(keys)?.values();
-            Set<Object> resultSet = CacheManager.dedupe(resultList);
-            return resultSet?.contains(true) == true; 
+            return CollectionUtils.toSet(this.contains(keys)?.values())?.contains(true) == true;
         }
 
         global override Object get(String key) {
@@ -293,15 +290,12 @@ global abstract class CacheManager {
         }
 
         global Boolean containsAll(Set<String> keys) {
-            List<Boolean> resultList = this.contains(keys)?.values();
-            Set<Object> resultSet = CacheManager.dedupe(resultList);
+            Set<Object> resultSet = CollectionUtils.toSet(this.contains(keys)?.values());
             return resultSet?.size() == 1 && resultSet?.contains(true); 
         }
 
         global Boolean containsSome(Set<String> keys) {
-            List<Boolean> resultList = this.contains(keys)?.values();
-            Set<Object> resultSet = CacheManager.dedupe(resultList);
-            return resultSet?.contains(true) == true; 
+            return CollectionUtils.toSet(this.contains(keys)?.values())?.contains(true) == true;
         }
 
         global Object get(String key) {
