@@ -133,7 +133,8 @@ global class CacheManager_Test {
         Map<String, Object> cacheMap = new Map<String, Object>{
             'foo' => 'bar',
             'abcd' => 1234,
-            'today' => Date.today()
+            'today' => Date.today(),
+            'nullItem' => null
         };
 
         Test.startTest();

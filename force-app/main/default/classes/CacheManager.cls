@@ -26,11 +26,7 @@ global abstract class CacheManager {
     global static CacheDivision getCache(CacheType cacheType) {
         return DIVISIONS_BY_TYPE?.get(cacheType);
     }
-
-    static Set<Object> toSet(List<Object> items) {
-        return (items != null) ? new Set<Object>(items) : new Set<Object>();
-    }
-
+    
     // **** INNER **** //
     global enum CacheType {
         ORG,
