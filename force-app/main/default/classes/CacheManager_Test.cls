@@ -102,25 +102,90 @@ global class CacheManager_Test {
 
     // **** HELPER **** //
     static void interactWithCache(CacheManager.Partition partition) {
-        String key = 'abcd';
-        Object value = 1234;
+        System.debug('Partition is a ' + TypeUtils.getTypeName(partition)); 
+        Map<String, Object> cacheMap = new Map<String, Object>{
+            'foo' => 'bar',
+            'abcd' => 1234,
+            'today' => Date.today()
+        };
 
         Test.startTest();
-        // Without any prior interaction, should not contain key
-        System.assertEquals(false, partition?.contains(key), 'Unexpected contains() value');
-        System.assertEquals(null, partition?.get(key), 'Unexpected get() value');
-        // Add the key/value to the cache - should now be returned
-        partition?.put(key, value);
-        System.assertEquals(true, partition?.contains(key), 'Unexpected contains() value');
-        System.assertEquals(value, partition?.get(key), 'Unexpected get() value');
-        // Remove the key - should no longer contain
-        partition?.remove(key);
-        System.assertEquals(false, partition?.contains(key), 'Unexpected contains() value');
-        System.assertEquals(null, partition?.get(key), 'Unexpected get() value');
-        // Use the TTL param to customize the amount of time persisted in the cache
-        partition?.put(key, value, 10);
-        System.assertEquals(true, partition?.contains(key), 'Unexpected contains() value');
+        // Without any prior interaction, contains()/get() methods should not return values
+        CacheManager_Test.assertNotContains(partition, cacheMap);
+        // Test bulk put methods
+        partition?.put(cacheMap); 
+        // Re-test contains()/get() methods; should return values
+        CacheManager_Test.assertContains(partition, cacheMap); 
+        // Test bulk remove() methods
+        partition?.removeAll();
+        // Re-test contains()/get() methods; should not return values
+        CacheManager_Test.assertNotContains(partition, cacheMap);
+        // Test single put() methods w/ttl
+        for (String key : cacheMap?.keySet()) {
+            Object value = cacheMap?.get(key);
+            partition?.put(key, value, 60); 
+            System.assertEquals(true, partition?.containsSome(cacheMap?.keySet()), 'Unexpected containsSome(Set<String>) value'); 
+        }
+        // Re-test contains()/get() methods; should return values
+        CacheManager_Test.assertContains(partition, cacheMap); 
+        // Test single remove() methods
+        for (String key : cacheMap?.keySet()) {
+            partition?.remove(key);
+        }
+        // Re-test contains()/get() methods; should not return values
+        CacheManager_Test.assertNotContains(partition, cacheMap);
+        // Test single put() methods
+        for (String key : cacheMap?.keySet()) {
+            Object value = cacheMap?.get(key);
+            partition?.put(key, value); 
+            System.assertEquals(true, partition?.containsSome(cacheMap?.keySet()), 'Unexpected containsSome(Set<String>) value'); 
+        }
+        // Re-test contains()/get() methods; should return values
+        CacheManager_Test.assertContains(partition, cacheMap); 
+        // Test single remove() methods
+        for (String key : cacheMap?.keySet()) {
+            partition?.remove(key);
+        }
+        // Re-test contains()/get() methods; should not return values
+        CacheManager_Test.assertNotContains(partition, cacheMap);
         Test.stopTest();
+    }
+
+    static void assertNotContains(CacheManager.Partition partition, Map<String, Object> cacheMap) {
+        System.assertEquals(false, partition?.containsAll(cacheMap?.keySet()), 'Unexpected containsAll(Set<String>) value');
+        System.assertEquals(false, partition?.containsSome(cacheMap?.keySet()), 'Unexpected containsSome(Set<String>) value');
+        for (String key : cacheMap?.keySet()) {
+            System.assertEquals(false, partition?.contains(key), 'Unexpected contains(String) value');
+        }
+        Map<String, Boolean> containsResults = partition?.contains(cacheMap?.keySet());
+        System.assertEquals(cacheMap?.keySet(), containsResults?.keySet(), 'Unexpected contains(Set<String>) keySet');
+        System.assertEquals(cacheMap?.values()?.size(), containsResults?.values()?.size(), 'Unexpected # of contains(Set<String>) values');
+        System.assertEquals(false, new Set<Boolean>(containsResults?.values())?.contains(true), 'contains(Set<String>) returned some true values');
+        System.assertEquals(true, partition?.getAll()?.isEmpty(), 'Unexpected getAll() values');
+        System.assertEquals(cacheMap?.keySet(), partition?.get(cacheMap?.keySet())?.keySet(), 'Unexpected get(Set<String>) keys');
+        for (String key : cacheMap?.keySet()) {
+            System.assertEquals(null, partition?.get(key), 'Unexpected get(String) value');
+        }
+        System.assertEquals(0, partition?.getKeys()?.size(), 'Unexpected # of getKeys() results');
+    }
+
+    static void assertContains(CacheManager.Partition partition, Map<String, Object> cacheMap) {
+        System.assertEquals(true, partition?.containsAll(cacheMap?.keySet()), 'Unexpected containsAll(Set<String>) value');
+        System.assertEquals(true, partition?.containsSome(cacheMap?.keySet()), 'Unexpected containsSome(Set<String>) value');
+        for (String key : cacheMap?.keySet()) {
+            System.assertEquals(true, partition?.contains(key), 'Unexpected contains(String) value');
+        }
+        Map<String, Boolean> containsResults = partition?.contains(cacheMap?.keySet());
+        System.assertEquals(cacheMap?.keySet(), containsResults?.keySet(), 'Unexpected contains(Set<String>) keySet');
+        System.assertEquals(cacheMap?.values()?.size(), containsResults?.values()?.size(), 'Unexpected # of contains(Set<String>) values');
+        System.assertEquals(true, new Set<Boolean>(containsResults?.values())?.contains(true), 'contains(Set<String>) returned some true values');
+        System.assertEquals(false, partition?.getAll()?.isEmpty(), 'Unexpected getAll() values');
+        System.assertEquals(cacheMap?.keySet(), partition?.get(cacheMap?.keySet())?.keySet(), 'Unexpected get(Set<String>) keys');
+        for (String key : cacheMap?.keySet()) {
+            Object value = cacheMap?.get(key); 
+            System.assertEquals(value, partition?.get(key), 'Unexpected get(String) value');
+        }
+        System.assertEquals(cacheMap?.keySet()?.size(), partition?.getKeys()?.size(), 'Unexpected # of getKeys() results');
     }
 
     static void testMissingPartition(CacheManager.CacheType cacheType) {

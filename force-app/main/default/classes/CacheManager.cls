@@ -300,7 +300,7 @@ global abstract class CacheManager {
         }
 
         global Map<String, Object> get(Set<String> keys) {
-            return this.get(keys); 
+            return this.partition?.get(keys); 
         }
 
         global Map<String, Object> getAll() {
