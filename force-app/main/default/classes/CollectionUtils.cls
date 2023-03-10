@@ -90,4 +90,8 @@ global abstract class CollectionUtils {
 		}
 		return JSON.deserialize(JSON.serialize(results), resultType);
 	}
+
+	global static Set<Object> toSet(List<Object> items) {
+		return (items != null) ? new Set<Object>(items) : new Set<Object>();
+	}
 }

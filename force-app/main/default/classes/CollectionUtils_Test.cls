@@ -158,6 +158,45 @@ private class CollectionUtils_Test {
 		System.assertEquals(1000, accs?.size(), 'Original list was transformed');
 	}
 
+	@IsTest 
+	static void shouldConvertPopulatedListToSet() {
+		List<Object> itemList = new List<Integer>{1, 1, 2, 2, 3, 3};
+
+		Test.startTest();
+		Set<Object> itemSet = CollectionUtils.toSet(itemList);
+		Test.stopTest();
+
+		System.assertEquals(3, itemSet?.size(), 'Wrong # of items returned');
+		for (Object item : itemSet) {
+			System.assertEquals(true, itemList?.contains(item), 'Original list does not contain ' + item);
+		}
+		for (Object item : itemList) { 
+			System.assertEquals(true, itemSet?.contains(item), 'New set does not contain ' + item);
+		}
+	}
+
+	@IsTest 
+	static void shouldConvertEmptyListToSet() {
+		List<Object> itemList = new List<Integer>{};
+
+		Test.startTest();
+		Set<Object> itemSet = CollectionUtils.toSet(itemList);
+		Test.stopTest();
+
+		System.assertEquals(itemList?.size(), itemSet?.size(), 'Wrong # of items returned');
+	}
+
+	@IsTest 
+	static void shouldConvertNullListToSet() {
+		List<Object> itemList = null;
+
+		Test.startTest();
+		Set<Object> itemSet = CollectionUtils.toSet(itemList);
+		Test.stopTest();
+
+		System.assertEquals(0, itemSet?.size(), 'Wrong # of items returned');
+	}
+
 	// **** HELPER **** //
 	static List<Account> initAccounts(Integer numAccs) {
 		List<Account> accounts = new List<Account>();
