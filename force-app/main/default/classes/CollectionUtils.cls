@@ -90,9 +90,4 @@ global abstract class CollectionUtils {
 		}
 		return JSON.deserialize(JSON.serialize(results), resultType);
 	}
-
-	global static Object dedupe(List<Object> items, Type resultType) {
-		Set<Object> deduped = (items != null) ? new Set<Object>(items) : new Set<Object>();
-		return JSON.deserialize(JSON.serialize(deduped), resultType);
-	}
 }

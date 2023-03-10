@@ -158,42 +158,6 @@ private class CollectionUtils_Test {
 		System.assertEquals(1000, accs?.size(), 'Original list was transformed');
 	}
 
-	@IsTest 
-	static void shouldDedupeValidList() {
-		List<Integer> ints = new List<Integer>{1, 1, 2, 2, 3, 3};
-
-		Test.startTest();
-		Set<Integer> results = (Set<Integer>) CollectionUtils.dedupe(ints, Set<Integer>.class);
-		Test.stopTest();
-
-		System.assertEquals(3, results?.size(), 'Wrong # of results');
-		for (Integer value : ints) {
-			System.assertEquals(true, results?.contains(value), 'Results does not contain ' + value);
-		}
-	}
-
-	@IsTest 
-	static void shouldDedupeEmptyList() {
-		List<Integer> ints = new List<Integer>();
-
-		Test.startTest();
-		Set<Integer> results = (Set<Integer>) CollectionUtils.dedupe(ints, Set<Integer>.class); 
-		Test.stopTest();
-
-		System.assertEquals(true, results?.isEmpty(), 'Results is not empty for {}');
-	}
-
-	@IsTest 
-	static void shouldDedupeNullList() {
-		List<Integer> ints = null; 
-
-		Test.startTest();
-		Set<Integer> results = (Set<Integer>) CollectionUtils.dedupe(ints, Set<Integer>.class); 
-		Test.stopTest();
-
-		System.assertEquals(true, results?.isEmpty(), 'Results is not empty for null list');
-	}
-
 	// **** HELPER **** //
 	static List<Account> initAccounts(Integer numAccs) {
 		List<Account> accounts = new List<Account>();
