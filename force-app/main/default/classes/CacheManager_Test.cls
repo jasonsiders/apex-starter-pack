@@ -76,10 +76,43 @@ global class CacheManager_Test {
     @IsTest
     static void shouldInteractWithPlatformPartition() {
         // Mostly for test coverage in orgs that do not have platform cache enabled
+        // We would never have a null partition IRL thanks to the fallback cache mechanism
         CacheManager.PlatformPartition partition = new CacheManager.PlatformPartition(null);
-        String key = 'foo';
-        Object value = 'bar';
-        CacheManager_Test.interactWithCache(partition);
+        Map<String, Object> cacheMap = new Map<String, Object>{
+            'foo' => 'bar',
+            'abcd' => 1234,
+            'today' => Date.today()
+        };
+        
+        Test.startTest();
+        // Test put() methods - since the partition is null, this will do nothing
+        partition?.put(cacheMap, 1000);
+        for (String key : cacheMap?.keySet()) {
+            Object value = cacheMap?.get(key);
+            partition?.put(key, value, 1000);
+            partition?.put(key, value);
+        }
+        // Test the contains()/get() methods - since the partition is null, this will return nothing
+        System.assertEquals(false, partition?.containsAll(cacheMap?.keySet()), 'Unexpected containsAll(Set<String>) value for null partition');
+        System.assertEquals(false, partition?.containsSome(cacheMap?.keySet()), 'Unexpected containsSome(Set<String>) value for null partition');
+        for (String key : cacheMap?.keySet()) {
+            System.assertEquals(false, partition?.contains(key), 'Unexpected contains(String) value for null partition');
+        }
+        Map<String, Boolean> containsResults = partition?.contains(cacheMap?.keySet());
+        System.assertEquals(null, containsResults, 'Unexpected contains(Set<String>) for null partition');
+        System.assertEquals(null, partition?.getAll(), 'Unexpected getAll() values for null partition');
+        System.assertEquals(null, partition?.get(cacheMap?.keySet()), 'Unexpected get(Set<String>) keys for null partition');
+        for (String key : cacheMap?.keySet()) {
+            System.assertEquals(null, partition?.get(key), 'Unexpected get(String) value for null partition');
+        }
+        System.assertEquals(null, partition?.getKeys(), 'Unexpected # of getKeys() results for null partition');
+        // Test the remove() methods - should no-op since the keys do not exist
+        for (String key : cacheMap?.keySet()) {
+            partition?.remove(key); 
+        }
+        partition?.remove(cacheMap?.keySet());
+        partition?.removeAll();
+        Test.stopTest();
     }
 
     @IsTest 

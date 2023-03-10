@@ -27,6 +27,10 @@ global abstract class CacheManager {
         return DIVISIONS_BY_TYPE?.get(cacheType);
     }
 
+    static Set<Object> dedupe(List<Object> items) {
+        return (items != null) ? new Set<Object>(items) : new Set<Object>();
+    }
+
     // **** INNER **** //
     global enum CacheType {
         ORG,
@@ -120,12 +124,6 @@ global abstract class CacheManager {
             this.getDefault()?.removeAll();
             return this; 
         }
-
-        protected Set<Boolean> getContainsResultSet(Set<String> keys) {
-            List<Boolean> resultList = this.contains(keys)?.values();
-            resultList = (resultList != null) ? resultList : new List<Boolean>();
-            return new Set<Boolean>(resultList);
-        }
     }
 
     global virtual class TransactionCache extends CacheDivision {
@@ -160,12 +158,15 @@ global abstract class CacheManager {
         }
 
         global override Boolean containsAll(Set<String> keys) {
-            Set<Boolean> resultSet = this.getContainsResultSet(keys);
+            List<Boolean> resultList = this.contains(keys)?.values();
+            Set<Object> resultSet = CacheManager.dedupe(resultList);
             return resultSet?.size() == 1 && resultSet?.contains(true);
         }
 
         global override Boolean containsSome(Set<String> keys) {
-            return this.getContainsResultSet(keys)?.contains(true) == true; 
+            List<Boolean> resultList = this.contains(keys)?.values();
+            Set<Object> resultSet = CacheManager.dedupe(resultList);
+            return resultSet?.contains(true) == true; 
         }
 
         global override Object get(String key) {
@@ -292,12 +293,15 @@ global abstract class CacheManager {
         }
 
         global Boolean containsAll(Set<String> keys) {
-            Set<Boolean> resultSet = this.getContainsResultSet(keys);
+            List<Boolean> resultList = this.contains(keys)?.values();
+            Set<Object> resultSet = CacheManager.dedupe(resultList);
             return resultSet?.size() == 1 && resultSet?.contains(true); 
         }
 
         global Boolean containsSome(Set<String> keys) {
-            return this.getContainsResultSet(keys)?.contains(true) == true; 
+            List<Boolean> resultList = this.contains(keys)?.values();
+            Set<Object> resultSet = CacheManager.dedupe(resultList);
+            return resultSet?.contains(true) == true; 
         }
 
         global Object get(String key) {
@@ -345,6 +349,7 @@ global abstract class CacheManager {
         }
 
         global Partition remove(Set<String> keys) {
+            keys = (keys != null) ? keys : new Set<String>();
             for (String key : keys) {
                 this.partition?.remove(key); 
             }
@@ -354,13 +359,6 @@ global abstract class CacheManager {
         global Partition removeAll() {
             Set<String> allKeys = this.getKeys();
             return this.remove(allKeys);
-        }
-
-        protected Set<Boolean> getContainsResultSet(Set<String> keys) {
-            // TODO: Don't love that this is duplicated from the PlatformCache method...
-            List<Boolean> resultList = this.contains(keys)?.values();
-            resultList = (resultList != null) ? resultList : new List<Boolean>();
-            return new Set<Boolean>(resultList);
         }
     }
 }
