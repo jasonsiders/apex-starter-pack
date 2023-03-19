@@ -335,6 +335,27 @@ private class Soql_Test {
 		Soql_Test.runTestQuery(query);
 	}
 
+	@IsTest 
+	static void shouldHandleBindQuery() {
+		Id userId = UserInfo.getUserId();
+		Soql query = new Soql(Account.SObjectType)
+			.whereCriteria(new Filter(Account.OwnerId, Filter.EQUALS, ':userId'))
+			.bind('userId', userId);
+		Soql_Test.checkQueryString('SELECT Id FROM Account WHERE OwnerId = :userId', query);
+		Soql_Test.runTestQuery(query);
+	}
+
+	@IsTest 
+	static void shouldHandleAccessLevel() {
+		// AccessLevel defaults to USER_MODE, but can be overridden
+		AccessLevel mode = AccessLevel.SYSTEM_MODE;
+		Soql query = new Soql(Account.SObjectType).setAccessLevel(mode);
+		// This does not appear in the actual query string; used as an arg in Database.query()
+		System.assertEquals(mode, query.access, 'AccessLevel was not set');
+		Soql_Test.checkQueryString('SELECT Id FROM Account', query);
+		Soql_Test.runTestQuery(query);
+	}
+
 	@IsTest
 	static void shouldHandleRelativeDateQuery() {
 		Soql query = new Soql(Account.SObjectType)
