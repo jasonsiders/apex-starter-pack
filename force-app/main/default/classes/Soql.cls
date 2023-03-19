@@ -12,6 +12,8 @@ global inherited sharing virtual class Soql {
 	global Integer rowLimit { get; private set; }
 	global Integer rowOffset { get; private set; }
 	global Usage usage { get; private set; }
+	global AccessLevel access { get; private set; }
+	global Map<String, Object> binds { get; private set; }
 
 	@TestVisible
 	protected Soql(SObjectType objectType) {
@@ -24,6 +26,8 @@ global inherited sharing virtual class Soql {
 		this.whereCriteria = new AndLogic();
 		this.groupByClauses = new List<String>();
 		this.havingCriteria = new AndLogic(); 
+		this.access = AccessLevel.USER_MODE;
+		this.binds = new Map<String, Object>(); 
 	}
 
 	// **** Running a Query **** //
@@ -32,7 +36,10 @@ global inherited sharing virtual class Soql {
 		String soql = this.toString();
 		List<SObject> results;
 		try {
-			results = Database.query(soql);
+			System.debug('Database.query(' + soql + ', ' + this.binds + ', ' + this.access + ')');
+			results = this.binds?.isEmpty() 
+				? Database.query(soql) 
+				: Database.queryWithBinds(soql, this.binds, this.access);
 		} catch (System.QueryException queryError) {
 			final String newMessage = queryError.getMessage() + '. Query: [' + soql + ']';
 			queryError.setMessage(newMessage);
@@ -136,7 +143,7 @@ global inherited sharing virtual class Soql {
 		this.whereCriteria = ((FilterLogic) newLogicType.newInstance())?.setCriteria(filters);
 		return this;
 	}
-
+	
 	global Soql groupBy(List<FieldRef> fieldReferences) {
 		for (FieldRef fieldReference : fieldReferences) {
 			this.groupByClauses?.add(fieldReference?.toString());
@@ -196,6 +203,20 @@ global inherited sharing virtual class Soql {
 
 	global Soql forUsage(Usage usage) {
 		this.usage = usage;
+		return this;
+	}
+
+	global Soql bind(Map<String, Object> binds) {
+		this.binds?.putAll(binds);
+		return this;
+	}
+
+	global Soql bind(String key, Object value) {
+		return this.bind(new Map<String, Object>{key => value});
+	}
+
+	global Soql setAccessLevel(AccessLevel access) {
+		this.access = access;
 		return this;
 	}
 
