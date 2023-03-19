@@ -36,7 +36,6 @@ global inherited sharing virtual class Soql {
 		String soql = this.toString();
 		List<SObject> results;
 		try {
-			System.debug('Database.query(' + soql + ', ' + this.binds + ', ' + this.access + ')');
 			results = this.binds?.isEmpty() 
 				? Database.query(soql) 
 				: Database.queryWithBinds(soql, this.binds, this.access);
