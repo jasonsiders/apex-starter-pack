@@ -128,9 +128,9 @@ global virtual class Filter implements ICriteria {
 	}
 
 	private String processString(String value) {
-		// First, check if the string is actually checking a relative date value
-		// Else, process the string as a string, according to its operator
-		return value.startsWithIgnoreCase('LAST_N_DAYS:') ? value : this.operator?.processStringValue(value);
+		// Allow special modifiers (bind variables & relative date operators) to pass through unmodified
+		Boolean specialModifier = value?.startsWithIgnoreCase('LAST_N_DAYS') || value?.startsWith(':');
+		return (specialModifier) ? value : this.operator?.processStringValue(value);
 	}
 
 	private String processDate(Date value) {
