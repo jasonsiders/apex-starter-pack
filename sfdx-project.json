@@ -4,14 +4,14 @@
 			"default": true,
 			"package": "apex-starter-pack",
 			"path": "force-app",
-			"versionName": "v0.9.0",
-			"versionNumber": "0.9.0.NEXT"
+			"versionName": "v0.10.0",
+			"versionNumber": "0.10.0.NEXT"
 		}
 	],
 	"name": "apex-starter-pack",
 	"namespace": "apxsp",
 	"sfdcLoginUrl": "https://login.salesforce.com",
-	"sourceApiVersion": "56.0",
+	"sourceApiVersion": "58.0",
 	"packageAliases": {
 		"apex-starter-pack": "0HoDn000000k9sMKAQ",
 		"apex-starter-pack@0.1.0-1": "04tDn0000006JBBIA2",
@@ -22,6 +22,7 @@
 		"apex-starter-pack@0.6.0-1": "04tDn0000006mIiIAI",
 		"apex-starter-pack@0.7.0-1": "04tDn0000006mQiIAI",
 		"apex-starter-pack@0.8.0-1": "04tDn0000006mXPIAY",
-		"apex-starter-pack@0.9.0-1": "04tDn0000006mctIAA"
+		"apex-starter-pack@0.9.0-1": "04tDn0000006mctIAA",
+		"apex-starter-pack@0.10.0-1": "04tDn0000006wWKIAY"
 	}
 }
