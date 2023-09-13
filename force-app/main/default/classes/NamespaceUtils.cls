@@ -1,4 +1,6 @@
 global abstract class NamespaceUtils {
+	static final String PACKAGE_NAMESPACE = 'apxsp'; 
+
 	global static String getNamespaceOf(Object obj) {
 		String typeName = TypeUtils.getTypeName(obj); 
 		return NamespaceUtils.getNamespaceOf(typeName); 
@@ -19,5 +21,12 @@ global abstract class NamespaceUtils {
 			}
 		}
 		return null;
+	}
+
+	@AuraEnabled(cacheable=true)
+	global static String getPackageNamespace() {
+		// Returns the namespace of the current package if in a packaged context, or null if in an unpackaged context
+		String typeName = NamespaceUtils.class?.getName();
+		return (typeName?.startsWith(PACKAGE_NAMESPACE)) ? PACKAGE_NAMESPACE : null;
 	}
 }
